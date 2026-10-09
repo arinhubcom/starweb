@@ -36,5 +36,3 @@ Give each sub-agent a clear input and output:
 - If a sub-agent is blocked or not sure, it reports the problem. It does not guess.
 - If a sub-agent cannot escalate, it reports to its parent agent.
 - Check the sub-agent result before you use it.
-
-## Goals
