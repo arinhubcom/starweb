@@ -1,5 +1,16 @@
 # PERF
 
+## Core Web Vitals
+
+### [Web Vitals](https://web.dev/articles/vitals)
+
+- Meet all three targets at the 75th percentile of page loads, for mobile and desktop separately: Largest Contentful Paint (LCP) 2.5 seconds or less, Interaction to Next Paint (INP) 200 milliseconds or less, and Cumulative Layout Shift (CLS) 0.1 or less.
+- Measure in the field with [Cloudflare Web Analytics](https://developers.cloudflare.com/web-analytics/data-metrics/core-web-vitals/): in the dashboard, open Web Analytics, select the site, then select **Core Web Vitals**. It grades LCP, INP, and CLS and shows the 75th percentile (P75). Set it up as in [PRIVACY.md](PRIVACY.md). CLS data comes only from Chromium browsers.
+- Check the Chrome User Experience Report data for the public URL in PageSpeed Insights, and in the Search Console Core Web Vitals report.
+- Measure in the lab with Lighthouse or Chrome DevTools before each release. Lighthouse cannot measure INP: use Total Blocking Time as the lab proxy, and check INP in the field.
+- Do not trust lab numbers alone. Field data is the result that counts.
+
+
 ## Backend
 
 ### [Cloudflare Workers](https://developers.cloudflare.com/workers/)

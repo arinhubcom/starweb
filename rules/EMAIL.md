@@ -5,8 +5,9 @@
 ### [React Email](https://react.email)
 
 - Write transactional emails with React Email components.
-- Send email through one email module. Use the email provider that EmDash uses ([Cloudflare Email Service](https://developers.cloudflare.com/email-service/) or [Resend](https://resend.com)), so auth and app emails share one setup.
-- Send emails from a Queue consumer, not in the request. A Queue retries failed sends.
+- Send app emails through one email module. Use the same provider and sender domain as the EmDash email provider ([Cloudflare Email Service](https://developers.cloudflare.com/email-service/) or [Resend](https://resend.com)), so auth and app emails share one setup. Set up the provider as in [AUTH.md](AUTH.md) (Email).
+- Do not send auth emails (verification, password reset, magic link, invites) from app code. emdash-better-auth sends them through the EmDash email provider.
+- Send app emails from a Queue consumer, not in the request. A Queue retries failed sends. This rule covers app emails only, not auth emails.
 
 ### [emailcn](https://emailcn.run/docs)
 
