@@ -12,7 +12,7 @@ Technical rules for personal data, cookies, analytics, and logs. These rules are
 - Do not send `Cache-Control: public, no-transform` on pages when you use the automatic setup. It blocks the beacon injection. Remove `no-transform` or use the manual snippet.
 - Do not set the automatic setup to "Enable, excluding EU visitor data" unless you want no data from EU visitors. Choose "Enable with JS Snippet installation" to control the snippet in code.
 - Set `"spa": false` in the `data-cf-beacon` attribute of a manual snippet only when you do not want route changes of single page apps tracked. Tracking is on by default.
-- Allow the beacon in the CSP when `security.csp` is on (see [SECURITY.md](SECURITY.md) (Headers)): add `https://static.cloudflareinsights.com/beacon.min.js` to `csp.scriptDirective.resources` (keep `'self'` in the list), and add `"connect-src 'self'"` to `csp.directives` for the automatic setup or `"connect-src cloudflareinsights.com"` for the manual snippet. Include the query string of the script URL in the entry when it has one.
+- Allow the beacon in the CSP when `security.csp` is on: add the sources to the CSP module (see [SECURITY.md](SECURITY.md) (Headers)). Add `https://static.cloudflareinsights.com/beacon.min.js` to `scriptDirective.resources`, and include the query string of the script URL in the entry when it has one. For the manual snippet, add `cloudflareinsights.com` to the single `connect-src` entry. Keep `'self'` in `connect-src` for both setups: the automatic setup sends the beacon to your own domain.
 - Do not put personal data in URLs or query strings. Web Analytics does not log query strings, but other logs and tools do.
 - Add no other analytics or tracking script, such as Google Analytics or a session recorder, before you add a consent banner (see Cookies).
 
@@ -22,12 +22,13 @@ Technical rules for personal data, cookies, analytics, and logs. These rules are
 
 - Ask for consent before you store information on, or read information from, the device of a user, unless it is strictly needed. The directive exempts storage that only carries out a transmission, and storage that is needed for a service the user explicitly requested.
 - Do not set a non-essential cookie, and do not load a third-party script, pixel, font, embed, or tracker, before the user gives consent. Load embeds such as maps and videos only after a click.
+- Load Cloudflare Turnstile (see [SECURITY.md](SECURITY.md) (Abuse)) only on pages that have a protected form, and not before the user opens such a page. It is the only third-party script that this rule allows without a consent banner. Cloudflare states in the [Turnstile Privacy Addendum](https://www.cloudflare.com/turnstile-privacy-policy/) that Turnstile signals are strictly necessary for bot detection and that Cloudflare acts as processor for the site operator. Name Turnstile in the privacy policy (see Privacy policy). Ask your data protection adviser to confirm this for your site: the EDPB guidelines below do not analyze the exemptions.
 - Make withdrawing consent as easy as giving it ([GDPR Article 7(3)](https://gdpr-info.eu/art-7-gdpr/)): put a link in the footer that reopens the consent choice.
 - List each cookie and `localStorage` key that the site sets, with its purpose and lifetime, in one place on the privacy policy page.
 
 ### [EDPB Guidelines 2/2023 on Article 5(3)](https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-22023-technical-scope-art-53-eprivacy-directive_en)
 
-- Check Article 5(3) for each technique that reads or stores data on the device of a user, not only for cookies. Read the guidelines for the scope.
+- Check Article 5(3) for each technique that reads or stores data on the device of a user, not only for cookies. Read the guidelines for the scope. They do not analyze the exemptions from consent (paragraph 56): check each exemption for your use case.
 
 ## Privacy policy
 
@@ -35,7 +36,7 @@ Technical rules for personal data, cookies, analytics, and logs. These rules are
 
 - Add a privacy policy page at `/privacy` and link it in the footer of the base layout and on each sign-up form.
 - Follow [GDPR Article 13](https://gdpr-info.eu/art-13-gdpr/) for the policy content: the contact of the controller, the purposes, the recipients (such as Cloudflare, Stripe, and the email provider), the retention period, and the rights of the user, including the right to complain to a supervisory authority.
-- List each processor that receives personal data in the policy, by name: Cloudflare (hosting, D1, R2, logs), and the others that the app uses, such as Stripe, the email provider, and Sentry (GDPR Article 13(1)(e)).
+- List each processor that receives personal data in the policy, by name: Cloudflare (hosting, D1, R2, logs, and Turnstile bot protection on pages with a protected form), and the others that the app uses, such as Stripe, the email provider, and Sentry (GDPR Article 13(1)(e)).
 - State the transfer of personal data to the United States for each processor that stores or processes data there, with its safeguard (GDPR Article 13(1)(f)). For Cloudflare, name the certification under the [EU-U.S. Data Privacy Framework](https://www.cloudflare.com/privacypolicy/) and the EU Standard Contractual Clauses in the [Cloudflare DPA](https://www.cloudflare.com/cloudflare-customer-dpa/), and link both. Put this in the privacy policy page. Do not add a separate page for it.
 - Check the safeguards of each processor again when you add one, and update the policy in the same pull request.
 - Name in the policy how a user requests access, export, and deletion, and give one contact email.
