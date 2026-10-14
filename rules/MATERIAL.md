@@ -1,6 +1,6 @@
 # MATERIAL
 
-Material Design 3 (MD3) rules for layout, spacing, states, motion, and component sizes. The rules follow MD3 Expressive.
+Material Design 3 (MD3) rules for layout, spacing, states, motion, color, and component sizes. The rules follow MD3 Expressive.
 
 ## Sources
 
@@ -18,7 +18,7 @@ Material Design 3 (MD3) rules for layout, spacing, states, motion, and component
 
 ### [Material Design 3 layout](https://m3.material.io/foundations/layout/layout-overview)
 
-- Use the Material Design 3 (MD3) rules for layout, spacing, and component sizes. Keep the look (colors, fonts, radius) from the Fulldev UI theme.
+- Use the Material Design 3 (MD3) rules for layout, spacing, and component sizes. Keep the fonts and the radius from the Fulldev UI theme. Generate the colors as described in [Color](#color).
 - Read 1dp as 1 CSS pixel. One Tailwind spacing step (`--spacing: 0.25rem`) is 4px.
 - Add the MD3 breakpoints to the `@theme` block in `global.css`: `--breakpoint-medium: 37.5rem;` (600px), `--breakpoint-expanded: 52.5rem;` (840px), `--breakpoint-large: 75rem;` (1200px), `--breakpoint-xlarge: 100rem;` (1600px). Below 600px is compact, with no prefix.
 - Use `medium:`, `expanded:`, `large:`, and `xlarge:` for page layout. Do not remove the Tailwind default breakpoints (`sm:`, `md:`, and so on): Fulldev UI components use them.
@@ -89,6 +89,40 @@ Material Design 3 (MD3) rules for layout, spacing, states, motion, and component
 - Animate a movement or a scale change (`transform`) in a small component, such as a switch handle, with the MD3 Expressive fast spatial spring: `ease-spring-fast-spatial duration-350`. Use longer durations from the list for full-screen transitions.
 - Animate opacity and color with `ease-standard`. Do not use the spring for them: it overshoots.
 - Follow the rules for reduced motion in [UI-UX.md](UI-UX.md#motion).
+
+## Color
+
+### [Material Design 3 color system](https://m3.material.io/styles/color/system/overview)
+
+- Generate the theme colors from one seed color with [material-color-utilities](https://github.com/material-foundation/material-color-utilities) (`@material/material-color-utilities`). Do not pick theme colors by hand.
+- Use `SchemeTonalSpot` with the 2025 spec (MD3 Expressive) and the standard contrast level: `new SchemeTonalSpot(Hct.fromInt(argbFromHex(seed)), isDark, 0, "2025")`. Build one scheme with `isDark` set to `false` for `:root` and one with `true` for `.dark`.
+- Use `SchemeFidelity` only when the exact brand color must appear in the UI: it puts the seed color in `primaryContainer`, but supports only the 2021 spec. Do not use `SchemeExpressive`: it moves the hues away from the seed color.
+- Generate the colors at build time in `scripts/theme.ts`, and run it with `npx tsx scripts/theme.ts`. Install both packages as dev dependencies: `npm i -D @material/material-color-utilities tsx`. Do not run the script with plain `node`: version 0.4.0 imports its own files without the `.js` extension, so Node cannot load it.
+- Read each role from the scheme and write it as hex: `hexFromArgb(scheme.surfaceContainerHigh)`.
+- Write the output to `src/styles/theme.css` and import it in `global.css`. Do not edit `theme.css` by hand: change the seed and run the script again.
+- Remove the color variables that `shadcn init` wrote to `:root` and `.dark` in `global.css`. Keep `--radius`, the shadows, the fonts, and the chart colors (`--chart-1` to `--chart-5`) from the Fulldev UI theme.
+- Map the MD3 roles to the shadcn/ui variables. The roles follow the MD3 component tokens, for example a menu container is `surface-container`:
+
+  | shadcn/ui variable | MD3 role |
+  |---|---|
+  | `--background`, `--foreground` | `surface`, `onSurface` |
+  | `--card`, `--card-foreground` | `surfaceContainerLow`, `onSurface` |
+  | `--popover`, `--popover-foreground` | `surfaceContainer`, `onSurface` |
+  | `--primary`, `--primary-foreground` | `primary`, `onPrimary` |
+  | `--secondary`, `--secondary-foreground` | `secondaryContainer`, `onSecondaryContainer` |
+  | `--muted`, `--muted-foreground` | `surfaceContainerHighest`, `onSurfaceVariant` |
+  | `--accent`, `--accent-foreground` | `secondaryContainer`, `onSecondaryContainer` |
+  | `--destructive`, `--destructive-foreground` | `error`, `onError` |
+  | `--border` | `outlineVariant` |
+  | `--input` | `outline` |
+  | `--ring` | `secondary` |
+  | `--sidebar`, `--sidebar-foreground` | `surface`, `onSurface` |
+  | `--sidebar-primary`, `--sidebar-primary-foreground` | `primary`, `onPrimary` |
+  | `--sidebar-accent`, `--sidebar-accent-foreground` | `secondaryContainer`, `onSecondaryContainer` |
+  | `--sidebar-border`, `--sidebar-ring` | `outlineVariant`, `secondary` |
+
+- Add the MD3 roles that have no shadcn/ui variable as kebab-case variables, and expose them in `@theme inline` in `theme.css`: `primaryContainer`, `onPrimaryContainer`, `tertiary`, `onTertiary`, `tertiaryContainer`, `onTertiaryContainer`, `errorContainer`, `onErrorContainer`, `surfaceContainerLowest` to `surfaceContainerHighest`, `inverseSurface`, `inverseOnSurface`, `inversePrimary`, `outline`, `outlineVariant`, and `scrim`. For example, write `--surface-container-high` and `--color-surface-container-high: var(--surface-container-high);`.
+- Use the extra roles where MD3 uses them, for example `bg-surface-container-high` for a dialog and `bg-primary-container text-on-primary-container` for a highlighted area.
 
 ## Components
 

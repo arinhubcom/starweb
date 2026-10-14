@@ -41,7 +41,7 @@ Set up a new Starweb project with these steps, in order. Later steps depend on e
 15. Install Tailwind CSS with `npx astro add tailwind`. Follow the rules in [DESIGN.md](DESIGN.md).
 16. Install Prettier with `npm i -D prettier prettier-plugin-astro prettier-plugin-tailwindcss`. Put `prettier-plugin-tailwindcss` last in `plugins` in `.prettierrc`. Follow the rules in [DESIGN.md](DESIGN.md).
 17. Set up Fulldev UI with `shadcn init`, then install `@base-ui/react` and `lucide-react`. Follow the rules in [COMPONENTS.md](COMPONENTS.md).
-18. Add the Material Design 3 breakpoints to `src/styles/global.css`. Follow the rules in [MATERIAL.md](MATERIAL.md).
+18. Add the Material Design 3 breakpoints and easing curves to `src/styles/global.css`. Generate `src/styles/theme.css` from the brand seed color with `npx tsx scripts/theme.ts`, and import it in `global.css`. Follow the rules in [MATERIAL.md](MATERIAL.md) (Color).
 19. Update the base layout `src/layouts/Base.astro`: import `src/styles/global.css`, add `class="@container"` to `<body>`, render the `.dark` class on `<html>` from the theme cookie, and add the "Skip to main content" link and one `<main>`. Follow the rules in [DESIGN.md](DESIGN.md), [COMPONENTS.md](COMPONENTS.md), and [UI-UX.md](UI-UX.md).
 
 ## Cache
