@@ -1,6 +1,6 @@
 # MATERIAL
 
-Material Design 3 (MD3) rules for layout, spacing, and component sizes.
+Material Design 3 (MD3) rules for layout, spacing, states, and component sizes.
 
 ## Layout
 
@@ -49,6 +49,16 @@ Material Design 3 (MD3) rules for layout, spacing, and component sizes.
 - Do not make dense components with targets smaller than 48x48px by default. Do not use density in menus, dialogs, and snackbars.
 - Keep the font size the same in all density steps.
 
+## States
+
+### [Material Design 3 interaction states](https://m3.material.io/foundations/interaction/states/overview)
+
+- Show hover, focus, and pressed states with a state layer: an overlay in the content color on top of the container. Do not change the container color. Take the color from the theme (`currentColor`) and only the opacity from MD3.
+- Use these state layer opacities: hover 8%, focus 10%, pressed 10%, and dragged 16%. Draw the layer with a `::before` element, for example `relative before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10`.
+- Add the state layer once, in the base class of the component variants (`cva()`). When you add it to an installed component, remove the component's own hover color (for example `hover:bg-primary/90`), so the two do not stack.
+- Show a disabled control at 38% opacity: `disabled:opacity-38`, or `data-disabled:opacity-38` for Base UI. Change the `disabled:opacity-50` that shadcn/ui components use. Do not show a state layer on a disabled control.
+- Make the focus indicator 3px thick with a 2px offset: `focus-visible:outline-3 focus-visible:outline-offset-2`. Take the outline color from the theme, for example `outline-ring`.
+
 ## Components
 
 ### [Material Design 3 buttons](https://m3.material.io/components/buttons/specs)
@@ -64,3 +74,58 @@ Material Design 3 (MD3) rules for layout, spacing, and component sizes.
   | XL | 136px | 64px | 40px | 16px | `h-34 px-16 gap-4 [&_svg]:size-10` |
 
 - Give XS and S buttons and icon buttons a 48x48px target. See [Targets](#targets).
+
+### [Material Design 3 icon buttons](https://m3.material.io/components/icon-buttons/specs)
+
+- Set icon button sizes to the MD3 values. Use the same size names as the buttons:
+
+  | MD3 size | Container | Icon | Tailwind |
+  |---|---|---|---|
+  | XS | 32px | 20px | `size-8 [&_svg]:size-5` |
+  | S (default) | 40px | 24px | `size-10 [&_svg]:size-6` |
+  | M | 56px | 24px | `size-14 [&_svg]:size-6` |
+  | L | 96px | 32px | `size-24 [&_svg]:size-8` |
+  | XL | 136px | 40px | `size-34 [&_svg]:size-10` |
+
+### [Material Design 3 text fields](https://m3.material.io/components/text-fields/specs)
+
+- Make a text field 56px high with 16px leading and trailing padding: `h-14 px-4`. Use 24px icons (`size-6`) and a 16px gap between an icon and the input (`gap-4`).
+- Put the supporting text 4px below the field, with 16px side padding: `pt-1 px-4`.
+
+### [Material Design 3 lists](https://m3.material.io/components/lists/specs)
+
+- Make list items 56px high for one line, 72px for two lines, and 88px for three lines: `min-h-14`, `min-h-18`, `min-h-22`.
+- Use 16px side padding, 10px top and bottom padding, and a 12px gap between the leading element and the text: `px-4 py-2.5 gap-3`.
+- Use 20px leading icons (`size-5`), 40px avatars (`size-10`), and 56px images (`size-14`).
+
+### [Material Design 3 menus](https://m3.material.io/components/menus/specs)
+
+- Make a menu at least 112px wide (`min-w-28`), with 8px top and bottom padding (`py-2`).
+- Make menu items 44px high, with 16px side padding, 8px top and bottom padding, and a 12px gap: `h-11 px-4 py-2 gap-3`. Use 20px icons (`size-5`).
+
+### [Material Design 3 chips](https://m3.material.io/components/chips/specs)
+
+- Make chips 32px high with 16px side padding: `h-8 px-4`. With a leading icon, use 8px leading padding (`ps-2`).
+- Use 18px icons (`size-4.5`) and an 8px gap between an icon and the label, and between chips: `gap-2`.
+
+### [Material Design 3 dialogs](https://m3.material.io/components/dialogs/specs)
+
+- Make a dialog from 280px to 560px wide, and at least 24px from the screen edges: `min-w-70 max-w-[min(560px,calc(100%-3rem))]`.
+- Use 24px padding (`p-6`) and 24px icons (`size-6`).
+
+### [Material Design 3 selection controls](https://m3.material.io/components/checkbox/specs)
+
+- Make a checkbox 18px (`size-4.5`), a radio button 20px (`size-5`), and a switch track 52x32px (`w-13 h-8`).
+- Put a 40px state layer (`size-10`) around each control, and give it a 48x48px target. See [Targets](#targets).
+
+### [Material Design 3 navigation bar](https://m3.material.io/components/navigation-bar/specs)
+
+- Make the bottom navigation bar 64px high (`h-16`), as in MD3 Expressive.
+- Make the active indicator 56x32px (`w-14 h-8`), with 24px icons (`size-6`) and a 4px gap between the icon and the label (`gap-1`).
+
+### [Material Design 3 navigation rail](https://m3.material.io/components/navigation-rail/specs)
+
+- Make the collapsed navigation rail 96px wide (`w-24`), as in MD3 Expressive. Make each item 64px high (`h-16`), with a 56x32px active indicator (`w-14 h-8`).
+- Put 44px above the first item (`pt-11`), and 40px between an optional header, such as a FAB, and the items (`mb-10`).
+- Make the expanded rail from 220px to 360px wide: `min-w-55 max-w-90`.
+- Do not use a navigation drawer. MD3 Expressive deprecates it. Use the expanded navigation rail instead.

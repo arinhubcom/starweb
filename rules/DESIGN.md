@@ -7,7 +7,7 @@
 - Use Tailwind CSS and Base UI for the site and the app: `.astro` pages and React islands.
 - Use [Kumo](https://github.com/cloudflare/kumo) for admin pages of native EmDash plugins. Follow the rules in [SAAS.md](SAAS.md) (App admin).
 - Do not import Kumo in site or app code.
-- Follow the rules in [MATERIAL.md](MATERIAL.md) for layout, spacing, and component sizes (Material Design 3).
+- Follow the rules in [MATERIAL.md](MATERIAL.md) for layout, spacing, states, and component sizes (Material Design 3).
 - Follow the rules in [COMPONENTS.md](COMPONENTS.md) for Astro and React components (Fulldev UI, Base UI).
 - Follow the rules in [UI-UX.md](UI-UX.md) for how the UI behaves: accessibility, states, forms, feedback, motion, navigation, and theme.
 

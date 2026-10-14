@@ -10,7 +10,7 @@ Rules for how the UI behaves and how users finish a task. They apply to the site
 - Give text a contrast of at least 4.5:1, and large text 3:1 (1.4.3). Give the borders, icons, and states that identify a control at least 3:1 against the colors next to them (1.4.11). Check each theme token pair in light and dark mode.
 - Make each action work with the keyboard alone (2.1.1). Do not trap focus: the user must be able to leave each component with the keyboard (2.1.2). A modal dialog keeps focus inside until it closes (see WAI-ARIA APG).
 - Keep the focus order the same as the visual order (2.4.3). Do not set a positive `tabindex`.
-- Show a focus ring on each focusable element with `focus-visible:`, for example `focus-visible:outline-2 focus-visible:outline-offset-2`. Do not remove the outline with `outline-none` unless you add a `focus-visible:` style in the same class list (2.4.7).
+- Show a focus ring on each focusable element with `focus-visible:`, for example `focus-visible:outline-3 focus-visible:outline-offset-2` (see [MATERIAL.md](MATERIAL.md#states)). Do not remove the outline with `outline-none` unless you add a `focus-visible:` style in the same class list (2.4.7).
 - Keep the focused element visible. Add `scroll-padding-top` and `scroll-padding-bottom` to `<html>` with the height of a sticky header or bottom bar, so they do not cover it (2.4.11).
 - Make each page work at 320px width without horizontal scroll (1.4.10). Scroll only tables and code blocks horizontally, inside their own container.
 - Let content that appears on hover or focus, such as a tooltip, close with Escape and stay open while the pointer is over it (1.4.13). Do not put the only way to an action in a tooltip or a hover state.
