@@ -7,7 +7,7 @@ These rules are for a small SaaS app: few tenants, little data per tenant, no re
 ### [EmDash](https://docs.emdashcms.com/)
 
 - Keep the site, the app, and EmDash in one Astro project and one Worker.
-- Put app pages and API routes in `src/pages` as normal Astro files, for example under `/app` and `/api`.
+- Put each app in its own folder under `src/apps/`, with its pages and API routes under its path prefix, for example `/app1` and `/app1/api`. Keep `src/pages/` for the site. Follow the rules in [ARCH.md](ARCH.md) (Apps).
 - Do not use paths under `/_emdash/`. Do not add `/sitemap.xml`, `/robots.txt`, or `/.well-known/oauth-protected-resource`. EmDash owns them.
 - Use EmDash content only for editorial content (pages, posts, docs). Store app data in your own tables.
 - Do not use EmDash internal handlers (`handleContentCreate`, `emdash/internal/*`) in app code. Use the REST API, MCP, or plugin `ctx.content` to write content.
@@ -18,15 +18,26 @@ These rules are for a small SaaS app: few tenants, little data per tenant, no re
 
 ## Multiple apps
 
-### [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/)
+### Micro frontends: [Astro integrations](https://docs.astro.build/en/reference/integrations-reference/)
 
 - Build each app as a micro frontend in its own folder, for example `src/apps/app1/`, with its own path prefix, for example `/app1` and `/app2`. Follow the rules in [ARCH.md](ARCH.md) (Apps).
-- Give each app its own D1 database and binding, for example `APP1_DB` and `APP2_DB`. Do not share app tables between apps.
-- Set `migrations_dir` for each database in the Wrangler config, for example `migrations/app1` and `migrations/app2`. Apply them per binding: `wrangler d1 migrations apply APP1_DB`.
-- Create one Kysely instance per app database, each with its own `Database` interface.
-- Use the same login and organizations for all apps. Use `session.activeOrganizationId` as `tenant_id` in each app database.
+- Use the same login and organizations for all apps. Follow the rules in Auth.
 - Check app access (plan or membership) at the start of each app route. Do not rely on the path prefix alone.
-- Count databases before you add an app: the Workers Free plan allows 10 D1 databases per account, and EmDash uses one of them.
+- Check roles on the server with `auth.api.hasPermission()` from Better Auth. Do not use `authClient.organization.checkRolePermission()` for access checks: it runs on the client.
+
+### [D1](https://developers.cloudflare.com/d1/platform/limits/)
+
+- Give each app its own D1 database and binding, for example `APP1_DB` and `APP2_DB`. Do not share app tables between apps.
+- Count databases before you add an app. The Workers Free plan allows 10 D1 databases per account, and EmDash uses one of them, so you can have up to 9 apps. The Workers Paid plan allows 50,000.
+
+### [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/)
+
+- Set `migrations_dir` in each `d1_databases` entry of the Wrangler config, for example `migrations/app1` and `migrations/app2`.
+- Apply migrations per database. Use the database name, not the binding name: `wrangler d1 migrations apply app1-db --remote`. Use `--local` for `wrangler dev`.
+
+### [Kysely](https://kysely.dev)
+
+- Create one Kysely instance per app database in `src/apps/app1/db/`, each with its own `Database` interface. Follow the rules in [DATA.md](DATA.md).
 
 ## Auth
 
@@ -50,9 +61,9 @@ These rules are for a small SaaS app: few tenants, little data per tenant, no re
 
 ### [D1](https://developers.cloudflare.com/d1/)
 
-- Create a separate D1 database for app data. Bind it as `APP_DB` in the Wrangler config (one per app, see Multiple apps). Do not put app tables in the EmDash database.
-- Read `APP_DB` from `env` in `cloudflare:workers`. Do not use `locals.emdash.db` for app data.
-- Use D1 migrations (`wrangler d1 migrations apply APP_DB`) for app tables. Do not change the schema by hand.
+- Create a separate D1 database for app data, one per app, for example `APP1_DB` (see Multiple apps). Do not put app tables in the EmDash database.
+- Read the app binding (`APP1_DB`) from `env` in `cloudflare:workers`. Do not use `locals.emdash.db` for app data.
+- Use D1 migrations for app tables (see Multiple apps). Do not change the schema by hand.
 - Query app tables with Kysely (see [DATA.md](DATA.md)).
 - Set EmDash migrations to manual mode. Run `emdash migrate` and the app migrations before `wrangler deploy`.
 - Use one app database for all tenants. Add a `tenant_id` column to each tenant table and an index that starts with `tenant_id`.

@@ -12,7 +12,7 @@
 
 ### [Kysely](https://kysely.dev)
 
-- Connect Kysely to D1 with the [kysely-d1](https://github.com/aidenwallis/kysely-d1) dialect: `new Kysely<Database>({ dialect: new D1Dialect({ database: env.APP_DB }) })`.
+- Connect Kysely to D1 with the [kysely-d1](https://github.com/aidenwallis/kysely-d1) dialect: `new Kysely<Database>({ dialect: new D1Dialect({ database: env.APP1_DB }) })`.
 - Write the `Database` interface (one type per table) in one file. Update it in the same commit as the migration that changes the schema.
 - Put the queries for each table in one repository module, for example `src/db/repositories/project.ts`. Do not write queries in routes or components.
 - Use the query builder for all queries. Use the `sql` template tag only for SQL the builder cannot express. Do not build SQL from strings.
