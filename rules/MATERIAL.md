@@ -112,7 +112,7 @@ Material Design 3 (MD3) rules for layout, spacing, states, motion, color, and co
   | `--secondary`, `--secondary-foreground` | `secondaryContainer`, `onSecondaryContainer` |
   | `--muted`, `--muted-foreground` | `surfaceContainerHighest`, `onSurfaceVariant` |
   | `--accent`, `--accent-foreground` | `secondaryContainer`, `onSecondaryContainer` |
-  | `--destructive`, `--destructive-foreground` | `error`, `onError` |
+  | `--destructive` | `error` |
   | `--border` | `outlineVariant` |
   | `--input` | `outline` |
   | `--ring` | `secondary` |
@@ -121,8 +121,8 @@ Material Design 3 (MD3) rules for layout, spacing, states, motion, color, and co
   | `--sidebar-accent`, `--sidebar-accent-foreground` | `secondaryContainer`, `onSecondaryContainer` |
   | `--sidebar-border`, `--sidebar-ring` | `outlineVariant`, `secondary` |
 
-- Add the MD3 roles that have no shadcn/ui variable as kebab-case variables, and expose them in `@theme inline` in `theme.css`: `primaryContainer`, `onPrimaryContainer`, `tertiary`, `onTertiary`, `tertiaryContainer`, `onTertiaryContainer`, `errorContainer`, `onErrorContainer`, `surfaceContainerLowest` to `surfaceContainerHighest`, `inverseSurface`, `inverseOnSurface`, `inversePrimary`, `outline`, `outlineVariant`, and `scrim`. For example, write `--surface-container-high` and `--color-surface-container-high: var(--surface-container-high);`.
-- Use the extra roles where MD3 uses them, for example `bg-surface-container-high` for a dialog and `bg-primary-container text-on-primary-container` for a highlighted area.
+- Add the MD3 roles that have no shadcn/ui variable as kebab-case variables, and expose them in `@theme inline` in `theme.css`: `primaryContainer`, `onPrimaryContainer`, `tertiary`, `onTertiary`, `tertiaryContainer`, `onTertiaryContainer`, `onError`, `errorContainer`, `onErrorContainer`, `surfaceContainerLowest` to `surfaceContainerHighest`, `inverseSurface`, `inverseOnSurface`, `inversePrimary`, `outline`, `outlineVariant`, and `scrim`. For example, write `--surface-container-high` and `--color-surface-container-high: var(--surface-container-high);`.
+- Use the extra roles where MD3 uses them, for example `bg-surface-container-high` for a dialog `bg-primary-container text-on-primary-container` for a highlighted area, and `bg-destructive text-on-error` for a destructive button.
 
 ## Components
 
