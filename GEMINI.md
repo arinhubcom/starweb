@@ -43,7 +43,3 @@ Use a sub-agent with `Model: "inherit"` only when:
 ### Escalation
 
 Model order, from weakest to strongest: `flash_lite`, `flash`, `pro`, `inherit`.
-
----
-
-@AGENTS.md
