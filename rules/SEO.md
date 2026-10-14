@@ -30,22 +30,27 @@ Rules for search engine optimization of the public site. For `hreflang` and tran
 
 ### [Canonical URL](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls)
 
-- Add `<link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />` to each indexable page, also when the canonical URL is the page itself.
+- Make every indexable page output exactly one `<link rel="canonical">`, also when the canonical URL is the page itself. A page that renders `<EmDashHead>` gets it from there (see EmDash SEO below). Do not add a second one.
 - Use an absolute URL in `rel="canonical"`. Do not use a relative path.
 - Use one canonical URL per page in every place: `rel="canonical"`, `og:url`, and the sitemap. Do not give different URLs for the same page.
+- Check the rendered HTML of a sample page for each template: one `rel="canonical"`, one `og:url`, and both equal to the sitemap URL.
 
 ### [EmDash SEO](https://docs.emdashcms.com/guides/seo/)
 
 - Add `"seo"` to `supports` of each routable collection, or turn on **SEO** in **Content Types**. Editors then get the SEO panel (title, description, image, canonical URL, and **Hide from search engines**).
 - Render `<EmDashHead page={page} />` from `emdash/ui` in the `<head>` of every public page. Build `page` with `createPublicPageContext()` from `emdash/page`. It renders the description, robots, canonical, Open Graph, and Twitter Card tags.
 - On a content page, pass `content: { collection, id, slug }` to `createPublicPageContext()`, and get the title and canonical URL from `getSeoMeta()`. Use `kind: "custom"` for pages that are not content entries.
+- Render `<EmDashHead>` on custom pages too (home, listings, landing pages). The `WebSite` JSON-LD, `hreflang`, and verification tags depend on it.
+- Pass `canonical: new URL(Astro.url.pathname, Astro.site).href` to `createPublicPageContext()` on a `kind: "custom"` page. `<EmDashHead>` writes `rel="canonical"` and `og:url` only when the page context or the entry sets a canonical URL: it does not compute one.
+- Skip `<EmDashHead>` only on pages that are not public: private pages and app routes. Add `<meta name="robots" content="noindex">` to them.
 - Render the `<title>` element yourself. `<EmDashHead>` does not render it.
 - Do not write your own description, canonical, or Open Graph tags on a page that renders `<EmDashHead>`. Change them with the SEO panel, the page context, or the `page:metadata` hook of a plugin.
 - Set the title separator and the default social image in **Settings > SEO**. Pass `settings.seo?.titleSeparator` to `getSeoMeta()` as `titleSeparator`.
 
 ### [Open Graph](https://ogp.me/)
 
-- On pages that do not render `<EmDashHead>`, set `og:title`, `og:type`, `og:image`, and `og:url` as `<meta property>` tags. Also set `og:description` and `og:site_name`.
+- Do not write Open Graph tags on pages that render `<EmDashHead>`. Check that the output has `og:type`, `og:title`, `og:description`, `og:image`, `og:site_name`, and `og:url`. Set missing values in the SEO panel, **Settings > SEO** (default social image), or the page context.
+- Set `og:title`, `og:type`, `og:image`, and `og:url` as `<meta property>` tags on a page that does not render `<EmDashHead>` but people share. Also set `og:description` and `og:site_name`.
 - Set `og:url` to the canonical URL. Set `og:image:alt` when you set `og:image`.
 - Build the `og:image` URL with `new URL('/images/preview.png', Astro.site)`. Do not use a relative path.
 
