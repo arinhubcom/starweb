@@ -16,7 +16,7 @@
   |---|---|---|---|---|
   | PR preview | dev Worker, version without traffic | Each push to a PR | `wrangler versions upload --env="" --preview-alias pr-<number>` | `pr-<number>-<worker>.<subdomain>.workers.dev` |
   | dev | `<worker>` | Each PR merge to `main` | `wrangler deploy --env=""` | `<worker>.<subdomain>.workers.dev` |
-  | stage | `<worker>-production`, version without traffic | Each release tag `web-YYYY-MM-DD-rN` | `wrangler versions upload --env production --tag web-YYYY-MM-DD-rN --preview-alias stage` | `stage-<worker>-production.<subdomain>.workers.dev` |
+  | stage | `<worker>-production`, version without traffic | Each release tag `<worker>-YYYY-MM-DD-rN` | `wrangler versions upload --env production --tag <worker>-YYYY-MM-DD-rN --preview-alias stage` | `stage-<worker>-production.<subdomain>.workers.dev` |
   | prod | `<worker>-production` | After you test stage | `wrangler versions deploy --env production` | Your custom domain |
 
 - Put the dev config at the top level of `wrangler.jsonc`, and the prod config in `env.production`. Wrangler names the prod Worker `<worker>-production`.
@@ -31,8 +31,8 @@
 
 ### [Git tags](https://git-scm.com/docs/git-tag)
 
-- Name each release tag `web-YYYY-MM-DD-rN`, for example `web-2026-10-14-r1`. Start `rN` at `r1` each day, and raise it for each further release on that day. Do not use semver tags such as `v1.2.3`. Read [WHY.md](../WHY.md#why-date-based-release-tags).
-- Create an annotated tag on `main` and push it: `git tag -a web-2026-10-14-r1 -m "<summary>"`, then `git push origin web-2026-10-14-r1`. The push uploads stage (see CI).
+- Name each release tag `<worker>-YYYY-MM-DD-rN`, where `<worker>` is the top-level `name` in `wrangler.jsonc`, not `<worker>-production`. For example, the Worker `mysite` gets `mysite-2026-10-14-r1`. Start `rN` at `r1` each day, and raise it for each further release on that day. Do not use semver tags such as `v1.2.3`. Read [WHY.md](../WHY.md#why-date-based-release-tags).
+- Create an annotated tag on `main` and push it: `git tag -a mysite-2026-10-14-r1 -m "<summary>"`, then `git push origin mysite-2026-10-14-r1`. The push uploads stage (see CI).
 - Pass the same tag to `wrangler versions upload --tag`, so you can find the version by its tag when you promote it to prod.
 
 ### [Gradual deployments](https://developers.cloudflare.com/workers/configuration/versions-and-deployments/gradual-deployments/)
@@ -95,7 +95,7 @@
 - Set `concurrency` per PR with `cancel-in-progress: true`, for example `group: cf-preview-${{ github.event.pull_request.number }}`, so fast pushes do not race.
 - Deploy dev when a PR merges: run on `pull_request` with `types: [closed]` and `if: github.event.pull_request.merged == true`. Check out `${{ github.event.pull_request.merge_commit_sha }}`, apply the migrations to the dev database, then run `wrangler deploy --env=""`.
 - Set `concurrency` for the dev deploy with `cancel-in-progress: false`, so merges deploy in order and no migration stops halfway.
-- Upload stage on a release tag (`push` with `tags: ["web-*"]`): apply the prod migrations, then run `wrangler versions upload --env production --tag ${{ github.ref_name }} --preview-alias stage`.
+- Upload stage on a release tag (`push` with `tags: ["<worker>-[0-9]*"]`, for example `tags: ["mysite-[0-9]*"]`): apply the prod migrations, then run `wrangler versions upload --env production --tag ${{ github.ref_name }} --preview-alias stage`.
 - Promote stage to prod from a `workflow_dispatch` workflow that uses a GitHub environment named `production` with required reviewers. Find the version by its tag, and deploy it in steps with `wrangler versions deploy <version-id>@10% <old-version-id>@90% --env production -y`. Follow the rules in Releases.
 
 ### [Previews](https://developers.cloudflare.com/workers/previews/)
@@ -132,7 +132,7 @@ These rules apply when you move an app to its own Worker. Follow the rules in [A
 ### [GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)
 
 - Add one workflow file per Worker for the PR preview, the dev deploy, and stage. Filter each by `paths`, for example `paths: ["workers/app1/**", "src/shared/**"]`, so a PR builds only the Workers that it changes. Include the paths of the shared code.
-- Name the release tags of the app Worker with its own prefix, `app1-YYYY-MM-DD-rN`, and trigger its stage upload on `tags: ["app1-*"]`.
+- Name the release tags of the app Worker with its own Worker name, for example `app1-YYYY-MM-DD-rN` for the Worker `app1`, and trigger its stage upload on `tags: ["app1-[0-9]*"]`.
 - Promote and roll back each Worker on its own. Keep the contract between the Workers compatible with the previous version of the other Worker: the cookie name, the session data, and the links between them.
 
 ## Checks

@@ -327,7 +327,8 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 
 - A web app has no users who depend on a version number, so semver major, minor, and patch carry no meaning. A date shows how old a release is, which helps during a rollback and in logs.
 - `rN` lets you release more than once a day without a time in the tag.
-- The `web-` prefix names the Worker. When an app moves to its own Worker, it gets its own prefix and its own tag trigger, for example `app1-*`.
+- The prefix is the Worker name, so each tag says which Worker it deploys. A generic prefix such as `web-` stops being clear when an app moves to its own Worker. That Worker then gets tags with its own name and its own tag trigger, for example `app1-*`, with no new rule.
+- The tag trigger is `<worker>-[0-9]*`, not `<worker>-*`. Without `[0-9]`, the trigger `mysite-*` also matches the tags of a Worker named `mysite-app1`, and one tag would upload stage of both Workers.
 - The trendaro-fe project uses the same format, for example `trendaro-2026-10-08-r2`.
 
 ### Why separate Workers share one hostname
