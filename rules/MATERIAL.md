@@ -1,6 +1,18 @@
 # MATERIAL
 
-Material Design 3 (MD3) rules for layout, spacing, states, motion, and component sizes.
+Material Design 3 (MD3) rules for layout, spacing, states, motion, and component sizes. The rules follow MD3 Expressive.
+
+## Sources
+
+### [Material Design 3 Expressive](https://m3.material.io/blog/building-with-m3-expressive)
+
+- Use the MD3 Expressive value when it differs from baseline MD3, for example a 64px navigation bar instead of 80px.
+- Take MD3 Expressive specs from the generated Jetpack Compose tokens in [androidx `material3/tokens`](https://github.com/androidx/androidx/tree/androidx-main/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/tokens), for example `NavigationRailCollapsedTokens.kt`. They are the most complete source.
+- Check what MD3 Expressive changed in the "M3 Expressive styles" section of each component doc in [MDC-Android](https://github.com/material-components/material-components-android/tree/master/docs/components).
+- Take values for the web, such as `linear()` spring curves, from the experimental Expressive web components in [material-web `labs/gb`](https://github.com/material-components/material-web/tree/main/labs/gb).
+- Do not take MD3 Expressive values from the material-web [`tokens/versions/latest`](https://github.com/material-components/material-web/tree/main/tokens/versions/latest/sass) folder: it has baseline MD3 values. Use it only for values that MD3 Expressive did not change, such as the state layer opacities.
+- Do not use Flutter as a source: it does not implement MD3 Expressive ([flutter#168813](https://github.com/flutter/flutter/issues/168813)).
+- Read the usage guidance on [m3.material.io](https://m3.material.io) in a browser, for example with `agent-browser`. The site is a JavaScript app, so fetch tools return no content.
 
 ## Layout
 
