@@ -4,7 +4,7 @@
 
 ### [Google developer documentation style guide](https://developers.google.com/style)
 
-- Follow the Google developer documentation style guide for docs, rules, code comments, and commit messages. Do not use it for UI text: see UI text below.
+- Follow the Google developer documentation style guide for docs, rules, code comments, and commit messages. For UI text, follow the UI text rules below first.
 - Follow the project rules in `AGENTS.md` and `rules/` when they differ from the guide. Follow the guide for everything that the project rules do not cover.
 - Check the [word list](https://developers.google.com/style/word-list) for the spelling and use of terms.
 
@@ -42,7 +42,7 @@
 
 ### [Material Design 3 content design](https://m3.material.io/foundations/content-design/overview)
 
-- Follow the MD3 content design rules for all text in the UI: labels, buttons, menus, headings, dialogs, errors, emails, and alt text. Follow [AP Style](https://www.apstylebook.com) for everything that MD3 does not cover.
+- Follow the MD3 content design rules for all text in the UI: labels, buttons, menus, headings, dialogs, errors, emails, and alt text. Follow the Google developer documentation style guide for everything that MD3 does not cover. When the two differ, follow MD3.
 
 ### [UX writing best practices](https://m3.material.io/foundations/content-design/style-guide/ux-writing-best-practices)
 
@@ -88,6 +88,7 @@
 - Use parentheses only to define terms and acronyms. Do not use them for side notes.
 - Use "&" only in headlines, table and column headers, navigation labels, and buttons when space is short. Write "and" in sentences.
 - Do not use em dashes. Use an en dash with no spaces for ranges, for example "9 AM–5 PM". Do not put spaces around hyphens.
+- When you are not sure if a compound adjective or noun needs a hyphen, check [AP Style](https://www.apstylebook.com). Do not use AP Style for other rules.
 - Use bold for emphasis. Use italics only for one word or a name, never for a sentence.
 
 ### [Global writing](https://m3.material.io/foundations/content-design/global-writing/word-choice)

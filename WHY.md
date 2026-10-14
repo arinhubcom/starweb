@@ -165,7 +165,16 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 ### What we do not take
 
 - We do not take the Mailchimp brand voice: offbeat, dry humor, and "we" for the company. MD3 does not allow "we" for the product, and humor is hard to translate.
-- We do not take the other parts of the guide (grammar, web elements, word list). MD3 and AP Style cover them, and a third guide would add conflicts.
+- We do not take the other parts of the guide (grammar, web elements, word list). MD3 and the Google developer documentation style guide cover them, and a third guide would add conflicts.
+
+## Style guide for UI text
+
+### Why the Google guide fills the gaps in MD3
+
+- MD3 content design covers the main UI text rules, but not all topics. MD3 says that Google generally follows AP Style, and it links to AP Style only for hyphens.
+- The AP Stylebook is paid. An agent cannot read or verify its rules, so a rule that says "follow AP Style" cannot be checked.
+- The Google developer documentation style guide is free, current, and from Google, like MD3. We already use it for docs, so agents follow one guide for both.
+- AP Style differs from our rules on some points: it does not use the serial comma, it writes times as "1 p.m.", and it abbreviates months ("Aug. 25"). We keep AP Style only for hyphens, as MD3 does.
 
 ## [Conversation mining](https://uxwritinghub.com/leveraging-conversation-mining-for-ux-writing-research/)
 
