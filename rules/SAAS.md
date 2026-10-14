@@ -20,8 +20,7 @@ These rules are for a small SaaS app: few tenants, little data per tenant, no re
 
 ### [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/)
 
-- Give each app its own path prefix, for example `/app1` and `/app2`. Put its pages in `src/pages/app1/` and its API routes in `src/pages/api/app1/`.
-- Put the code of each app in its own folder, for example `src/apps/app1/` (repositories, `Database` interface, services). Do not import from another app folder. Put shared code in `src/lib/`.
+- Build each app as a micro frontend in its own folder, for example `src/apps/app1/`, with its own path prefix, for example `/app1` and `/app2`. Follow the rules in [ARCH.md](ARCH.md) (Apps).
 - Give each app its own D1 database and binding, for example `APP1_DB` and `APP2_DB`. Do not share app tables between apps.
 - Set `migrations_dir` for each database in the Wrangler config, for example `migrations/app1` and `migrations/app2`. Apply them per binding: `wrangler d1 migrations apply APP1_DB`.
 - Create one Kysely instance per app database, each with its own `Database` interface.

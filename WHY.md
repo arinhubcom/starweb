@@ -237,6 +237,15 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - Presigned URLs send large uploads straight to R2, so they do not use Worker CPU time or memory.
 - A test that checks tenant isolation catches the most costly SaaS bug: one customer sees the data of another.
 
+### Why micro frontends per app
+
+- Each app is one vertical slice: its pages, API, data, and UI are in one folder. An agent can work on one app and read only that folder and the shared code.
+- Apps cannot break each other: they do not import from each other and do not share tables.
+- An app is easy to add or remove: one folder, one line in `astro.config`, and its bindings.
+- We compose the apps at build time, with Astro integrations (`injectRoute`, `addMiddleware`). All apps run in one Worker, so a request has no extra hop, and all apps share one login, one layout, and one design system.
+- Runtime composition (each app in its own Worker, joined by routes or service bindings) gives separate deploys, but each Worker needs its own copy of the auth and layout code. We keep it as the next step, not the start.
+- Tested on 2026-10-14 with Astro 7.3 and `@astrojs/cloudflare`: injected pages, catch-all routes, app middleware, and grouped actions work in `wrangler dev`.
+
 ### When to split the app into a separate Worker
 
 - The app needs Better Auth plugins that emdash-better-auth cannot load yet ([emdash-better-auth#22](https://github.com/theweekendprojects/emdash-better-auth/issues/22)).

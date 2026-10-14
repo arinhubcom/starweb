@@ -64,3 +64,22 @@
 - Charts: use it for charts in dashboards. It renders SVG and supports server rendering.
 - AI: use it for streaming chat and tool calls. Use the `@tanstack/ai-cloudflare` adapter for Workers AI.
 - Markdown and Highlight: use them only for Markdown that arrives at runtime, such as streamed AI output. For site content, use content collections and Astro code highlighting at build time.
+
+## Apps
+
+### Micro frontends: [Astro integrations](https://docs.astro.build/en/reference/integrations-reference/)
+
+- Build each app as a vertical micro frontend: one folder, for example `src/apps/app1/`, that owns all of the app: pages, API routes, middleware, actions, components, islands, repositories, and the `Database` interface.
+- Use this layout in each app folder: `integration.ts`, `pages/`, `api/`, `middleware.ts`, `actions.ts`, `components/`, `islands/`, `db/`. Keep the migrations in `migrations/app1/`. Follow the rules in [SAAS.md](SAAS.md) (Multiple apps).
+- Register each app as a local Astro integration in `src/apps/app1/integration.ts`, and add it to `integrations` in `astro.config`: `integrations: [emdash(), app1()]`. To remove an app, remove its folder, its line in `astro.config`, and its bindings.
+- Add the app routes with `injectRoute()` in the `astro:config:setup` hook. Pass the entrypoint as a URL relative to the integration file: `injectRoute({ pattern: "/app1/[...path]", entrypoint: new URL("./pages/[...path].astro", import.meta.url) })`.
+- Do not put app pages in `src/pages/`. Keep `src/pages/` for the site: marketing pages and CMS content.
+- Start every route of an app with its prefix: pages at `/app1/...` and API routes at `/app1/api/...`.
+- Add app middleware with `addMiddleware({ entrypoint: new URL("./middleware.ts", import.meta.url), order: "pre" })`. It runs on every request, so return `next()` at once when `context.url.pathname` does not start with the app prefix.
+- Define app actions in `src/apps/app1/actions.ts` as one object (`export const app1 = { create, update }`). Add it to `src/actions/index.ts` as a group: `export const server = { app1 }`. Call it as `actions.app1.create`.
+- Use relative imports inside an app. Use `@/` imports only for shared code.
+- Do not import from another app folder. Share code only through `src/lib/`, `src/layouts/`, and `src/components/ui/`.
+- Do not read the database binding of another app. To use its data, call its API route or send a message to a Queue.
+- Use the shared base layout from `src/layouts/` in all apps, so all apps have the same header, theme, and login.
+- Do not share island state between apps. Each app has its own stores.
+- When an app must deploy on its own, move its folder to a separate Astro project and Worker. Keep the same domain and add a Workers route for the path, for example `example.com/app1/*`: the most specific route wins, and the login cookie still works. Read [WHY.md](../WHY.md#when-to-split-the-app-into-a-separate-worker) first.
