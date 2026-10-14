@@ -13,6 +13,30 @@
 - Keep the EmDash passkey login at `/_emdash/admin/login`. Do not redirect it to Better Auth.
 - Turn on organizations and Stripe billing in the plugin settings for SaaS features.
 
+## Users
+
+### [EmDash authentication](https://docs.emdashcms.com/guides/authentication/)
+
+- Read the user from `Astro.locals.user` in app pages and routes.
+- Check `locals.user` and its `role` at the start of each protected app route. Return `401` or redirect to sign-in when it is missing.
+- Do not branch on `locals.user` in cached public pages. Send `Cache-Control: private, no-store` on pages that depend on the user.
+- Use emdash-better-auth for customer signup, organizations, and billing.
+
+## Organizations
+
+### [emdash-better-auth organizations](https://github.com/theweekendprojects/emdash-better-auth#readme)
+
+- Turn on "Organizations (+ teams)" in the Better Auth admin settings page.
+- Use `requireUser(Astro)` from `emdash-better-auth/route` as the login guard on app pages. Return its response when it is not `null`.
+- Read the active organization with `auth.api.getSession()` and `session.activeOrganizationId`. Get `auth` from `createAuthForRequest()` in `emdash-better-auth/route`, inside `withEmDashRuntime()` from `emdash/middleware`. Do not use `getAuthUser()`: it returns only the user.
+- Put this code in one helper, for example `getActiveOrgId(Astro)`. `createAuthForRequest()` is not a documented API. Replace the helper when [emdash-better-auth#23](https://github.com/theweekendprojects/emdash-better-auth/issues/23) adds a public one.
+- Call the helper once per request. Each call builds a Better Auth instance and reads the session from storage.
+- Redirect to `/organization` when `activeOrganizationId` is empty.
+
+### [Better Auth organization plugin](https://better-auth.com/docs/plugins/organization)
+
+- Check roles on the server with `auth.api.hasPermission()`. Do not use `authClient.organization.checkRolePermission()` for access checks: it runs on the client.
+
 ## Login
 
 ### [Better Auth Last Login Method](https://better-auth.com/docs/plugins/last-login-method)
@@ -30,7 +54,7 @@
 
 - Check these issues before you work around a plugin limit. When an issue is closed, update the rules that link to it.
 - [#22](https://github.com/theweekendprojects/emdash-better-auth/issues/22) Server-side Better Auth plugins: do not add Better Auth plugins (Polar, Creem, Last Login Method) to emdash-better-auth until it is fixed. Use Stripe billing.
-- [#23](https://github.com/theweekendprojects/emdash-better-auth/issues/23) Session helper: read `activeOrganizationId` with the `getActiveOrgId()` helper from [SAAS.md](SAAS.md) until a public helper exists.
+- [#23](https://github.com/theweekendprojects/emdash-better-auth/issues/23) Session helper: read `activeOrganizationId` with the `getActiveOrgId()` helper (see Organizations) until a public helper exists.
 - [#24](https://github.com/theweekendprojects/emdash-better-auth/issues/24) Precompiled auth CSS: the plugin scans `node_modules` with a relative `@source` path. Check the auth page styles after each install until it is fixed.
 - [#25](https://github.com/theweekendprojects/emdash-better-auth/issues/25) Headless mode: keep the built-in HeroUI auth pages until it is fixed. Then build the auth pages with the Better Auth UI shadcn/ui variant or `@better-auth-ui/react` and your own Tailwind components.
 - [#26](https://github.com/theweekendprojects/emdash-better-auth/issues/26) Dependabot and minor pins: expect Better Auth UI 1.7.19 and Better Auth `^1.7.2` in the plugin until it is fixed.

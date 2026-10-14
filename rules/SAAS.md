@@ -21,9 +21,8 @@ These rules are for a small SaaS app: few tenants, little data per tenant, no re
 ### Micro frontends: [Astro integrations](https://docs.astro.build/en/reference/integrations-reference/)
 
 - Build each app as a micro frontend in its own folder, for example `src/apps/app1/`, with its own path prefix, for example `/app1` and `/app2`. Follow the rules in [ARCH.md](ARCH.md) (Apps).
-- Use the same login and organizations for all apps. Follow the rules in Auth.
-- Check app access (plan or membership) at the start of each app route. Do not rely on the path prefix alone.
-- Check roles on the server with `auth.api.hasPermission()` from Better Auth. Do not use `authClient.organization.checkRolePermission()` for access checks: it runs on the client.
+- Use the same login and organizations for all apps. Follow the rules in [AUTH.md](AUTH.md).
+- Check app access (plan or membership) at the start of each app route. Do not rely on the path prefix alone. Follow the rules in [AUTH.md](AUTH.md) (Organizations).
 
 ### [D1](https://developers.cloudflare.com/d1/platform/limits/)
 
@@ -41,21 +40,9 @@ These rules are for a small SaaS app: few tenants, little data per tenant, no re
 
 ## Auth
 
-### [EmDash authentication](https://docs.emdashcms.com/guides/authentication/)
+### [Auth](AUTH.md)
 
-- Read the user from `Astro.locals.user` in app pages and routes.
-- Check `locals.user` and its `role` at the start of each protected app route. Return `401` or redirect to sign-in when it is missing.
-- Do not branch on `locals.user` in cached public pages. Send `Cache-Control: private, no-store` on pages that depend on the user.
-- Use [emdash-better-auth](https://github.com/theweekendprojects/emdash-better-auth) for customer signup, organizations, and billing.
-
-### [emdash-better-auth organizations](https://github.com/theweekendprojects/emdash-better-auth#readme)
-
-- Turn on "Organizations (+ teams)" in the Better Auth admin settings page.
-- Use `requireUser(Astro)` from `emdash-better-auth/route` as the login guard on app pages. Return its response when it is not `null`.
-- Read the active organization with `auth.api.getSession()` and `session.activeOrganizationId`. Get `auth` from `createAuthForRequest()` in `emdash-better-auth/route`, inside `withEmDashRuntime()` from `emdash/middleware`. Do not use `getAuthUser()`: it returns only the user.
-- Put this code in one helper, for example `getActiveOrgId(Astro)`. `createAuthForRequest()` is not a documented API. Replace the helper when [emdash-better-auth#23](https://github.com/theweekendprojects/emdash-better-auth/issues/23) adds a public one.
-- Call the helper once per request. Each call builds a Better Auth instance and reads the session from storage.
-- Redirect to `/organization` when `activeOrganizationId` is empty.
+- Follow the rules in [AUTH.md](AUTH.md) for users, login, and organizations.
 
 ## Data
 

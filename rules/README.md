@@ -8,7 +8,7 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 | --- | --- |
 | [STACK.md](STACK.md) | The tools of the stack, with a link to the topic file for each tool. |
 | [ARCH.md](ARCH.md) | Architecture: Effect, Zod, Cloudflare Workers, background work, Astro, TanStack, micro frontends, and app admin pages. |
-| [SAAS.md](SAAS.md) | Rules for a small SaaS app in one Astro project and one Worker: multiple apps, auth, data, plugins, building blocks, limits, and billing. |
+| [SAAS.md](SAAS.md) | Rules for a small SaaS app in one Astro project and one Worker: multiple apps, data, plugins, building blocks, limits, and billing. |
 
 ## Backend and data
 
@@ -16,7 +16,7 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 | --- | --- |
 | [CMS.md](CMS.md) | EmDash as the CMS: setup, content types, content queries, and plugins. |
 | [DATA.md](DATA.md) | D1 limits, Kysely queries, and D1 migrations. |
-| [AUTH.md](AUTH.md) | Site user login with emdash-better-auth and the last login method plugin. |
+| [AUTH.md](AUTH.md) | Site user login with emdash-better-auth, users, organizations, role checks, and the last login method plugin. |
 | [PAYMENTS.md](PAYMENTS.md) | Payment providers: Stripe billing, Creem for EU sales, x402 agent payments, and premium content. |
 | [EMAIL.md](EMAIL.md) | Transactional email with React Email and emailcn. |
 
