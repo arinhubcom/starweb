@@ -31,7 +31,7 @@
 - Keep Fulldev UI and other `.astro` components in `src/components/ui/`, one folder per component (for example `ui/button/` with `button.astro`, `button-variants.ts`, and `index.ts`). Import them from the folder: `import { Button } from "@/components/ui/button"`. Edit them there: they are your code after install, not a package.
 - Change the theme in the CSS variables that the init step adds. Do not hardcode colors in components.
 - Install the agent skills: `npx skills add shadcn/ui` and `npx skills add fulldotdev/ui --skill fulldev-ui`.
-- Use React islands with Base UI only when a part must be interactive and no Fulldev component fits.
+- Use React islands with shadcn/ui and Base UI only when a part must be interactive and no Fulldev component fits.
 
 ## React components
 
@@ -58,13 +58,21 @@
 - Do not expect React context to work across islands. Share state through a store. Follow the rules in [ARCH.md](ARCH.md).
 - Put islands in `src/components/islands/`. Keep reusable React UI parts in `src/components/ui/react/`.
 
+### [shadcn/ui](https://ui.shadcn.com/docs)
+
+- Use shadcn/ui components for React islands, such as dialog, dropdown menu, popover, tabs, and select. They are Base UI wrappers with Tailwind classes in the same theme as Fulldev UI. Do not use them for static UI: use Fulldev UI `.astro` components there.
+- Start from the shadcn/ui component when one exists. Do not write a Base UI wrapper by hand.
+- Keep `"style": "base-vega"` in `components.json`, as the Fulldev init writes it. The style cannot change after init. Do not install from a `radix-*` style: those components import `radix-ui`.
+- Install React components with `--path`, for example `npx shadcn@latest add dialog --path src/components/ui/react`. The default path is `src/components/ui/`, which is for `.astro` components. The CLI puts registry dependencies (for example `button.tsx` for `dialog`) in the same folder and rewrites their imports to `@/components/ui/react/...`.
+- Install `@base-ui/react` and `lucide-react` yourself before the first React component: `npm i @base-ui/react lucide-react`. The Fulldev init and the `base-vega` registry items do not install them.
+- Run `npx astro check` (needs `@astrojs/check`) after each install. Install each missing package that it reports.
+- Check `package.json` after each install. Remove `radix-ui` or `@radix-ui/*` if the CLI added it, and install the component again from `base-vega`.
+- Edit the installed components in `src/components/ui/react/`. They are your code after install, not a package.
+
 ### [Base UI](https://base-ui.com/react/handbook/styling)
 
 - Use Base UI (`@base-ui/react`) for interactive components in React islands, such as dialogs, menus, popovers, tabs, and selects. Do not add Radix UI.
 - Put React components for islands, such as Base UI wrappers, in `src/components/ui/react/`. Do not put `.tsx` files in `src/components/ui/`.
-- Install React components from a shadcn registry with `--path`, for example `npx shadcn@latest add dialog --path src/components/ui/react`. The default path is `src/components/ui/`, which is for `.astro` components. The CLI puts registry dependencies (for example `button.tsx` for `dialog`) in the same folder and rewrites their imports to `@/components/ui/react/...`.
-- Install `@base-ui/react` and `lucide-react` yourself before the first React component: `npm i @base-ui/react lucide-react`. The Fulldev init and the `base-vega` registry items do not install them.
-- Run `npx astro check` (needs `@astrojs/check`) after each install. Install each missing package that it reports.
 - Wrap each Base UI part in your own component in `src/components/ui/react/`, styled with Tailwind classes. Import the wrapper in islands, not the Base UI part.
 - Compose all parts of one component (for example `Dialog`, `DialogTrigger`, `DialogContent`) in one `.tsx` island in `src/components/islands/`, and use that island in `.astro` with a `client:*` directive. Do not use the parts directly in `.astro`: each one becomes a separate island without the shared context, and the render fails (Base UI error #79).
 - Style component states with Base UI data attributes and Tailwind data variants, for example `data-checked:bg-primary` or `data-popup-open:opacity-100`.

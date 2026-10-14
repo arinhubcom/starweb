@@ -136,8 +136,22 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 ### Alternatives
 
 - **Radix UI:** similar headless primitives. Base UI is the newer library from the same people.
-- **shadcn/ui:** Base UI or Radix with Tailwind, copied into the project. A good source of examples for your own wrappers.
 - **HeroUI:** a styled library with its own look. Harder to match the site theme.
+
+## [shadcn/ui](https://ui.shadcn.com)
+
+### Why
+
+- Ready-made Base UI wrappers with Tailwind classes. Agents install them with the shadcn CLI instead of writing focus, keyboard, and ARIA styles by hand.
+- The shadcn/ui [changelog](https://ui.shadcn.com/docs/changelog) has a July 2026 entry, "Base UI as the Default". The `base-vega` components import `@base-ui/react`.
+- The Fulldev init writes `"style": "base-vega"` to `components.json`, so `.astro` components and React islands share one theme and one CLI.
+- You own the code after install, as with Fulldev UI.
+
+### Risks
+
+- shadcn/ui components are React. In `.astro` pages each one is an island with client JavaScript, so we use them only for interactive parts.
+- shadcn/ui also has `radix-*` styles that import `radix-ui`. The style cannot change after init, so a project set up with a Radix style must start again.
+- Component sizes (for example `h-9`) are not MD3 sizes. We change them after install.
 
 ## [Material Design 3](https://m3.material.io/foundations/layout/layout-overview)
 
