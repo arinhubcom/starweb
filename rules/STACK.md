@@ -34,7 +34,7 @@
 
 ### [Astro](https://docs.astro.build/)
 
-- Use Astro as the framework. Follow the rules in [ARCH.md](ARCH.md), [PERF.md](PERF.md), and [QUALITY.md](QUALITY.md).
+- Use Astro as the framework. Build pages with as little client JavaScript as possible. Follow the rules in [ARCH.md](ARCH.md), [PERF.md](PERF.md), and [QUALITY.md](QUALITY.md).
 
 ### [TanStack](https://tanstack.com)
 

@@ -43,8 +43,12 @@
 ### [Astro](https://docs.astro.build/)
 
 - Use `output: "server"` with the `@astrojs/cloudflare` adapter. Add `export const prerender = true` to pages that do not change per request.
-- Write UI as `.astro` components by default. Use a UI framework island only when the part must be interactive.
-- Pick the lowest hydration directive that works: `client:visible` or `client:idle` before `client:load`.
+- Send as little JavaScript to the browser as possible. Astro renders components to HTML and CSS and removes client JavaScript by default. Keep it that way, and add JavaScript only for a part that must be interactive.
+- Pick the first option that works, in this order: static `.astro` HTML and CSS, native HTML (`<details>`, `popover` with `popovertarget`, a `<form>` with an Astro Action), a `<script>` in the component, a server island, and a React island last.
+- Write UI as `.astro` components by default. Use a UI framework island only when the part must be interactive. Follow the rules in [COMPONENTS.md](COMPONENTS.md).
+- Submit forms with `<form method="POST" action={actions.name}>` and read the result with `Astro.getActionResult()`. Do not add an island only to send a form. The page must render on demand (no `prerender`).
+- Use a server island (`server:defer`) for slow or per-user parts of a page, such as an avatar or a cart count. Do not fetch them with client JavaScript.
+- Pick the lowest hydration directive that works: `client:visible`, `client:idle`, or `client:media` before `client:load`. Use `client:only` only when the component cannot render on the server.
 - Use content collections for Markdown and MDX content. Do not render Markdown per request.
 - Use Astro Actions for forms and mutations. Validate input with Zod.
 - Read Cloudflare bindings and secrets with `import { env } from "cloudflare:workers"`. Do not use `process.env` or the removed `Astro.locals.runtime` API.
