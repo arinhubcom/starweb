@@ -70,10 +70,16 @@ Technical rules for personal data, cookies, analytics, and logs. These rules are
 
 ### [D1 data location](https://developers.cloudflare.com/d1/configuration/data-location/)
 
-- Set the D1 jurisdiction when you create a database that must stay in the EU: `wrangler d1 create <name> --jurisdiction=eu`. You can set a jurisdiction only at creation, so decide before the first deploy.
-- Use `--location=<hint>` for a latency preference. Valid hints are `wnam`, `enam`, `weur`, `eeur`, `apac`, and `oc`. A hint does not guarantee the location. A jurisdiction takes precedence when you set both.
-- Set the same jurisdiction on each app database and the EmDash database. Read replicas then stay inside the jurisdiction.
+- Create each D1 database with the EU jurisdiction: `npx wrangler d1 create <name> --jurisdiction=eu`. This applies to the EmDash database, each app database, and the databases of each environment and of Previews. You can set a jurisdiction only at creation.
+- Create the database before the first deploy, and set its `database_id` in the `d1_databases` entry of `wrangler.jsonc`. Do not leave out `database_id`: Wrangler automatic provisioning then creates the database on deploy, and the Wrangler config has no `jurisdiction` key for D1.
+- Move a database that has no jurisdiction: create a new database with `--jurisdiction=eu`, export the old one with `wrangler d1 export <old> --remote --output=<file>`, and import the file with `wrangler d1 execute <new> --remote --file=<file>`.
+- Do not pass `--location` with `--jurisdiction`: Wrangler ignores the location hint when a jurisdiction is set.
+- Use the same jurisdiction for all databases. Read replicas then stay inside the jurisdiction.
 - Do not claim in the policy that all processing stays in one region. A jurisdiction controls only where the database runs and stores data: Workers can still read it from anywhere.
+
+### [R2 data location](https://developers.cloudflare.com/r2/reference/data-location/)
+
+- Create each R2 bucket with the EU jurisdiction: `npx wrangler r2 bucket create <name> --jurisdiction eu`. Set `"jurisdiction": "eu"` in its `r2_buckets` entry in `wrangler.jsonc`. Workers need the key to reach a bucket in a jurisdiction.
 
 ## Logs
 

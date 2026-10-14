@@ -26,7 +26,7 @@ These rules are for a small SaaS app: few tenants, little data per tenant, no re
 
 ### [D1](https://developers.cloudflare.com/d1/platform/limits/)
 
-- Give each app its own D1 database and binding, for example `APP1_DB` and `APP2_DB`. Do not share app tables between apps.
+- Give each app its own D1 database and binding, for example `APP1_DB` and `APP2_DB`. Do not share app tables between apps. Create each database with `--jurisdiction=eu`, as in [PRIVACY.md](PRIVACY.md) (Data residency).
 - Count databases before you add an app. The Workers Free plan allows 10 D1 databases per account, and EmDash uses one of them, so you can have up to 9 apps. The Workers Paid plan allows 50,000.
 
 ### [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/)

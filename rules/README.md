@@ -42,7 +42,7 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 | [TESTING.md](TESTING.md) | Vitest, the Cloudflare Vitest plugin, Storybook with Storybook Astro, ARIA snapshots, screenshot tests, Playwright end-to-end tests, axe, and CI. |
 | [PERF.md](PERF.md) | CPU time budget for Workers, Astro route caching, and the Cache API. |
 | [SECURITY.md](SECURITY.md) | Secrets, security headers (Astro CSP, HSTS, `_headers`, middleware), CSRF, input validation, XSS, SQL injection, auth checks, Turnstile and WAF rate limits, and security.txt. |
-| [PRIVACY.md](PRIVACY.md) | Cloudflare Web Analytics, cookie consent (ePrivacy Article 5(3)), the privacy policy page, data minimization, user data access, export, and delete (GDPR), and D1 jurisdiction. |
+| [PRIVACY.md](PRIVACY.md) | Cloudflare Web Analytics, cookie consent (ePrivacy Article 5(3)), the privacy policy page, data minimization, user data access, export, and delete (GDPR), and the EU jurisdiction for D1 and R2. |
 | [OBSERVABILITY.md](OBSERVABILITY.md) | Workers Logs, structured logs without personal data, `wrangler tail`, Effect logging and spans, Sentry for Cloudflare and Astro, release names and source maps, alerts, and a health endpoint. |
 | [DEPS.md](DEPS.md) | npm and `package-lock.json`, `npm ci`, Dependabot (groups, schedule, ignore, automerge workflow, cooldown), `npm audit`, rules for a new package, version sync of Astro, Wrangler, and EmDash, and `compatibility_date`. |
 | [DEV.md](DEV.md) | Local dev with `astro dev`, and build tests with `astro preview`. |
