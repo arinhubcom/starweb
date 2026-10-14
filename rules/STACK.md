@@ -20,6 +20,10 @@
 
 - Use Cloudflare Workers to run the site and the app. Follow the rules in [ARCH.md](ARCH.md), [PERF.md](PERF.md), [SECURITY.md](SECURITY.md), [DEV.md](DEV.md), and [DEPLOY.md](DEPLOY.md).
 
+### [OpenAPI](https://spec.openapis.org/oas/v3.1.1.html)
+
+- Use OpenAPI 3.1, generated from Zod schemas, as the contract for each app API. Follow the rules in [API.md](API.md).
+
 ### Background work
 
 - Use `waitUntil()`, Queues, Cron Triggers, or Workflows for background work. Follow the rules in [ARCH.md](ARCH.md).

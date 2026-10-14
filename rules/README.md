@@ -15,6 +15,7 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 | File | Contents |
 | --- | --- |
 | [CMS.md](CMS.md) | EmDash as the CMS: setup, content types, content queries, and plugins. |
+| [API.md](API.md) | OpenAPI as the contract for all interfaces, one purpose for each field, zod-openapi, API routes, errors (RFC 9457), API keys, CORS, rate limits, and webhooks. |
 | [DATA.md](DATA.md) | D1 limits, Kysely queries, and D1 migrations. |
 | [AUTH.md](AUTH.md) | Site user login with emdash-better-auth, users, organizations, role checks, and the last login method plugin. |
 | [PAYMENTS.md](PAYMENTS.md) | Payment providers: Stripe billing, Creem for EU sales, x402 agent payments, and premium content. |
@@ -50,6 +51,5 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 
 These files have only a heading and no rules:
 
-- [API.md](API.md)
 - [SETUP.md](SETUP.md)
 - [TESTING.md](TESTING.md)

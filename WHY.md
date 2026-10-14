@@ -320,6 +320,47 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - The app needs Better Auth plugins that emdash-better-auth cannot load yet ([emdash-better-auth#22](https://github.com/theweekendprojects/emdash-better-auth/issues/22)).
 - The app grows large, and EmDash upgrades or middleware start to slow it down.
 
+## API
+
+### Why OpenAPI is the contract
+
+- One document describes each operation for every interface: API routes, React islands, external clients, agents, and MCP tools. Each interface reads the same shapes, so they cannot drift apart.
+- Agents and external clients can read the contract at `/app1/api/openapi.json` and call the API with no other docs.
+- Tools check the contract in CI: Redocly CLI lints it, and oasdiff finds breaking changes in a PR.
+
+### Why each field has one purpose
+
+- An agent or a client reads the name and the `description` and knows what to send. When `image` can be a path, a URL, or base64, each client must guess, and each server must detect the form.
+- A field with one purpose has one narrow type, so the schema can validate it (`format`, `pattern`, `enum`).
+- A new form of the same thing is a new field, which is not a breaking change. Changing the meaning of an existing field breaks clients without a type error.
+
+### Why Zod is the source and not a hand-written YAML
+
+- The stack uses Zod for all validation. When the API routes validate with the same schemas that generate the document, the contract and the code cannot differ.
+- [zod-openapi](https://github.com/samchungy/zod-openapi) supports Zod 4 and reads the native `.meta()`, so schemas need no extra wrapper. Its only dependency is Zod, and it uses no `eval` or `new Function`.
+- Alternative: [@asteasolutions/zod-to-openapi](https://github.com/asteasolutions/zod-to-openapi) also supports Zod 4, has more downloads, and outputs OpenAPI 3.0, 3.1, and 3.2. It needs an `OpenAPIRegistry` and `extendZodWithOpenApi`. Use it when you must output OpenAPI 3.0 or 3.2.
+
+### Why OpenAPI 3.1 and not 3.2
+
+- OpenAPI 3.2.1 is the latest version (2026-09-10). zod-openapi documents only 3.1 output, and openapi-typescript documents 3.0 and 3.1.
+- OpenAPI 3.1 uses JSON Schema 2020-12, the default target of `z.toJSONSchema()`.
+- Check again when zod-openapi and openapi-typescript document 3.2.
+
+### Why RFC 9457 problem details
+
+- It is the IETF standard for HTTP API errors, and it replaces RFC 7807. Clients and tools know the `application/problem+json` shape.
+- Extension members, such as `errors`, carry field errors without a second error format.
+
+### Why API keys are not a Better Auth plugin
+
+- The API key plugin is now the separate package `@better-auth/api-key`. emdash-better-auth cannot load server-side Better Auth plugins yet ([#22](https://github.com/theweekendprojects/emdash-better-auth/issues/22)).
+- The API keys feature of emdash-better-auth is for staff, not for customers.
+
+### Why JSON-only mutations
+
+- Astro `security.checkOrigin` blocks cross-site form submissions. It does not check requests with `Content-Type: application/json`, because a browser sends a CORS preflight for them first.
+- When API routes that use the session cookie accept only JSON, a cross-site page cannot send a mutation without a preflight, and the preflight fails without a CORS allow rule for that origin.
+
 ## Deploy
 
 ### Why two-step releases
