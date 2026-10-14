@@ -14,9 +14,11 @@
 - Use `Astro.slots.has("name")` to render a wrapper only when that slot has content: `{Astro.slots.has("footer") && <footer><slot name="footer" /></footer>}`.
 - Keep components in `src/components/ui/` presentational: no database, API, or `Astro.locals` access. Load data in pages or block components, and pass it as props. Follow the rules in [DATA.md](DATA.md).
 - Use semantic HTML: `<button>` for actions, `<a href>` for navigation, and headings in order. Do not put click handlers on `<div>`.
-- Use `<Image />` from `astro:assets` for images, with an `alt` text. Follow the rules in [ARCH.md](ARCH.md).
+- Use `<Image />` from `astro:assets` for images, with an `alt` text. Follow the rules in [MEDIA.md](MEDIA.md). Render EmDash image fields with `Image` from `emdash/ui` (see [MEDIA.md](MEDIA.md) (EmDash media)).
 - Use a `<script>` in the component for small interactions (toggle, copy, open a menu) instead of a React island. Astro bundles it and adds it once per page.
-- Pass server values to the script in `data-*` attributes and read them with `element.dataset`. Do not use `define:vars` or `is:inline`: they turn off processing and bundling (`define:vars` implies `is:inline`).
+- Pass server values to the script in `data-*` attributes and read them with `element.dataset`. Do not use `define:vars` or `is:inline`: they turn off processing and bundling (`define:vars` implies `is:inline`). The one exception is the theme script (next rule).
+- Add the theme script as the one allowed `is:inline` script: a blocking script in `<head>` of the base layout that sets the `.dark` class before the first paint (see [UI-UX.md](UI-UX.md) (Theme)). Keep its text in a constant in `src/lib/theme-script.ts` and render it with `<script is:inline set:html={themeScript} />`.
+- Allow the theme script in the CSP. Astro does not add a hash for an `is:inline` script. Compute the SHA-256 hash of the `themeScript` text (`"sha256-" + createHash("sha256").update(themeScript).digest("base64")` from `node:crypto`) in the CSP module, and add it to `csp.scriptDirective.hashes` (see [SECURITY.md](SECURITY.md) (Headers)).
 - Wrap the script logic in a custom element (`customElements.define`) when the component can appear more than once on a page. The browser runs `connectedCallback` for each element.
 - Do not add a `client:*` directive to an `.astro` component. Astro components have no client runtime, and Astro throws an error.
 - Keep the kebab-case file names that the shadcn CLI writes (`button.astro`). Import components with PascalCase names (`Button`).
@@ -56,7 +58,7 @@
 - Keep each island small. Render static content in `.astro` around it, and hydrate only the interactive part.
 - Use `client:only="react"` only for a component that needs browser APIs during render. It shows nothing until JavaScript loads.
 - Do not expect React context to work across islands. Share state through a store. Follow the rules in [ARCH.md](ARCH.md).
-- Put islands in `src/components/islands/`. Keep reusable React UI parts in `src/components/ui/react/`.
+- Put islands that several pages or apps share in `src/components/islands/`. Put the islands of one app in its folder, `src/apps/<app>/islands/` (see [ARCH.md](ARCH.md) (Apps)). Keep reusable React UI parts in `src/components/ui/react/`.
 
 ### [shadcn/ui](https://ui.shadcn.com/docs)
 
@@ -74,7 +76,7 @@
 - Use Base UI (`@base-ui/react`) for interactive components in React islands, such as dialogs, menus, popovers, tabs, and selects. Do not add Radix UI.
 - Put React components for islands, such as Base UI wrappers, in `src/components/ui/react/`. Do not put `.tsx` files in `src/components/ui/`.
 - Wrap each Base UI part in your own component in `src/components/ui/react/`, styled with Tailwind classes. Import the wrapper in islands, not the Base UI part.
-- Compose all parts of one component (for example `Dialog`, `DialogTrigger`, `DialogContent`) in one `.tsx` island in `src/components/islands/`, and use that island in `.astro` with a `client:*` directive. Do not use the parts directly in `.astro`: each one becomes a separate island without the shared context, and the render fails (Base UI error #79).
+- Compose all parts of one component (for example `Dialog`, `DialogTrigger`, `DialogContent`) in one `.tsx` island (in `src/components/islands/`, or in `src/apps/<app>/islands/` for an app), and use that island in `.astro` with a `client:*` directive. Do not use the parts directly in `.astro`: each one becomes a separate island without the shared context, and the render fails (Base UI error #79).
 - Style component states with Base UI data attributes and Tailwind data variants, for example `data-checked:bg-primary` or `data-popup-open:opacity-100`.
 - Use the `className` function only when a state has no data attribute: `className={(state) => cn(base, state.checked && checked)}`.
 - Use the CSS variables that Base UI exposes (for example `--available-height` on a popup) in arbitrary values, for example `max-h-(--available-height)`.

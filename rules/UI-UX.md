@@ -47,7 +47,10 @@ Rules for how the UI behaves and how users finish a task. They apply to the site
 - Show the error when the user leaves a field (`blur`) or submits. Do not show errors while the user types for the first time.
 - Keep the values that the user entered after a failed submit. Astro clears the inputs on submit, so render the values from the submitted data, or add `transition:persist` to each input with view transitions.
 - Redirect after a successful submit with `Astro.redirect()` (POST, redirect, GET), so a reload does not send the form again.
-- Disable the submit button and show progress while the form sends, so it cannot be sent twice. Keep the button label, for example **Saving…** instead of **Save**.
+- Show the result of a form without an island on the page after the redirect, as a status message in an element with `role="status"`: a toast needs an island.
+- Pass the message with an [Astro session](https://docs.astro.build/en/guides/sessions/). Set it in the action handler: `context.session?.set("flash", message, { ttl: 60 })`. Read it in the page after the redirect: `await Astro.session?.get("flash")`, then clear it with `Astro.session?.set("flash", null)`. Use it only on a per-user page, and call `Astro.cache.set(false)` on that page (see [PERF.md](PERF.md) (Cache)). The Cloudflare adapter stores sessions in the `SESSION` KV binding.
+- Do not read the session on a public page that the CDN caches. Redirect to a fixed confirmation URL instead, for example `/contact/thanks`.
+- Disable the submit button and show progress while the form sends, so it cannot be sent twice. Keep the button label, for example **Save**: do not replace it with **Saving…**, because buttons have no ellipsis (see [WRITING.md](WRITING.md)). Show progress with a spinner, or with a text such as "Saving…" in an element with `role="status"`.
 
 ### [WCAG 2.2 input](https://www.w3.org/WAI/WCAG22/quickref/?versions=2.2&levels=a,aa#input-assistance)
 
@@ -93,5 +96,7 @@ Rules for how the UI behaves and how users finish a task. They apply to the site
 ### [prefers-color-scheme](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme)
 
 - Follow the system color scheme by default. Offer a theme setting with three options: light, dark, and system.
-- Store the theme choice in a cookie, so the server renders the `.dark` class on `<html>` in the first HTML response. Follow the rules in [DESIGN.md](DESIGN.md) for the dark variant.
+- Store the theme choice in `localStorage` under the key `theme` (`light`, `dark`, or `system`). Do not store it in a cookie or render `.dark` on the server: the CDN caches public pages (see [PERF.md](PERF.md) (Cache)), so a cached page would carry the theme of another user, and the server cannot know the system setting.
+- Set the `.dark` class on `<html>` before the first paint, with the one blocking inline script in `<head>` of the base layout. The script reads `theme` and falls back to `matchMedia("(prefers-color-scheme: dark)")` when the value is `system` or missing. Follow the rules in [DESIGN.md](DESIGN.md) for the dark variant and in [COMPONENTS.md](COMPONENTS.md) (Astro components) for the script.
+- Update `localStorage` and the `.dark` class together when the user picks an option. For `system`, also listen to the `change` event of the `matchMedia` query.
 - Check the contrast rules in Accessibility in both themes.

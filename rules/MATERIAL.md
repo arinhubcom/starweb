@@ -122,7 +122,7 @@ Material Design 3 (MD3) rules for layout, spacing, states, motion, color, and co
   | `--sidebar-border`, `--sidebar-ring` | `outlineVariant`, `secondary` |
 
 - Add the MD3 roles that have no shadcn/ui variable as kebab-case variables, and expose them in `@theme inline` in `theme.css`: `primaryContainer`, `onPrimaryContainer`, `tertiary`, `onTertiary`, `tertiaryContainer`, `onTertiaryContainer`, `onError`, `errorContainer`, `onErrorContainer`, `surfaceContainerLowest` to `surfaceContainerHighest`, `inverseSurface`, `inverseOnSurface`, `inversePrimary`, `outline`, `outlineVariant`, and `scrim`. For example, write `--surface-container-high` and `--color-surface-container-high: var(--surface-container-high);`.
-- Use the extra roles where MD3 uses them, for example `bg-surface-container-high` for a dialog `bg-primary-container text-on-primary-container` for a highlighted area, and `bg-destructive text-on-error` for a destructive button.
+- Use the extra roles where MD3 uses them, for example `bg-surface-container-high` for a dialog, `bg-primary-container text-on-primary-container` for a highlighted area, and `bg-destructive text-on-error` for a destructive button.
 
 ## Components
 
@@ -166,12 +166,13 @@ Material Design 3 (MD3) rules for layout, spacing, states, motion, color, and co
 ### [Material Design 3 menus](https://m3.material.io/components/menus/specs)
 
 - Make a menu at least 112px wide (`min-w-28`), with 8px top and bottom padding (`py-2`).
-- Make menu items 44px high, with 16px side padding, 8px top and bottom padding, and a 12px gap: `h-11 px-4 py-2 gap-3`. Use 20px icons (`size-5`).
+- Make menu items at least 48px high (`min-h-12`), with 16px side padding, 8px top and bottom padding, and a 12px gap: `min-h-12 px-4 py-2 gap-3`. Use 20px icons (`size-5`). Do not use 44px: that is the height of an MD3 Expressive segmented menu item, which is below the 48px target (see [Targets](#targets)).
 
 ### [Material Design 3 chips](https://m3.material.io/components/chips/specs)
 
 - Make chips 32px high with 16px side padding: `h-8 px-4`. With a leading icon, use 8px leading padding (`ps-2`).
-- Use 18px icons (`size-4.5`) and an 8px gap between an icon and the label, and between chips: `gap-2`.
+- Use 18px icons (`size-4.5`) and an 8px gap between an icon and the label, and between chips in a row: `gap-2`.
+- Give each chip a 48px high target (see [Targets](#targets)): extend the 32px chip with a transparent `::after` element, for example `relative after:absolute after:inset-x-0 after:-inset-y-2`. Put 16px between rows of chips (`gap-y-4`), so the targets do not overlap.
 
 ### [Material Design 3 dialogs](https://m3.material.io/components/dialogs/specs)
 
