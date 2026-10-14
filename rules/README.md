@@ -27,6 +27,7 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 | [DESIGN.md](DESIGN.md) | Where each UI system applies (Tailwind CSS, Base UI, Kumo) and Tailwind CSS styling. |
 | [COMPONENTS.md](COMPONENTS.md) | Astro components, Fulldev UI, React components, Astro islands, shadcn/ui, and Base UI. |
 | [MD.md](MD.md) | Material Design 3 layout, spacing, targets, and component sizes. |
+| [UI-UX.md](UI-UX.md) | How the UI behaves: WCAG 2.2 AA accessibility, loading, empty, and error states, forms, toasts, motion, navigation, and theme. |
 
 ## Quality and operations
 
@@ -52,4 +53,3 @@ These files have only a heading and no rules:
 - [API.md](API.md)
 - [SETUP.md](SETUP.md)
 - [TESTING.md](TESTING.md)
-- [UI-UX.md](UI-UX.md)

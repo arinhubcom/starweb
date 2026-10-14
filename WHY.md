@@ -202,6 +202,26 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 
 - The method also suggests copying slang and hashtags into the UI. We take only the words for things and actions: slang and idioms break the MD3 Global writing rules and are hard to translate.
 
+## UI and UX
+
+### Why UI-UX.md is about behavior
+
+- The other frontend files answer one question each: MD.md and DESIGN.md say how the UI looks, COMPONENTS.md says what it is built from, and WRITING.md says what it says. UI-UX.md says how it behaves and how a user finishes a task.
+- Each rule then has one place. For a form, an agent finds the validation flow in UI-UX.md, the error text in WRITING.md, and the field size in MD.md.
+
+### Why WCAG 2.2 AA
+
+- Level AA is the level that accessibility laws and standards usually ask for. WCAG 2.2 keeps the 2.0 and 2.1 success criteria, except the removed 4.1.1 Parsing, and adds 9 new ones, so a 2.2 AA site also meets the 2.1 AA rules that older standards name ([What's new in WCAG 2.2](https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/)).
+- Level AAA is not a goal for whole sites, so we take single AAA rules only where they cost little.
+- Base UI handles focus, keyboard, and ARIA for composite widgets, and native HTML handles the rest. Most AA rules then come down to contrast, focus styles, labels, and error messages, which this file covers.
+- The 48x48px MD3 target (see MD.md) already passes the AA target size of 24x24px (2.5.8).
+
+### Why toasts with an action do not close on their own
+
+- WCAG 2.2.1 (Timing Adjustable, level A) asks that the user can turn off, adjust, or extend a time limit. A toast with **Undo** that closes after 5 seconds is a time limit on the undo.
+- The Base UI docs do not say that the toast timer pauses on hover or focus. `timeout: 0` keeps the toast open until the user closes it, so the undo has no time limit.
+- A toast without an action only confirms a result. When it closes, the user loses nothing.
+
 ## Payments
 
 ### Why a Merchant of Record for the EU

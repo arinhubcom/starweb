@@ -9,6 +9,7 @@
 - Do not import Kumo in site or app code.
 - Follow the rules in [MD.md](MD.md) for layout, spacing, and component sizes (Material Design 3).
 - Follow the rules in [COMPONENTS.md](COMPONENTS.md) for Astro and React components (Fulldev UI, Base UI).
+- Follow the rules in [UI-UX.md](UI-UX.md) for how the UI behaves: accessibility, states, forms, feedback, motion, navigation, and theme.
 
 ## Styling
 
