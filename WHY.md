@@ -315,6 +315,20 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - A Preview gets its own variables, secrets, and Durable Object namespace, but it uses the same D1 database as production unless you bind a different one. A branch with a new migration could change production data.
 - Version URLs use the bindings of their version, so they also read production data. Use them only for versions that are ready for production.
 
+### Why three environments
+
+- Dev is its own Worker with its own D1, KV, and R2. PRs and merges can change it freely, and it never touches prod data.
+- Stage is not a separate Worker. Versions belong to one Worker, so a version uploaded to a stage Worker cannot be promoted to prod. A stage Worker forces a new build for prod, and then prod does not run the build that you tested. As a version of the prod Worker, stage reads prod data, so apply only migrations that work with the running prod code.
+- Prod is the stage version after `wrangler versions deploy`. It gets traffic in steps (see Why two-step releases).
+- This setup follows the Cloudflare deploy of the trendaro-fe project, which runs it in production.
+- The Cloudflare docs do not say whether an alias moves to the newest upload when you reuse it. In trendaro-fe, `pr-<number>` serves the latest push of the PR. Check this on your first PR.
+
+### Why GitHub Actions and not Workers Builds
+
+- GitHub Actions runs the full flow in one place: PR preview, dev deploy on merge, stage on a release tag, and a prod promotion that a GitHub environment can protect with required reviewers.
+- Each step is a workflow file in the repository, so you can review and change it in a PR.
+- With both connected, each push deploys twice.
+
 ### Why Wrangler and not cf
 
 [`cf`](https://github.com/cloudflare/cf) is the new Cloudflare CLI for the whole Cloudflare API, built for agents. It gives JSON output, command search, a `cloudflare.config.ts` config, and Vite as the dev server. We do not use it yet:
