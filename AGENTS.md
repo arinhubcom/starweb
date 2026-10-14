@@ -4,7 +4,7 @@
 
 - All text must be in English only. The only exception is i18n translation files.
 - Follow the [Google developer documentation style guide](https://developers.google.com/style) for docs, rules, code comments, and commit messages.
-- Follow the [Material Design 3 content design](https://m3.material.io/foundations/content-design/overview) rules for UI text.
+- Follow the [Material Design 3 content design](https://m3.material.io/foundations/content-design/overview) rules for UI text. Follow the [Mailchimp voice and tone](https://styleguide.mailchimp.com/voice-and-tone/) rules only for voice and tone.
 - Follow the rules in [rules/WRITING.md](rules/WRITING.md) for both.
 - Verify each technical claim and architecture decision in the official docs or the project's GitHub repository before you write it. Do not write from memory. If you cannot verify a claim, say so.
 

@@ -47,7 +47,8 @@
 ### [UX writing best practices](https://m3.material.io/foundations/content-design/style-guide/ux-writing-best-practices)
 
 - Tell users what happens when they take an action and how they can undo it. Use neutral, direct words. Do not use alarming or condescending warnings.
-- Use specific titles and headings that users can scan.
+- Do not misrepresent consequences, and do not try to influence the user's decision, for example when they cancel a subscription.
+- Use specific titles and headings that users can scan. Use headings and subheads to prioritize and group information.
 - Use sentence case for all UI text: titles, headings, labels, menu items, navigation, app bars, and buttons. Capitalize only product and brand names.
 - Do not use all caps.
 - Spell out words. Do not use Latin abbreviations such as "e.g." and "etc.": write "for example" and "and more".
@@ -57,6 +58,23 @@
 - Address the user as "you" and "your".
 - Do not mix "me" or "my" with "you" or "your" on one screen.
 - Do not use "we", "our", or "I" to speak for the product. Use "I" or "my" only where the user agrees to something, for example "I agree to the terms of service".
+
+### [Conversation mining](https://uxwritinghub.com/leveraging-conversation-mining-for-ux-writing-research/)
+
+- Before you write UI text for a feature, find the words that its users use: support requests, customer feedback, reviews, forums, and social media.
+- Set a goal before you search, for example the name of a feature or the words for one problem. Use positive conversations for new text and negative conversations to find pain points.
+- Use the users' words for things and actions in labels, buttons, headings, and search. Do not copy slang, idioms, or hashtags: follow Global writing below.
+- Record each chosen term in a glossary. Use the same term for the same thing in all UI text.
+
+### [Mailchimp voice and tone](https://styleguide.mailchimp.com/voice-and-tone/)
+
+- Use this section only for voice and tone. Follow MD3 for all other UI text rules, also when the Mailchimp guide differs, for example on "we".
+- Keep one voice in all UI text, from the home page to system alerts: plain, warm, and human. Change only the tone.
+- Before you write, think about the user's state of mind, for example relieved after a task, or confused by an error. Match the tone to it.
+- Put clarity before fun. Use humor only when it fits and comes naturally. Do not force jokes. When you are not sure, write without humor.
+- Write positively: say what the user can do, not what they cannot do.
+- Do not use hype, over-promises, or upsell language. Do not use emotional tricks to make users act.
+- Explain hard concepts in plain words, without condescension.
 
 ### [Grammar and punctuation](https://m3.material.io/foundations/content-design/style-guide/grammar-and-punctuation)
 

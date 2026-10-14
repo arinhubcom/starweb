@@ -155,6 +155,30 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - MD3 spacing tokens are only implemented in Jetpack Compose, not for the web. We map them to Tailwind steps by hand.
 - The Fulldev UI and shadcn button sizes (for example `h-9`) are not MD3 sizes. We change them after install.
 
+## [Mailchimp voice and tone](https://styleguide.mailchimp.com/voice-and-tone/)
+
+### Why
+
+- MD3 content design gives rules for words, grammar, and punctuation, but few rules for how the tone changes with the user's situation. The Mailchimp guide separates a fixed voice from a tone that changes with the reader's state of mind.
+- The guide is public under a Creative Commons Attribution-NonCommercial 4.0 license.
+
+### What we do not take
+
+- We do not take the Mailchimp brand voice: offbeat, dry humor, and "we" for the company. MD3 does not allow "we" for the product, and humor is hard to translate.
+- We do not take the other parts of the guide (grammar, web elements, word list). MD3 and AP Style cover them, and a third guide would add conflicts.
+
+## [Conversation mining](https://uxwritinghub.com/leveraging-conversation-mining-for-ux-writing-research/)
+
+### Why
+
+- MD3 and the Mailchimp guide say how to write, but not which words users know. Conversation mining, a UX writing research method named by the UX Writing Hub in 2018, finds the words, phrases, and terms that users use in real conversations.
+- UI text in the users' words is easier to understand and to find in search. Negative conversations also show pain points that users do not report.
+- A glossary keeps one term for one thing. This is our own rule, not part of the method.
+
+### What we do not take
+
+- The method also suggests copying slang and hashtags into the UI. We take only the words for things and actions: slang and idioms break the MD3 Global writing rules and are hard to translate.
+
 ## Payments
 
 ### Why a Merchant of Record for the EU
