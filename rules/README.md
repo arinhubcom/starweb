@@ -7,7 +7,7 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 | File | Contents |
 | --- | --- |
 | [STACK.md](STACK.md) | The tools of the stack, with a link to the topic file for each tool. |
-| [SETUP.md](SETUP.md) | Steps to set up a new project, in order: EmDash Cloudflare template, Wrangler, TypeScript, UI, auth, agent skills, checks, and the first deploy. |
+| [SETUP.md](SETUP.md) | Steps to set up a new project, in order: EmDash Cloudflare template, Wrangler, TypeScript, Effect and Zod, UI, cache, auth, agent skills, checks, and the first deploy. |
 | [ARCH.md](ARCH.md) | Architecture: Effect, Zod, Cloudflare Workers, background work, Astro, TanStack, micro frontends, and app admin pages. |
 | [SAAS.md](SAAS.md) | Rules for a small SaaS app in one Astro project and one Worker: multiple apps, data, plugins, building blocks, limits, and billing. |
 
