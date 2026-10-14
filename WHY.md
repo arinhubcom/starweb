@@ -323,6 +323,13 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - This setup follows the Cloudflare deploy of the trendaro-fe project, which runs it in production.
 - The Cloudflare docs do not say whether an alias moves to the newest upload when you reuse it. In trendaro-fe, `pr-<number>` serves the latest push of the PR. Check this on your first PR.
 
+### Why date-based release tags
+
+- A web app has no users who depend on a version number, so semver major, minor, and patch carry no meaning. A date shows how old a release is, which helps during a rollback and in logs.
+- `rN` lets you release more than once a day without a time in the tag.
+- The `web-` prefix names the Worker. When an app moves to its own Worker, it gets its own prefix and its own tag trigger, for example `app1-*`.
+- The trendaro-fe project uses the same format, for example `trendaro-2026-10-08-r2`.
+
 ### Why GitHub Actions and not Workers Builds
 
 - GitHub Actions runs the full flow in one place: PR preview, dev deploy on merge, stage on a release tag, and a prod promotion that a GitHub environment can protect with required reviewers.

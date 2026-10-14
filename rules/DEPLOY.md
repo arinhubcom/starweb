@@ -16,7 +16,7 @@
   |---|---|---|---|---|
   | PR preview | dev Worker, version without traffic | Each push to a PR | `wrangler versions upload --env="" --preview-alias pr-<number>` | `pr-<number>-<worker>.<subdomain>.workers.dev` |
   | dev | `<worker>` | Each PR merge to `main` | `wrangler deploy --env=""` | `<worker>.<subdomain>.workers.dev` |
-  | stage | `<worker>-production`, version without traffic | Each release tag | `wrangler versions upload --env production --tag <tag> --preview-alias stage` | `stage-<worker>-production.<subdomain>.workers.dev` |
+  | stage | `<worker>-production`, version without traffic | Each release tag `web-YYYY-MM-DD-rN` | `wrangler versions upload --env production --tag web-YYYY-MM-DD-rN --preview-alias stage` | `stage-<worker>-production.<subdomain>.workers.dev` |
   | prod | `<worker>-production` | After you test stage | `wrangler versions deploy --env production` | Your custom domain |
 
 - Put the dev config at the top level of `wrangler.jsonc`, and the prod config in `env.production`. Wrangler names the prod Worker `<worker>-production`.
@@ -28,6 +28,12 @@
 - Expect stage to use the prod bindings: it is a version of the prod Worker. Apply the prod migrations before you upload stage. Follow the order in Migrations.
 
 ## Releases
+
+### [Git tags](https://git-scm.com/docs/git-tag)
+
+- Name each release tag `web-YYYY-MM-DD-rN`, for example `web-2026-10-14-r1`. Start `rN` at `r1` each day, and raise it for each further release on that day. Do not use semver tags such as `v1.2.3`. Read [WHY.md](../WHY.md#why-date-based-release-tags).
+- Create an annotated tag on `main` and push it: `git tag -a web-2026-10-14-r1 -m "<summary>"`, then `git push origin web-2026-10-14-r1`. The push uploads stage (see CI).
+- Pass the same tag to `wrangler versions upload --tag`, so you can find the version by its tag when you promote it to prod.
 
 ### [Gradual deployments](https://developers.cloudflare.com/workers/configuration/versions-and-deployments/gradual-deployments/)
 
@@ -89,7 +95,7 @@
 - Set `concurrency` per PR with `cancel-in-progress: true`, for example `group: cf-preview-${{ github.event.pull_request.number }}`, so fast pushes do not race.
 - Deploy dev when a PR merges: run on `pull_request` with `types: [closed]` and `if: github.event.pull_request.merged == true`. Check out `${{ github.event.pull_request.merge_commit_sha }}`, apply the migrations to the dev database, then run `wrangler deploy --env=""`.
 - Set `concurrency` for the dev deploy with `cancel-in-progress: false`, so merges deploy in order and no migration stops halfway.
-- Upload stage on a release tag (`push` with `tags: ["v*"]`): apply the prod migrations, then run `wrangler versions upload --env production --tag ${{ github.ref_name }} --preview-alias stage`.
+- Upload stage on a release tag (`push` with `tags: ["web-*"]`): apply the prod migrations, then run `wrangler versions upload --env production --tag ${{ github.ref_name }} --preview-alias stage`.
 - Promote stage to prod from a `workflow_dispatch` workflow that uses a GitHub environment named `production` with required reviewers. Find the version by its tag, and deploy it in steps with `wrangler versions deploy <version-id>@10% <old-version-id>@90% --env production -y`. Follow the rules in Releases.
 
 ### [Previews](https://developers.cloudflare.com/workers/previews/)
