@@ -7,9 +7,9 @@
 - Use one OpenAPI document per app as the contract for every interface of the app: API routes, React islands, external clients, agents, and MCP tools. Do not define a request or response shape outside the contract.
 - Write OpenAPI 3.1 (`openapi: "3.1.1"`). Do not use 3.2 yet: zod-openapi, openapi-typescript, and openapi-fetch do not document 3.2 support.
 - Give each operation a unique `operationId`, a `summary`, and a `description`.
-- Publish the document at `/app1/api/openapi.json`, so that agents and external clients can read it.
+- Publish the document at `/app1/api/openapi.json`, so that agents and external clients can read it. Serve it from an API route, `src/apps/app1/api/openapi.ts`, that imports the generated JSON and returns it with `Response.json()`. Inject it in `integration.ts` like every app route: `injectRoute({ pattern: "/app1/api/openapi.json", entrypoint: new URL("./api/openapi.ts", import.meta.url) })`. The pattern sets the URL, so the file name needs no `.json`. The operations live under `/app1/api/v1/`. The `/app1/api/...` prefix in [ARCH.md](ARCH.md) (Apps) covers both.
 
-### Parameters and properties
+### [Parameters and properties](https://spec.openapis.org/oas/v3.1.1.html#schema-object)
 
 - Give each parameter and each schema property one purpose. Its name says what it holds, and it holds only that. For example, `image` holds the path to an image file, such as `/media/cover.jpg`. It does not also hold a URL, a base64 string, or an image object.
 - Add a new field with its own name for each other form of the same thing, for example `imageUrl` for an absolute URL and `imageAlt` for the alt text. Do not let the value of a field or of another field change what a field means.
@@ -57,13 +57,13 @@
 - Validate the path parameters, query, headers, and body with the contract schemas before any other work. Return `400` with the invalid fields when the input does not match.
 - Return only the status codes and response shapes that the contract defines for the operation.
 
-### Pagination
+### [Pagination](https://google.aip.dev/158)
 
 - Use cursor pagination for lists: a `cursor` and a `limit` query parameter, and a `nextCursor` property in the response. Set a maximum for `limit` in the schema. Do not use page numbers or offsets: rows can move between pages.
 
-### Idempotency
+### [Idempotency](https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/)
 
-- Accept an `Idempotency-Key` header on `POST` operations that create a resource or start a payment. Store the key with the response, and return the stored response when the same key comes again. The header is an [IETF draft](https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/), not an RFC yet.
+- Accept an `Idempotency-Key` header on `POST` operations that create a resource or start a payment. Store the key with the response, and return the stored response when the same key comes again. The header is an IETF draft, not an RFC yet.
 
 ## Errors
 
@@ -82,18 +82,21 @@
 - Check `locals.user` and its role at the start of each protected API route. Return `401` or `403` as problem details. Do not redirect to sign-in from an API route. Follow the rules in [AUTH.md](AUTH.md).
 - Filter each query by `tenant_id`. Follow the rules in [SAAS.md](SAAS.md) (Data).
 
-### API keys
+### [API keys](https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html#api-keys)
 
 - Do not add `@better-auth/api-key` to emdash-better-auth. It cannot load server-side Better Auth plugins yet ([#22](https://github.com/theweekendprojects/emdash-better-auth/issues/22)), and its own API keys page is for staff only.
 - Store API keys for customers in the app database as a SHA-256 hash (`crypto.subtle.digest("SHA-256", ...)`). Do not store the key. Show the key once, when it is created.
+- Store these columns in the key row: `tenant_id`, the `user_id` of the creator, a name, scopes, `created_at`, `last_used_at`, and `revoked_at`. Reject a key with a `revoked_at` value.
+- Take `tenant_id` for an API key request from the key row. Never take it from the path, query, header, or body. Follow the rules in [SAAS.md](SAAS.md) (Data).
+- Limit requests for each key. Follow the rules in this file (Limits).
 - Accept API keys only in the `Authorization: Bearer <key>` header. Do not accept them in the query string.
 
 ## Security
 
 ### [Astro security](https://docs.astro.build/en/reference/configuration-reference/#securitycheckorigin)
 
-- Keep `security.checkOrigin` on (the default). It checks only requests with a form content type or with no content type. It does not check JSON.
-- Return `415` for a `POST`, `PUT`, `PATCH`, or `DELETE` request to a route that uses the session cookie when its `Content-Type` is not `application/json`. A cross-site browser request with JSON needs a CORS preflight, so the browser blocks it.
+- Keep `security.checkOrigin` on (the default). It checks only on-demand requests with an unsafe method (`POST`, `PATCH`, `DELETE`, `PUT`) and no `Content-Type`, or `application/x-www-form-urlencoded`, `multipart/form-data`, or `text/plain`. It does not check JSON.
+- Return `415` for a `POST`, `PUT`, `PATCH`, or `DELETE` request that has a body, to a route that uses the session cookie, when its `Content-Type` media type (without parameters) is not `application/json`, so `application/json; charset=utf-8` passes. Do not check requests without a body, such as most `DELETE` requests. A cross-site page cannot send JSON without a CORS preflight, so the browser blocks it, and `security.checkOrigin` covers the other content types.
 - Set CORS headers in the app middleware, only for a list of allowed origins, and answer `OPTIONS`. Astro has no CORS option. Do not send `Access-Control-Allow-Origin: *` on routes that use cookies.
 
 ## Limits
