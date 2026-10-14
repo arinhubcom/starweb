@@ -83,7 +83,7 @@ These parts are not in the stack. Add them when the app needs them.
 
 ### App admin: [EmDash native plugins](https://docs.emdashcms.com/plugins/creating-native-plugins/react-admin/)
 
-- Build the admin for app data as a native EmDash plugin with React admin pages. Do not build a second admin panel.
+- Build the admin for app data as a native EmDash plugin with React admin pages, in the app folder. Follow the rules in [ARCH.md](ARCH.md) (App admin). Do not build a second admin panel.
 - Build admin pages with [Kumo](https://github.com/cloudflare/kumo) components (`@cloudflare/kumo`), like the EmDash admin. Do not use your Base UI wrappers or the site theme in admin pages.
 - Declare `@cloudflare/kumo`, `react`, and `react-dom` as peer dependencies of the plugin. The EmDash admin provides them. Do not bundle a second copy.
 - Use Kumo props for layout and style where you can. Use Tailwind classes in `className` only for small layout gaps, as the EmDash docs examples do (`space-y-4`, `text-kumo-danger`). Check each class in the browser: the admin CSS is compiled before your plugin, so a class that the admin does not use can have no styles.

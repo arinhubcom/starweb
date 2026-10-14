@@ -244,7 +244,9 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - An app is easy to add or remove: one folder, one line in `astro.config`, and its bindings.
 - We compose the apps at build time, with Astro integrations (`injectRoute`, `addMiddleware`). All apps run in one Worker, so a request has no extra hop, and all apps share one login, one layout, and one design system.
 - Runtime composition (each app in its own Worker, joined by routes or service bindings) gives separate deploys, but each Worker needs its own copy of the auth and layout code. We keep it as the next step, not the start.
+- The admin of an app is a native EmDash plugin in the same folder. It runs in the same Worker, so it can use the app repositories and bindings. Staff manage app data in the EmDash admin, with no second admin panel.
 - Tested on 2026-10-14 with Astro 7.3 and `@astrojs/cloudflare`: injected pages, catch-all routes, app middleware, and grouped actions work in `wrangler dev`.
+- Tested on 2026-10-14 with EmDash 1.2.0: a native plugin in `src/apps/app1/admin/` shows an admin page in the EmDash sidebar and reads `APP1_DB` through the app repository, in `astro dev` and in the production build with `wrangler dev`.
 
 ### When to split the app into a separate Worker
 

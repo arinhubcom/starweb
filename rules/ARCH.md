@@ -83,3 +83,18 @@
 - Use the shared base layout from `src/layouts/` in all apps, so all apps have the same header, theme, and login.
 - Do not share island state between apps. Each app has its own stores.
 - When an app must deploy on its own, move its folder to a separate Astro project and Worker. Keep the same domain and add a Workers route for the path, for example `example.com/app1/*`: the most specific route wins, and the login cookie still works. Read [WHY.md](../WHY.md#when-to-split-the-app-into-a-separate-worker) first.
+
+### App admin: [EmDash native plugins](https://docs.emdashcms.com/plugins/creating-native-plugins/react-admin/)
+
+- Build the admin of each app as a native EmDash plugin in the app folder: `src/apps/app1/admin/` with `descriptor.ts`, `plugin.ts`, and `pages.tsx`. Do not make a separate npm package.
+- Register it in the EmDash integration, next to the app integration: `integrations: [emdash({ plugins: [app1Admin()] }), app1()]`.
+- Put the descriptor factory in `descriptor.ts` and import only that file in `astro.config`. Return `id`, `version`, `format: "native"`, `entrypoint`, and `adminEntry`.
+- Put the runtime in `plugin.ts`: `export default function createPlugin() { return definePlugin({ ... }) }` with `routes` and `admin.pages`.
+- Set `entrypoint` and `adminEntry` as paths from the project root: `"/src/apps/app1/admin/plugin.ts"` and `"/src/apps/app1/admin/pages.tsx"`. Do not build them with `import.meta.url`: `plugin.ts` runs in the Worker, where `new URL(..., import.meta.url)` throws "Invalid URL string", EmDash does not start, and all `/_emdash` routes return 404.
+- Export the admin entry path as a constant from `descriptor.ts`, and use it for both `adminEntry` and `admin.entry`. The two values must be the same.
+- Name the plugin `<app>-admin`, for example `app1-admin`. Its pages are at `/_emdash/admin/plugins/app1-admin/<path>` and its routes at `/_emdash/api/plugins/app1-admin/<route>`.
+- Put all pages of an app in one sidebar group with the app name: `pages: [{ path: "/items", label: "Items", group: "App1" }]`.
+- Import the app repositories in the route handler with `await import("../db/items")`. Do not use `Astro.locals` in handlers: they get the plugin context.
+- Set a `permission` on each route. The default `plugins:manage` allows only administrators. Call the routes from admin pages with `apiFetch()` from `emdash/plugin-utils`.
+- Use plugin routes only for staff. Keep the routes for customers in the app (`/app1/api/...`).
+- Test admin pages locally after you log in with `/_emdash/api/auth/dev-bypass`.
