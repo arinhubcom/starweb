@@ -286,6 +286,8 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - GDPR does not require storage in the EU. It allows a transfer to the United States under an adequacy decision (Article 45) or with safeguards such as Standard Contractual Clauses (Article 46).
 - Cloudflare is certified under the EU-U.S. Data Privacy Framework, and its DPA includes the EU Standard Contractual Clauses.
 - A database without a jurisdiction needs only a location hint, and the Worker can run near it with Targeted Placement.
+- A jurisdiction can be set only when the database is created. Moving to one later needs a new database, an export, and an import.
+- Use the EU jurisdiction when customers require data in the EU, for example in B2B or public sector contracts.
 
 ### Why one project and one domain
 

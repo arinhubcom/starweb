@@ -76,6 +76,13 @@ Technical rules for personal data, cookies, analytics, and logs. These rules are
 - Create D1 databases and R2 buckets without a data location restriction. Read [WHY.md](../WHY.md#why-no-d1-jurisdiction).
 - Set the location of the D1 primary with a location hint, as in [PERF.md](PERF.md) (Placement).
 - Do not claim in the policy that data stays in the EU or in one region. State the transfer to the United States, as in Privacy policy.
+- Create a database with `npx wrangler d1 create <name> --jurisdiction=eu` only when a customer contract requires data in the EU. Supported jurisdictions are `eu`, `us`, and `fedramp`. Do not pass `--location` with it: Wrangler ignores the location hint when a jurisdiction is set.
+- Create a database in a jurisdiction by hand before the first deploy, and set its `database_id` in `wrangler.jsonc`. The Wrangler config has no `jurisdiction` key for D1, so automatic provisioning cannot set one.
+- Set a jurisdiction at creation: it cannot change later. To move a database, create a new one with `--jurisdiction=eu`, export the old one with `wrangler d1 export <old> --remote --output=<file>`, and import it with `wrangler d1 execute <new> --remote --file=<file>`.
+
+### [R2 data location](https://developers.cloudflare.com/r2/reference/data-location/)
+
+- Create an R2 bucket in the EU only when a customer contract requires it: `npx wrangler r2 bucket create <name> --jurisdiction eu`. Set `"jurisdiction": "eu"` in its `r2_buckets` entry in `wrangler.jsonc`. Workers need the key to reach a bucket in a jurisdiction.
 
 ## Logs
 
