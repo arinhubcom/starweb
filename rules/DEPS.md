@@ -16,47 +16,47 @@ Rules for the packages of a project and how to keep them up to date. For the CI 
 
 ## Update
 
-### [Renovate](https://docs.renovatebot.com/)
+### [Dependabot version updates](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference)
 
-- Use Renovate to update packages and GitHub Actions. Do not also turn on Dependabot version updates. Install the Renovate GitHub App on the repository, and merge its "Configure Renovate" PR. Read [WHY.md](../WHY.md#why-renovate-and-not-dependabot).
-- Keep the configuration in `renovate.json` in the repository root. Add `"$schema": "https://docs.renovatebot.com/renovate-schema.json"`.
-- Extend `config:recommended`. It turns on the Dependency Dashboard and groups monorepo packages.
-- Extend `helpers:pinGitHubActionDigests` to pin GitHub Actions to a commit SHA, as in [DEPLOY.md](DEPLOY.md) (CI).
-- Extend `:pinDevDependencies` to pin the versions of `devDependencies`. Keep the semver ranges of `dependencies`.
-- Set `lockFileMaintenance` to `{ "enabled": true, "automerge": true }` to refresh `package-lock.json` every week.
-- Set `timezone` to an IANA time zone, and `schedule` to a cron window of at least 4 hours, for example `["* 0-4 * * 1"]`. Use `*` for the minutes: Renovate does not support minute values in cron schedules.
-- Check the config with `npx -p renovate renovate-config-validator renovate.json`.
+- Use Dependabot version updates for npm packages and GitHub Actions. Do not use Renovate. Read [WHY.md](../WHY.md#why-dependabot-and-not-renovate).
+- Keep the configuration in `.github/dependabot.yml` with `version: 2`. Add one entry under `updates` with `package-ecosystem: "npm"` and one with `package-ecosystem: "github-actions"`, both with `directory: "/"`.
+- Set `schedule` in each entry to `interval: "weekly"`, `day: "monday"`, `time: "02:00"`, and `timezone` to an IANA time zone, for example `"Europe/Prague"`.
+- Turn on Dependabot alerts and Dependabot security updates in the repository settings. Security updates open PRs for vulnerable packages outside the schedule.
+- Pin each GitHub Action to a full commit SHA, with the version in a comment, for example `uses: actions/checkout@<sha> # v5.0.0`, as in [DEPLOY.md](DEPLOY.md) (CI). Dependabot updates the SHA and the comment. It does not pin a tag for you.
+- Refresh `package-lock.json` once a month: run `npm update` in a PR, and merge it after CI passes. It updates the installed packages within their semver ranges and does not change `package.json`.
+- Check the config with `uvx check-jsonschema --builtin-schema vendor.dependabot .github/dependabot.yml`.
 
-### [Renovate allowedVersions](https://docs.renovatebot.com/configuration-options/#packagerulesallowedversions)
+### [Dependabot groups](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference#groups--)
 
-- Hold back the test packages that Storybook Astro does not support yet: add `{ "matchPackageNames": ["vitest", "@vitest/*"], "allowedVersions": "<5.0.0" }` and `{ "matchPackageNames": ["@astrojs/react"], "allowedVersions": "<7.0.0" }` to `packageRules`. Follow the rules in [TESTING.md](TESTING.md).
-- Remove an `allowedVersions` entry when `@storybook-astro/framework` supports the new major version in its peer dependencies.
+- Group the packages that must have matching versions: in the npm entry, add a group named `astro` under `groups` with `patterns: ["astro", "@astrojs/*", "wrangler", "emdash", "@emdash-cms/*"]`. Dependabot opens one PR for all of them.
+- Group the other `minor` and `patch` updates of `devDependencies` in a second group named `dev-dependencies` with `dependency-type: "development"` and `update-types: ["minor", "patch"]`, so they come in one PR.
+- Merge the `astro` group by hand after you run the checks in Compatibility.
 
-### [Renovate groups](https://docs.renovatebot.com/configuration-options/#groupname)
+### [Dependabot ignore](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference#ignore--)
 
-- Group the packages that must have matching versions in one `packageRules` entry: set `matchPackageNames` to `["astro", "@astrojs/*", "wrangler", "emdash", "@emdash-cms/*"]` and `groupName` to one name. All updates with the same `groupName` go in one branch and one PR.
-- Put the group rule last in `packageRules`. Later rules override earlier rules, so the group rule keeps `"automerge": false` for these packages. Merge the group by hand after you run the checks in Compatibility.
+- Hold back the test packages that Storybook Astro does not support yet: in the npm entry, add `ignore` items with `dependency-name: "vitest"` and `dependency-name: "@vitest/*"`, both with `versions: [">=5.0.0"]`, and `dependency-name: "@astrojs/react"` with `versions: [">=7.0.0"]`. Follow the rules in [TESTING.md](TESTING.md).
+- Remove an `ignore` item when `@storybook-astro/framework` supports the new major version in its peer dependencies.
 
-### [Renovate automerge](https://docs.renovatebot.com/configuration-options/#automerge)
+### [Dependabot automerge](https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/automate-dependabot-with-actions)
 
-- Automerge `patch` updates of `dependencies`: set `matchDepTypes` to `["dependencies"]`, `matchUpdateTypes` to `["patch"]`, and `matchCurrentVersion` to `"!/^0/"`.
-- Automerge `minor` and `patch` updates of `devDependencies` the same way, with `matchDepTypes` set to `["devDependencies"]`.
-- Set `matchCurrentVersion` to `"!/^0/"` on each automerge rule.
-- Do not automerge `major` updates. Review the changelog and merge them by hand.
-- Make CI a required status check for `main`, and turn on "Allow auto-merge" in the repository settings. Renovate automerges only after the required checks pass.
+- Automerge with a workflow, `.github/workflows/dependabot-automerge.yml`. Dependabot has no automerge option in `dependabot.yml`.
+- Run the workflow on `pull_request` with `permissions: { contents: write, pull-requests: write }`, and only when `github.event.pull_request.user.login == 'dependabot[bot]'`.
+- Read the update with `dependabot/fetch-metadata` (v3), pinned to a commit SHA.
+- Run `gh pr merge --auto --squash "$PR_URL"` with `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` only for the `dev-dependencies` group (`dependency-group == 'dev-dependencies'`) or for a single `patch` update of a production package (`dependency-type == 'direct:production'` and `update-type == 'version-update:semver-patch'`).
+- Do not automerge an update when `previous-version` starts with `0.`, when `update-type` is `version-update:semver-major`, or when `dependency-group` is `astro`. Review the changelog and merge it by hand.
+- Make CI a required status check for `main`, and turn on "Allow auto-merge" in the repository settings. `gh pr merge --auto` merges only after the required checks pass.
 
 ## Supply chain
 
-### [Renovate minimumReleaseAge](https://docs.renovatebot.com/key-concepts/minimum-release-age/)
+### [Dependabot cooldown](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference#cooldown--)
 
-- Extend `security:minimumReleaseAgeNpm`. It sets `minimumReleaseAge` to `3 days` for npm packages, so Renovate waits before it opens a PR for a new version.
-- Keep `internalChecksFilter` at its default, `strict`, and turn on the Dependency Dashboard to see the PRs that Renovate holds back.
-- Do not set `minimumReleaseAge` to slow down a package that releases often. Use a `schedule` in a `packageRules` entry for that package.
+- Set `cooldown: { default-days: 3 }` in the npm entry, so Dependabot waits 3 days before it opens a PR for a new version. Security updates do not wait.
+- Do not set a longer cooldown to slow down a package that releases often. Put that package in a group instead.
 
 ### [npm min-release-age](https://docs.npmjs.com/cli/v11/using-npm/config#min-release-age)
 
 - Set `min-release-age=3` in the `.npmrc` file in the repository root. npm then installs only versions that are more than 3 days old, also for `npm i` on a developer machine. Commit `.npmrc`.
-- Keep the value of `min-release-age` the same as `minimumReleaseAge` in `renovate.json`.
+- Keep the value of `min-release-age` the same as `cooldown.default-days` in `.github/dependabot.yml`.
 
 ### [npm audit](https://docs.npmjs.com/cli/v11/commands/npm-audit)
 

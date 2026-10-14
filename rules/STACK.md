@@ -122,9 +122,9 @@
 
 - Use Workers Logs and Sentry for logs and errors. Follow the rules in [OBSERVABILITY.md](OBSERVABILITY.md).
 
-### [Renovate](https://docs.renovatebot.com/)
+### [Dependabot](https://docs.github.com/en/code-security/dependabot)
 
-- Use Renovate for dependency updates. Follow the rules in [DEPS.md](DEPS.md).
+- Use Dependabot for dependency updates. Follow the rules in [DEPS.md](DEPS.md).
 
 ### [Cloudflare Web Analytics](https://developers.cloudflare.com/web-analytics/)
 

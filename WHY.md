@@ -528,29 +528,30 @@ trendaro-fe (qset v4) has four test tiers for each widget: unit tests, DOM snaps
 
 ## Dependencies
 
-### Why Renovate and not Dependabot
+### Why Dependabot and not Renovate
 
-The rules in [DEPS.md](rules/DEPS.md) use Renovate features that Dependabot does not have, or has only with extra work:
+Dependabot is part of GitHub, so there is no third-party app to install and trust. The Renovate GitHub App needs read and write access to code, pull requests, issues, checks, commit statuses, and workflows, per the [Renovate permissions docs](https://docs.renovatebot.com/security-and-permissions/).
 
-- **Automerge:** Renovate merges a PR by itself with `automerge` after the required checks pass. Dependabot has no automerge option in `dependabot.yml`. It needs a GitHub Actions workflow that reads the PR with `dependabot/fetch-metadata` and runs `gh pr merge --auto`.
-- **Lockfile maintenance:** `lockFileMaintenance` deletes `package-lock.json` and runs npm again, so the versions of transitive packages also move. Dependabot has `versioning-strategy: lockfile-only`, which only skips updates that need a change in `package.json`. It does not refresh the full lockfile.
-- **Dependency Dashboard:** Renovate opens one issue that lists all pending updates, including the PRs that `minimumReleaseAge` holds back. Per the Renovate comparison page, Dependabot has no similar feature.
-- **Monorepo groups:** `config:recommended` includes `group:monorepos`, which updates the packages of one monorepo (for example `@storybook/*`) in one PR. Dependabot has `groups`, but you must write each group yourself.
-- **Schedules per package:** Renovate sets a `schedule` in any `packageRules` entry. Dependabot sets `schedule.interval` per package ecosystem.
-- **GitHub Actions digests:** `helpers:pinGitHubActionDigests` sets `pinDigests: true` for actions, so Renovate pins each action to its SHA digest, not only to a tag, and the version stays immutable.
+Dependabot covers what the rules in [DEPS.md](rules/DEPS.md) need:
 
-Both tools can do these things, so they are not a reason:
+- **Wait for new releases:** `cooldown` delays version updates. The default is 3 days, even without the option. Security updates do not wait.
+- **Hold back a version:** `ignore` with `dependency-name` and `versions`. `dependency-name` accepts `*`.
+- **Groups:** `groups` with `patterns` (with `*`), `dependency-type`, and `update-types`. One group gives one PR.
+- **GitHub Actions:** Dependabot updates actions that are pinned to a commit SHA, and the version comment after it. This is in `version_commenter.rb` in [dependabot-core](https://github.com/dependabot/dependabot-core/tree/main/github_actions/lib/dependabot/github_actions/file_updater/workflow_updater). It does not change a tag to a SHA, so you pin each action once by hand.
+- **Security updates:** Dependabot opens PRs for vulnerable packages outside the schedule.
 
-- **Wait for new releases:** Renovate has `minimumReleaseAge`, and Dependabot has `cooldown`, with a default of 3 days.
-- **Hold back a version:** Renovate has `allowedVersions` in `packageRules`, and Dependabot has `ignore` with `versions`.
+What Dependabot does not have, and what the rules do instead:
 
-Costs of Renovate:
+- **No automerge option.** A GitHub Actions workflow reads the PR with `dependabot/fetch-metadata` and runs `gh pr merge --auto`, as in the [Dependabot automerge guide](https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/automate-dependabot-with-actions). The workflow is one more file to maintain, and it runs with write permissions.
+- **No lockfile maintenance.** Renovate `lockFileMaintenance` deletes the lockfile and runs npm again. Dependabot `versioning-strategy: lockfile-only` only skips updates that need a change in `package.json`. The rules use a monthly `npm update` PR instead.
+- **No Dependency Dashboard.** The open Dependabot PRs show the pending updates, but not the updates that `cooldown` holds back. Per the [Renovate bot comparison](https://docs.renovatebot.com/bot-comparison/), Dependabot has no similar feature.
+- **No preset monorepo groups.** Renovate `config:recommended` includes `group:monorepos`. With Dependabot, you write each group, for example the `astro` group.
+- **One schedule per ecosystem.** Renovate can set a schedule for one package. Dependabot sets `schedule` per entry in `updates`.
 
-- The Renovate GitHub App is a third-party app. It needs read and write access to code, pull requests, issues, checks, commit statuses, and workflows, per the [Renovate permissions docs](https://docs.renovatebot.com/security-and-permissions/). Dependabot is part of GitHub.
-- Two bots that update the same packages open duplicate PRs, so Dependabot version updates stay off. The source for the feature list is the [Renovate bot comparison](https://docs.renovatebot.com/bot-comparison/), the [Dependabot options reference](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference), and the [Dependabot automerge guide](https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/automate-dependabot-with-actions), checked on 2026-10-14.
+Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference) and the `fetch-metadata` README (v3.1.0). A `dependabot.yml` with `cooldown`, two groups, and three `ignore` items passes `check-jsonschema --builtin-schema vendor.dependabot`, and the check rejects a misspelled `cooldown` key.
 
-### Why Renovate holds back Vitest 5 and `@astrojs/react` 7
+### Why Dependabot holds back Vitest 5 and `@astrojs/react` 7
 
 - `@storybook-astro/framework` 1.12.0 accepts only `vitest ^4.1.0` and `@astrojs/react ^4.2.3 || ^5.0.0 || ^6.0.0`. Read [Why Vitest 4.1 and not Vitest 5](#why-vitest-41-and-not-vitest-5).
-- Without `allowedVersions`, Renovate opens major update PRs for these packages, and `@astrojs/react` 7 would arrive in the Astro group PR. A local install of `@astrojs/react` 7 next to Storybook Astro failed with `ERESOLVE`.
-- Tested on 2026-10-14: `renovate-config-validator --strict` accepts both `allowedVersions` entries, and it rejects a misspelled option name.
+- Without `ignore`, Dependabot opens major update PRs for these packages, and `@astrojs/react` 7 would arrive in the `astro` group PR. A local install of `@astrojs/react` 7 next to Storybook Astro failed with `ERESOLVE`.
+- Upstream issues: [#192](https://github.com/storybook-astro/storybook-astro/issues/192) (`@astrojs/react` 7) and [#193](https://github.com/storybook-astro/storybook-astro/issues/193) (Vitest 5). Remove the `ignore` items when they are fixed.

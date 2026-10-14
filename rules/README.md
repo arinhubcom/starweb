@@ -44,7 +44,7 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 | [SECURITY.md](SECURITY.md) | Secrets, security headers (Astro CSP, HSTS, `_headers`, middleware), CSRF, input validation, XSS, SQL injection, auth checks, Turnstile and WAF rate limits, and security.txt. |
 | [PRIVACY.md](PRIVACY.md) | Cloudflare Web Analytics, cookie consent (ePrivacy Article 5(3)), the privacy policy page, data minimization, user data access, export, and delete (GDPR), and D1 jurisdiction. |
 | [OBSERVABILITY.md](OBSERVABILITY.md) | Workers Logs, structured logs without personal data, `wrangler tail`, Effect logging and spans, Sentry for Cloudflare and Astro, release names and source maps, alerts, and a health endpoint. |
-| [DEPS.md](DEPS.md) | npm and `package-lock.json`, `npm ci`, Renovate (groups, schedule, automerge, minimum release age), `npm audit`, rules for a new package, version sync of Astro, Wrangler, and EmDash, and `compatibility_date`. |
+| [DEPS.md](DEPS.md) | npm and `package-lock.json`, `npm ci`, Dependabot (groups, schedule, ignore, automerge workflow, cooldown), `npm audit`, rules for a new package, version sync of Astro, Wrangler, and EmDash, and `compatibility_date`. |
 | [DEV.md](DEV.md) | Local dev with `astro dev`, and build tests with `astro preview`. |
 | [DEPLOY.md](DEPLOY.md) | Environments (dev, stage, prod), gradual deployments, version URLs, migration order, D1 Time Travel, rollback, secrets, GitHub Actions (PR previews, dev deploy on merge), and Previews. |
 
