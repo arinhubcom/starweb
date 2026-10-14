@@ -6,7 +6,7 @@ It is built on [Astro](https://astro.build) and
 
 ## 🚀 Features
 
-- Rules and instructions in `AGENTS.md`, `CLAUDE.md`, and `rules/`.
+- Rules and instructions in `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and `rules/`.
 - Built on Astro.
 - Runs on Cloudflare Workers.
 - Content managed with EmDash CMS.
