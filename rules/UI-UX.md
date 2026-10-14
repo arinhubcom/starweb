@@ -76,7 +76,7 @@ Rules for how the UI behaves and how users finish a task. They apply to the site
 - Put each movement animation behind `motion-safe:`, for example `motion-safe:transition motion-safe:hover:-translate-y-0.5`. Use `motion-reduce:` only to turn off one animation, for example `motion-reduce:hidden` on a spinner that has a text alternative.
 - Keep fades and color changes for users with reduced motion. Turn off movement, scale, parallax, and auto-playing animation for them.
 - Do not use animation to show information that is not also in text, such as a state change.
-- Use the Tailwind duration and easing utilities, for example `duration-200 ease-out`, or the animations that the installed components bring. Do not use the MD3 motion tokens (see [WHY.md](../WHY.md#what-we-do-not-take)).
+- Use the MD3 easing curves and durations, for example `duration-200 ease-standard`, or the animations that the installed components bring. Follow the rules in [MATERIAL.md](MATERIAL.md#motion).
 
 ## Navigation
 

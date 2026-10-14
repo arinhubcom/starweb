@@ -161,13 +161,15 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - The MD3 spacing system is on an 8dp scale, and Tailwind steps are 4px. Each MD3 token maps to one Tailwind step, so we need no new utilities.
 - The MD3 breakpoints (600, 840, 1200, 1600) apply to Android and the web. Agents get one clear layout per breakpoint instead of free choices.
 - MD3 state layers and the focus indicator set only an opacity and a size, not a color. They work with the Fulldev UI theme and give all components one hover, focus, pressed, and disabled style. The values come from the `md.sys.state` tokens in [material-web](https://github.com/material-components/material-web/blob/main/tokens/versions/latest/sass/_md-sys-state.scss).
+- MD3 motion sets timing, not a look. One set of easing curves and durations makes all animations feel the same, and it is the set that the MD3 components use.
 - We follow MD3 Expressive where it changes a size, because the button sizes (XS to XL) are already Expressive. The `latest` tokens in material-web are still baseline MD3, so the Expressive values come from the generated Jetpack Compose tokens ([androidx `material3/tokens`](https://github.com/androidx/androidx/tree/androidx-main/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/tokens)) and the "M3 Expressive styles" sections of the [MDC-Android docs](https://github.com/material-components/material-components-android/tree/master/docs/components). Flutter does not implement MD3 Expressive ([flutter#168813](https://github.com/flutter/flutter/issues/168813)).
+- CSS has no spring easing. The fast spatial spring comes as a `linear()` curve from the experimental Expressive web components in material-web ([`labs/gb`](https://github.com/material-components/material-web/tree/main/labs/gb)). We found no official web curve for the default and slow springs, so we use the duration and easing tokens for longer animations.
 - The 48x48 target is bigger than the WCAG 2.2 target sizes (24x24px for AA in 2.5.8, 44x44px for AAA in 2.5.5), so it passes both.
 - At Google I/O 2026 (May 19, 2026), Material added the Expressive layout scaffold and the new 8dp spacing system. The breakpoints page lists five breakpoints, with large and extra-large for desktop ([What's new at I/O 2026](https://m3.material.io/blog/whats-new-at-io26)).
 
 ### What we do not take
 
-- We do not take the MD3 look (color roles, type, shapes, motion). The look comes from the Fulldev UI theme.
+- We do not take the MD3 look (color roles, type, shapes). The look comes from the Fulldev UI theme.
 - We do not take the MD3 Expressive shape morph (a corner that changes on press or select). It changes the radius, which the theme owns.
 - MD3 spacing tokens are only implemented in Jetpack Compose, not for the web. We map them to Tailwind steps by hand.
 - The Fulldev UI and shadcn button sizes (for example `h-9`) are not MD3 sizes. We change them after install.

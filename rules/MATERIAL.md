@@ -1,6 +1,6 @@
 # MATERIAL
 
-Material Design 3 (MD3) rules for layout, spacing, states, and component sizes.
+Material Design 3 (MD3) rules for layout, spacing, states, motion, and component sizes.
 
 ## Layout
 
@@ -58,6 +58,25 @@ Material Design 3 (MD3) rules for layout, spacing, states, and component sizes.
 - Add the state layer once, in the base class of the component variants (`cva()`). When you add it to an installed component, remove the component's own hover color (for example `hover:bg-primary/90`), so the two do not stack.
 - Show a disabled control at 38% opacity: `disabled:opacity-38`, or `data-disabled:opacity-38` for Base UI. Change the `disabled:opacity-50` that shadcn/ui components use. Do not show a state layer on a disabled control.
 - Make the focus indicator 3px thick with a 2px offset: `focus-visible:outline-3 focus-visible:outline-offset-2`. Take the outline color from the theme, for example `outline-ring`.
+
+## Motion
+
+### [Material Design 3 motion](https://m3.material.io/styles/motion/overview/specs)
+
+- Add the MD3 easing curves to the `@theme` block in `global.css`:
+
+  ```css
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --ease-spring-fast-spatial: linear(0, 0.099, 0.317, 0.561, 0.775, 0.934, 1.034, 1.083, 1.095, 1.084, 1.063, 1.04, 1.02, 1.005, 0.996, 0.992, 0.991, 0.992, 0.994, 0.996, 1);
+  ```
+
+- Use only MD3 durations with `duration-*`: 50, 100, 150, and 200ms (short), 250, 300, 350, and 400ms (medium), 450, 500, 550, and 600ms (long), and 700, 800, 900, and 1000ms (extra long). Do not use other values.
+- Animate an element that enters the screen with `ease-emphasized-decelerate`, and an element that leaves it with `ease-emphasized-accelerate`.
+- Animate a movement or a scale change (`transform`) in a small component, such as a switch handle, with the MD3 Expressive fast spatial spring: `ease-spring-fast-spatial duration-350`. Use longer durations from the list for full-screen transitions.
+- Animate opacity and color with `ease-standard`. Do not use the spring for them: it overshoots.
+- Follow the rules for reduced motion in [UI-UX.md](UI-UX.md#motion).
 
 ## Components
 
