@@ -140,4 +140,4 @@ These rules apply when you move an app to its own Worker. Follow the rules in [A
 ### [Wrangler](https://developers.cloudflare.com/workers/wrangler/)
 
 - Run `astro check` before each release. Follow the rules in [QUALITY.md](QUALITY.md).
-- Test the release locally with `wrangler dev`. Follow the rules in [DEV.md](DEV.md).
+- Test the release locally with `astro build` and `astro preview`. Follow the rules in [DEV.md](DEV.md).

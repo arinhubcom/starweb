@@ -29,7 +29,8 @@
   - Cron Triggers (`scheduled()`) for jobs on a schedule.
   - [Workflows](https://developers.cloudflare.com/workflows/) for processes with many steps that can run for minutes, days, or weeks.
 - Do not use Vercel Workflow DevKit or TanStack Workflow. They have no stable Cloudflare adapter.
-- Export Workflows, Durable Objects, and the `queue()` and `scheduled()` handlers from a custom entrypoint, for example `src/worker.ts`. Set `"main": "./src/worker.ts"` in `wrangler.jsonc`. Send Astro requests to `handle(request, env, ctx)` from `@astrojs/cloudflare/handler`.
+- Export Workflows, Durable Objects, and the `queue()` handler from the custom entrypoint `src/worker.ts` that the EmDash template writes (`"main": "./src/worker.ts"` in `wrangler.jsonc`).
+- Keep `...handler` from `@emdash-cms/cloudflare/worker` for Astro requests, and `scheduled: createScheduledHandler()` in `src/worker.ts`. Do not replace them with `handle()` from `@astrojs/cloudflare/handler`: the EmDash handler also publishes scheduled entries and purges their cache tags.
 - Write each workflow as a class that extends `WorkflowEntrypoint` from `cloudflare:workers`. Add it to the `workflows` array in `wrangler.jsonc` (`name`, `binding`, `class_name`). Start it from Astro with `env.MY_WORKFLOW.create({ id, params })`.
 - Follow the [rules of Workflows](https://developers.cloudflare.com/workflows/build/rules-of-workflows/):
   - Put each side effect in its own `step.do()`, and make it idempotent: a step can run more than once.

@@ -25,7 +25,7 @@ This page explains why Starweb uses Astro, Cloudflare Workers, and EmDash, and w
 - Static assets: the Astro build output is served from the same Worker.
 - Low cost: a generous free plan, then pay for use.
 - Safe releases: gradual deployments split traffic between versions, and rollback is instant.
-- Local dev: `wrangler dev` runs the same runtime (workerd) on your machine.
+- Local dev: `astro dev` and `astro preview` run the same runtime (workerd) on your machine.
 - Built-in security: DDoS protection and HTTPS by default.
 
 ### Alternatives

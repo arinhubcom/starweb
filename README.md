@@ -40,7 +40,7 @@ The steps are in [rules/SETUP.md](rules/SETUP.md).
 - Built for AI agents: rules in `AGENTS.md` and `rules/`, EmDash agent skills, CLI, and MCP server.
 - TypeScript in strict mode, with types generated for bindings (`wrangler types`) and content (`npx emdash types`).
 - Effect for typed errors and Zod for validation.
-- `wrangler dev` runs the same runtime (workerd) on your machine.
+- `astro dev` and `astro preview` run the same runtime (workerd) on your machine.
 - Safe releases with gradual deployments and instant rollback.
 
 ## 🎨 UX

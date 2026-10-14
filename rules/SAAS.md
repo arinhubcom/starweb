@@ -32,7 +32,7 @@ These rules are for a small SaaS app: few tenants, little data per tenant, no re
 ### [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/)
 
 - Set `migrations_dir` in each `d1_databases` entry of the Wrangler config, for example `migrations/app1` and `migrations/app2`.
-- Apply migrations per database. Use the database name, not the binding name: `wrangler d1 migrations apply app1-db --remote`. Use `--local` for `wrangler dev`.
+- Apply migrations per database. Use the database name, not the binding name: `wrangler d1 migrations apply app1-db --remote`. Use `--local` for local dev.
 
 ### [Kysely](https://kysely.dev)
 
