@@ -65,9 +65,13 @@ Related files: [DEPLOY.md](DEPLOY.md) (version metadata and release tags), [SAAS
 ### [Sentry for Astro on Cloudflare](https://docs.sentry.io/platforms/javascript/guides/cloudflare/frameworks/astro/)
 
 - Install both `@sentry/astro` and `@sentry/cloudflare`. The `@sentry/astro` guide does not support Cloudflare Workers on its own. Use Astro 6 or later and `@astrojs/cloudflare` v13 or later.
-- Set `"main": "./sentry.server.config.ts"` in `wrangler.jsonc`. In that file, export `Sentry.withSentry((env) => ({ dsn: env.SENTRY_DSN, ... }), handler)`, with `handler` from `@astrojs/cloudflare/entrypoints/server`.
+- Keep `"main": "./src/worker.ts"` in `wrangler.jsonc`. Do not point `main` at `sentry.server.config.ts` or use the handler from `@astrojs/cloudflare/entrypoints/server`: the Sentry guide shows that setup, but it replaces the EmDash handler (see [ARCH.md](ARCH.md) (Background work)).
+- Wrap the handler object in `src/worker.ts`: `export default Sentry.withSentry((env) => ({ dsn: env.SENTRY_DSN, ... }), { ...handler, scheduled: createScheduledHandler() })`, with `handler` from `@emdash-cms/cloudflare/worker`. `withSentry` instruments `fetch`, `scheduled`, `email`, `queue`, and `tail` on the object you pass, so keep `queue()` in that object.
+- Keep Workflow and Durable Object classes as separate named exports of `src/worker.ts`. `withSentry` does not wrap them. Instrument each class with `Sentry.instrumentWorkflowWithSentry` or `Sentry.instrumentDurableObjectWithSentry` when you want its errors in Sentry.
 - Add `sentry()` from `@sentry/astro` to `integrations` in `astro.config`, next to the Cloudflare adapter.
 - Create `sentry.client.config.ts` for the browser SDK, and call `Sentry.init({ dsn })` in it.
+- Add the host of the DSN, for example `https://o<orgId>.ingest.sentry.io`, to `connect-src` in the CSP module (see [SECURITY.md](SECURITY.md) (Headers)). Without it the browser blocks the events.
+- List Sentry as a processor in the privacy policy (see [PRIVACY.md](PRIVACY.md)).
 
 ### [Sentry data collection](https://docs.sentry.io/platforms/javascript/guides/cloudflare/configuration/options/#dataCollection)
 
@@ -79,13 +83,14 @@ Related files: [DEPLOY.md](DEPLOY.md) (version metadata and release tags), [SAAS
 
 - Add the `version_metadata` binding `CF_VERSION_METADATA` (see [DEPLOY.md](DEPLOY.md)). When no `release` is set, the SDK uses `SENTRY_RELEASE` first, then `CF_VERSION_METADATA.id`.
 - To name the release after the release tag, pass `--var SENTRY_RELEASE:<worker>-YYYY-MM-DD-rN` to `wrangler versions upload` in the tag workflow, for example `--var SENTRY_RELEASE:${{ github.ref_name }}`.
-- Use the same release name in the SDK and in the source map upload. Sentry needs the names to match.
+- Use the same release name in the SDK and in the source map upload. Sentry needs the names to match. Set `release: { name: process.env.SENTRY_RELEASE }` in the `sentry()` options of `astro.config`, and set the `SENTRY_RELEASE` environment variable to the release tag in the build step of the tag workflow.
 
 ### [Source maps](https://developers.cloudflare.com/workers/observability/source-maps/)
 
 - Set `"upload_source_maps": true` in `wrangler.jsonc`. Wrangler then uploads the maps on `wrangler deploy` and `wrangler versions upload`.
-- Make the Astro and Vite build generate maps. `upload_source_maps` only uploads maps that the build already made.
-- Keep the map files out of the public assets directory.
+- Set `vite: { build: { sourcemap: true } }` in `astro.config`, so the build writes server and client maps with `//# sourceMappingURL=` comments. Wrangler finds the server maps by those comments. Do not leave `sourcemap` unset: `sentry()` then sets `"hidden"`, which writes no comment, and Wrangler uploads no map.
+- Keep the server maps in `dist/server` until `wrangler deploy` or `wrangler versions upload` runs. Do not delete them in the build.
+- Delete only the client maps, because `dist/client` is the public assets directory. Set `sourcemaps: { filesToDeleteAfterUpload: ["./dist/client/**/*.map"] }` in the `sentry()` options. Do not rely on the default: when `sourcemap` is unset, `sentry()` deletes `./dist/**/client/**/*.map` and `./dist/**/server/**/*.map`.
 
 ### [Sentry source maps](https://docs.sentry.io/platforms/javascript/guides/cloudflare/sourcemaps/)
 
@@ -112,7 +117,7 @@ Related files: [DEPLOY.md](DEPLOY.md) (version metadata and release tags), [SAAS
 
 ### [Astro endpoints](https://docs.astro.build/en/guides/endpoints/)
 
-- Add a health endpoint in `src/pages/health.ts` that exports `GET` and `export const prerender = false`. Return status `200` and JSON with `status` and `version: env.CF_VERSION_METADATA.id`.
+- Add a health endpoint in `src/pages/health.ts` that exports `GET` and `export const prerender = false`. Return status `200` and JSON with `status` and `version: env.CF_VERSION_METADATA.id`. Bind `CF_VERSION_METADATA` again in `env.production`: bindings are not inherited (see [DEPLOY.md](DEPLOY.md) (Environments)).
 - Do not return secrets, binding names, or error details in the health response.
 
 ### [Sentry uptime monitoring](https://docs.sentry.io/product/uptime-monitoring/)
