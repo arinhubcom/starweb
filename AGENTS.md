@@ -3,7 +3,9 @@
 ## Rules
 
 - All text must be in English only. The only exception is i18n translation files.
-- Write exclusively in Globish combined with Simplified Technical English (STE).
+- Follow the [Google developer documentation style guide](https://developers.google.com/style) for docs, rules, code comments, and commit messages.
+- Follow the [Material Design 3 content design](https://m3.material.io/foundations/content-design/overview) rules for UI text.
+- Follow the rules in [rules/WRITING.md](rules/WRITING.md) for both.
 - Verify each technical claim and architecture decision in the official docs or the project's GitHub repository before you write it. Do not write from memory. If you cannot verify a claim, say so.
 
 ## Writing rules
