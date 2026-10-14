@@ -139,6 +139,22 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - **shadcn/ui:** Base UI or Radix with Tailwind, copied into the project. A good source of examples for your own wrappers.
 - **HeroUI:** a styled library with its own look. Harder to match the site theme.
 
+## [Material Design 3](https://m3.material.io/foundations/layout/layout-overview)
+
+### Why
+
+- Tailwind CSS gives a spacing scale, but no rules for when to use which value. MD3 gives tested rules for margins, panes, navigation, touch targets, and component sizes at each breakpoint.
+- The MD3 spacing system is on an 8dp scale, and Tailwind steps are 4px. Each MD3 token maps to one Tailwind step, so we need no new utilities.
+- The MD3 breakpoints (600, 840, 1200, 1600) apply to Android and the web. Agents get one clear layout per breakpoint instead of free choices.
+- The 48x48 target is bigger than the WCAG 2.2 target sizes (24x24px for AA in 2.5.8, 44x44px for AAA in 2.5.5), so it passes both.
+- At Google I/O 2026 (May 19, 2026), Material added the Expressive layout scaffold and the new 8dp spacing system. The breakpoints page lists five breakpoints, with large and extra-large for desktop ([What's new at I/O 2026](https://m3.material.io/blog/whats-new-at-io26)).
+
+### What we do not take
+
+- We do not take the MD3 look (color roles, shapes, motion). The look comes from the Fulldev UI theme.
+- MD3 spacing tokens are only implemented in Jetpack Compose, not for the web. We map them to Tailwind steps by hand.
+- The Fulldev UI and shadcn button sizes (for example `h-9`) are not MD3 sizes. We change them after install.
+
 ## Payments
 
 ### Why a Merchant of Record for the EU

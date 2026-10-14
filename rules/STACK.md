@@ -48,11 +48,15 @@
 
 ### [Fulldev UI](https://ui.full.dev)
 
-- Use Fulldev UI for `.astro` components and page blocks. Follow the rules in [DESIGN.md](DESIGN.md).
+- Use Fulldev UI for `.astro` components and page blocks. Follow the rules in [COMPONENTS.md](COMPONENTS.md).
 
 ### [Base UI](https://base-ui.com)
 
-- Use Base UI for interactive components, styled with Tailwind CSS. Follow the rules in [DESIGN.md](DESIGN.md).
+- Use Base UI for interactive components, styled with Tailwind CSS. Follow the rules in [COMPONENTS.md](COMPONENTS.md).
+
+### [Material Design 3](https://m3.material.io/foundations/layout/layout-overview)
+
+- Use Material Design 3 for layout, spacing, and component sizes. Follow the rules in [MD.md](MD.md).
 
 ## Email
 
