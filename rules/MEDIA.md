@@ -40,7 +40,7 @@ Rules for images, video, fonts, icons, and uploaded files. For layout shift rule
 - Set `format` in each transformation: the binding has no default output format. Use `avif` or `webp`.
 - Keep input images at 20 MB or less.
 - Enable [Workers Cache](https://developers.cloudflare.com/workers/cache/) for transformed images: the binding does not cache its responses.
-- Test transformations with `npx wrangler dev --remote`. Local `wrangler dev` supports only `width`, `height`, `rotate`, and `format`.
+- Test transformations with a remote binding: set `"remote": true` on the `images` binding in the top-level (dev) config of `wrangler.jsonc`, then run `astro dev`. The local simulation supports only `width`, `height`, `rotate`, and `format`. Do not set `remote` in `env.production`.
 
 ## EmDash media
 
@@ -53,7 +53,7 @@ Rules for images, video, fonts, icons, and uploaded files. For layout shift rule
 - Set `publicUrl` in `r2()` only when the bucket has a public custom domain. Do not expose the `backups/` prefix of the bucket on that domain.
 - Set `maxUploadSize` in `emdash()` (bytes) when the 50 MB default is wrong. Set the accepted types on the image or file field.
 - Do not add SVG to the accepted upload types: SVG files can contain active content.
-- Use a separate preview bucket in the `previews` or `env` block. Do not bind a preview to the production bucket. Follow the rules in [DEPLOY.md](DEPLOY.md).
+- Bind a separate dev R2 bucket to `MEDIA` in the top-level config and in the `previews` block. Bind the production bucket only in `env.production`. Do not bind dev, a PR preview, or a Preview to the production bucket. Follow the rules in [DEPLOY.md](DEPLOY.md) (Environments).
 
 ## User uploads
 

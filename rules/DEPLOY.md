@@ -15,7 +15,7 @@
   | Environment | Worker | Deployed when | Command | URL |
   |---|---|---|---|---|
   | PR preview | dev Worker, version without traffic | Each push to a PR | `wrangler versions upload --env="" --preview-alias pr-<number>` | `pr-<number>-<worker>.<subdomain>.workers.dev` |
-  | dev | `<worker>` | Each PR merge to `main` | `wrangler deploy --env=""` | `<worker>.<subdomain>.workers.dev` |
+  | dev | `<worker>` | Each push to `main` | `wrangler deploy --env=""` | `<worker>.<subdomain>.workers.dev` |
   | stage | `<worker>-production`, version without traffic | Each release tag `<worker>-YYYY-MM-DD-rN` | `wrangler versions upload --env production --tag <worker>-YYYY-MM-DD-rN --preview-alias stage` | `stage-<worker>-production.<subdomain>.workers.dev` |
   | prod | `<worker>-production` | After you test stage | `wrangler versions deploy --env production` | Your custom domain |
 
@@ -23,6 +23,8 @@
 - Pass `--env=""` for dev and `--env production` for prod in each Wrangler command, also `wrangler d1 migrations apply` and `wrangler secret put`. Write `--env=""` as one token: `wrangler-action` drops a separate empty `""`.
 - Do not create a separate stage Worker. Stage is a version of the prod Worker that has no traffic, so prod runs the same build that you tested. Read [WHY.md](../WHY.md#why-three-environments).
 - Bind a separate D1 database, KV namespace, and R2 bucket in each environment, with the same binding names. Bindings and `vars` are not inherited by environments, so define them again in `env.production`. Do not let dev or PR previews use prod data.
+- Repeat these non-inheritable keys in `env.production`: `d1_databases`, `r2_buckets`, `kv_namespaces`, `version_metadata`, `images`, `ratelimits`, `queues`, `workflows`, `durable_objects`, `services`, `vars`, `secrets`, and `define`. Do not repeat `compatibility_date`, `compatibility_flags`, `observability`, `placement`, `triggers`, and `assets`: they are inheritable, so `env.production` uses the top-level value until you set its own.
+- Add the `SESSION` KV namespace to `kv_namespaces` in `env.production` and at the top level. It is the default binding of Astro sessions (`sessionKVBindingName`) that the Cloudflare adapter uses. Set `session: false` in the Astro config when the site uses no sessions.
 - Give the prod environment its own `routes` with your custom domain. Keep dev on `workers.dev` while you have one Worker. For more than one Worker, follow Separate Workers.
 - Set `"preview_urls": true` in `env.production`. With `routes`, `workers_dev` defaults to `false`, version URLs follow it, and stage then has no URL. Protect the stage URL with Cloudflare Access (see Version URLs).
 - Expect stage to use the prod bindings: it is a version of the prod Worker. Apply the prod migrations before you upload stage. Follow the order in Migrations.
@@ -58,8 +60,20 @@
 ### [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/)
 
 - Run a release in this order: `emdash migrate`, then `wrangler d1 migrations apply <db> --remote` for each app database, then `wrangler versions upload`, then `wrangler versions deploy`.
-- Make each migration work with both the new version and the version that runs now. Add tables and columns first. Remove them in a later release, after no deployed version uses them.
+- Make each migration work with both the new version and the version that runs now. Add tables and columns first. Remove them in a later release, after no deployed version uses them. Apply the same rule to the migrations of a PR: its preview applies them to the shared dev database, which the dev Worker and other PR previews use.
+- Keep PR migrations independent of the migrations of other open PRs. When two PRs add a migration with the same number, keep both files with different names: D1 records each migration by file name.
+- Undo the migrations of a PR on the dev database when it closes without a merge: run `wrangler d1 time-travel restore <db> --timestamp=<time before its first preview run> --env=""`, then push again to each other open PR, so its preview applies its migrations again. As an alternative, add a new migration on `main` that reverts the change.
 - Do not rename or drop a column in one release. Add the new column, copy the data, switch the code, and drop the old column in a later release.
+
+### [EmDash core migrations](https://docs.emdashcms.com/deployment/core-migrations/)
+
+- Run `emdash migrate` in CI against the remote D1 database of the environment. Run `npm run build` first: the build writes `.emdash/migrations.json`, which the command reads. Keep that file in `.gitignore`.
+- Select the target explicitly and pass the reviewed fingerprint: `npx emdash migrate --account-id "$CLOUDFLARE_ACCOUNT_ID" --d1 "$D1_DATABASE_ID" --expected-target-fingerprint "$EMDASH_TARGET_FINGERPRINT"`. Set `CLOUDFLARE_API_TOKEN` with D1 Edit permission (see CI). A non-interactive apply fails without the fingerprint.
+- Run `npx emdash migrate --check` after the deploy: it exits non-zero when migrations are pending or the database has migrations that the build does not know.
+- Migrate from your machine with `npx emdash migrate --wrangler-config wrangler.jsonc --wrangler-env production`, with `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` set, in place of `--account-id` and `--d1`. Check the target it prints before you confirm. Use the explicit `--account-id` and `--d1` form in CI.
+- Get the fingerprint once for each database: run `npx emdash migrate --status --account-id <id> --d1 <database>` on your machine, check the account and database, and store the fingerprint as the variable `EMDASH_TARGET_FINGERPRINT` of the GitHub environment (dev or `production`). Change it only after you review a changed target.
+- Run one `emdash migrate` at a time for each database: a second run waits up to 10 seconds for the migration lock, then fails without applying anything. Do not cancel a running `emdash migrate`, because a cancelled run leaves the lock held.
+- Release a lock that stays held: run `npx emdash migrate --status`, check that no migration job runs, then run `npx emdash migrate --take-over-lock <id>` with the id from the status.
 
 ### [D1 Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/)
 
@@ -81,21 +95,26 @@
 
 - Set a production secret with `wrangler versions secret put`, then deploy it with `wrangler versions deploy`. Do not use `wrangler secret put` in production: it creates a version and deploys it at once, outside the gradual deployment.
 - Set a new secret before you deploy the version that reads it.
+- Set or change a production secret before the stage upload, or pass it in a file with `wrangler versions upload --secrets-file <file>`, so the tagged version has it. `wrangler versions secret put` changes the latest uploaded version, not the deployed one, and creates a new version.
+- Deploy the version that `wrangler versions secret put` created after a secret change that follows the stage upload. Find its ID with `wrangler versions list --env production`. Do not promote by the release tag: the tagged version does not have the change.
 
 ## CI
 
 ### [GitHub Actions](https://github.com/cloudflare/wrangler-action)
 
 - Deploy from GitHub Actions with `cloudflare/wrangler-action@v4`, pinned to a commit SHA. Store the API token as the `CLOUDFLARE_API_TOKEN` secret and pass it as `apiToken`. Do not also connect the repository to Workers Builds: each push then deploys twice. Read [WHY.md](../WHY.md#why-github-actions-and-not-workers-builds).
+- Create the API token from the **Edit Cloudflare Workers** template. Set **Account Resources** to your one account and **Zone Resources** to the one zone of your routes. Add the D1 Edit permission for D1 migrations and `emdash migrate`, and add Queues Edit only when the Worker uses Queues. Add no other permission.
+- Use two tokens: a repository secret for PR previews and the dev deploy, and a secret of the GitHub environment `production` for stage and promotion. Jobs that use that environment get its secrets only after the required reviewers approve.
 - Create the PR preview on the `pull_request` event. Its default types `opened`, `synchronize`, and `reopened` run it on each push to the PR. Run `wrangler versions upload --env="" --preview-alias pr-${{ github.event.pull_request.number }}`.
 - Do not use `pull_request_target` for previews: it runs the PR code with your secrets. PRs from forks get no secrets on `pull_request`, so they get no preview.
-- Apply the PR migrations to the dev database before the upload: `wrangler d1 migrations apply <db> --remote --env=""`. Do not edit a migration after a preview applied it. D1 does not apply a migration again, so add a new migration.
+- Apply the PR migrations to the dev database before the upload, in the order in Migrations: run `npm run build`, then `npx emdash migrate` (see EmDash core migrations), then `wrangler d1 migrations apply <db> --remote --env=""`. Do not edit a migration after a preview applied it. D1 does not apply a migration again, so add a new migration.
 - Post the preview URL as one PR comment that each push updates, for example with [`marocchino/sticky-pull-request-comment`](https://github.com/marocchino/sticky-pull-request-comment). Build the alias URL yourself: the action output `deployment-url` gives the versioned URL, not the alias URL ([wrangler-action#384](https://github.com/cloudflare/wrangler-action/issues/384)).
 - Give the job that holds the Cloudflare token only `contents: read`. Post the comment from a second job with `pull-requests: write`, so no job has both.
-- Set `concurrency` per PR with `cancel-in-progress: true`, for example `group: cf-preview-${{ github.event.pull_request.number }}`, so fast pushes do not race.
-- Deploy dev when a PR merges: run on `pull_request` with `types: [closed]` and `if: github.event.pull_request.merged == true`. Check out `${{ github.event.pull_request.merge_commit_sha }}`, apply the migrations to the dev database, then run `wrangler deploy --env=""`.
-- Set `concurrency` for the dev deploy with `cancel-in-progress: false`, so merges deploy in order and no migration stops halfway.
-- Upload stage on a release tag (`push` with `tags: ["<worker>-[0-9]*"]`, for example `tags: ["mysite-[0-9]*"]`): apply the prod migrations, then run `wrangler versions upload --env production --tag ${{ github.ref_name }} --preview-alias stage`.
+- Set `concurrency` per PR with `cancel-in-progress: false`, for example `group: cf-preview-${{ github.event.pull_request.number }}`. A new push then replaces the pending run of the PR, and no run is cancelled while it applies migrations.
+- Deploy dev on each push to `main`: run on `push` with `branches: [main]`. Check out the pushed commit `${{ github.sha }}`, then run `npm run build`, `npx emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""`, and `wrangler deploy --env=""` in this order. Do not run on `pull_request` with `types: [closed]`: a merged PR from a fork gets no secrets, and a direct push to `main` does not run it.
+- Set `concurrency` for the dev deploy with `cancel-in-progress: false`, so no migration stops halfway. A newer pending run replaces an older pending run, which is safe because each run applies all pending migrations of its commit.
+- Upload stage on a release tag (`push` with `tags: ["<worker>-[0-9]*"]`, for example `tags: ["mysite-[0-9]*"]`). Run the job in the GitHub environment `production` (`environment: production`), so the prod migrations wait for a required reviewer. In the job, run `npm run build`, `npx emdash migrate`, `wrangler d1 migrations apply <db> --remote --env production`, then `wrangler versions upload --env production --tag ${{ github.ref_name }} --preview-alias stage`.
+- Set the environment `production` to deploy only from the tag pattern `<worker>-[0-9]*` and from the branch `main`, with required reviewers. The rule matches `GITHUB_REF`: `refs/tags/<tag>` for the stage job and `refs/heads/main` for the promotion.
 - Promote stage to prod from a `workflow_dispatch` workflow that uses a GitHub environment named `production` with required reviewers. Find the version by its tag, and deploy it in steps with `wrangler versions deploy <version-id>@10% <old-version-id>@90% --env production -y`. Follow the rules in Releases.
 
 ### [Previews](https://developers.cloudflare.com/workers/previews/)
@@ -103,8 +122,8 @@
 - Use Previews instead of version URLs for PR previews when the Worker has Durable Objects: version URLs do not work for it. Run `wrangler preview --name pr-<number>`.
 - Delete the Preview when the PR closes: `wrangler preview delete --name pr-<number> --skip-confirmation`.
 - Use Wrangler 4.135.0 or later. Previews need it.
-- Bind each D1 database in the `previews` block of the Wrangler config to a staging database, with the same binding name. Do not let a Preview use a production database: Previews get their own D1 only when you bind one.
-- Apply the migrations to the staging databases before you create a Preview.
+- Bind each D1 database in the `previews` block of the Wrangler config to a dev database, with the same binding name. Do not let a Preview use a production database: Previews get their own D1 only when you bind one.
+- Apply the migrations to the dev databases before you create a Preview.
 - Set Preview secrets with `npx wrangler preview base-config secret put <NAME>`.
 - Protect Preview URLs with Cloudflare Access. They are public by default.
 
@@ -139,5 +158,5 @@ These rules apply when you move an app to its own Worker. Follow the rules in [A
 
 ### [Wrangler](https://developers.cloudflare.com/workers/wrangler/)
 
-- Run `astro check` before each release. Follow the rules in [QUALITY.md](QUALITY.md).
+- Run `npm run check` before each release. It includes `npm run typecheck`. Follow the rules in [QUALITY.md](QUALITY.md).
 - Test the release locally with `astro build` and `astro preview`. Follow the rules in [DEV.md](DEV.md).
