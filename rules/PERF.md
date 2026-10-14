@@ -7,6 +7,14 @@
 - Keep CPU time per request below 10 ms. Do heavy work at build time, not per request.
 - Set `Cache-Control` only on responses that do not come from Astro pages, such as a custom Worker entrypoint. For Astro pages, use Astro route caching (see Astro).
 
+## Placement
+
+### [Workers placement](https://developers.cloudflare.com/workers/configuration/placement/)
+
+- Create the D1 database with a location hint near most of the users, for example `npx wrangler d1 create <name> --location=weur`. Valid hints are `wnam`, `enam`, `weur`, `eeur`, `apac`, and `oc`. Set its `database_id` in `wrangler.jsonc`.
+- Run the Worker near the D1 primary with Targeted Placement: set `"placement": { "mode": "targeted", "region": "aws:eu-central-1" }` in `wrangler.jsonc`, with the cloud region nearest to the location hint. Follow [EmDash on Cloudflare](https://docs.emdashcms.com/deployment/cloudflare/#place-the-worker-near-d1).
+- Do not turn on D1 read replication with Targeted Placement. Keep the EmDash `session` option of `d1()` at its default, `"disabled"`.
+
 ## Cache
 
 ### [Astro](https://docs.astro.build/)

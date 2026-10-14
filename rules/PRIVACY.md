@@ -35,6 +35,9 @@ Technical rules for personal data, cookies, analytics, and logs. These rules are
 
 - Add a privacy policy page at `/privacy` and link it in the footer of the base layout and on each sign-up form.
 - Follow [GDPR Article 13](https://gdpr-info.eu/art-13-gdpr/) for the policy content: the contact of the controller, the purposes, the recipients (such as Cloudflare, Stripe, and the email provider), the retention period, and the rights of the user, including the right to complain to a supervisory authority.
+- List each processor that receives personal data in the policy, by name: Cloudflare (hosting, D1, R2, logs), and the others that the app uses, such as Stripe, the email provider, and Sentry (GDPR Article 13(1)(e)).
+- State the transfer of personal data to the United States for each processor that stores or processes data there, with its safeguard (GDPR Article 13(1)(f)). For Cloudflare, name the certification under the [EU-U.S. Data Privacy Framework](https://www.cloudflare.com/privacypolicy/) and the EU Standard Contractual Clauses in the [Cloudflare DPA](https://www.cloudflare.com/cloudflare-customer-dpa/), and link both. Put this in the privacy policy page. Do not add a separate page for it.
+- Check the safeguards of each processor again when you add one, and update the policy in the same pull request.
 - Name in the policy how a user requests access, export, and deletion, and give one contact email.
 - Update the policy in the same pull request that adds a new processor, a new cookie, or a new personal data field.
 
@@ -70,16 +73,9 @@ Technical rules for personal data, cookies, analytics, and logs. These rules are
 
 ### [D1 data location](https://developers.cloudflare.com/d1/configuration/data-location/)
 
-- Create each D1 database with the EU jurisdiction: `npx wrangler d1 create <name> --jurisdiction=eu`. This applies to the EmDash database, each app database, and the databases of each environment and of Previews. You can set a jurisdiction only at creation.
-- Create the database before the first deploy, and set its `database_id` in the `d1_databases` entry of `wrangler.jsonc`. Do not leave out `database_id`: Wrangler automatic provisioning then creates the database on deploy, and the Wrangler config has no `jurisdiction` key for D1.
-- Move a database that has no jurisdiction: create a new database with `--jurisdiction=eu`, export the old one with `wrangler d1 export <old> --remote --output=<file>`, and import the file with `wrangler d1 execute <new> --remote --file=<file>`.
-- Do not pass `--location` with `--jurisdiction`: Wrangler ignores the location hint when a jurisdiction is set.
-- Use the same jurisdiction for all databases. Read replicas then stay inside the jurisdiction.
-- Do not claim in the policy that all processing stays in one region. A jurisdiction controls only where the database runs and stores data: Workers can still read it from anywhere.
-
-### [R2 data location](https://developers.cloudflare.com/r2/reference/data-location/)
-
-- Create each R2 bucket with the EU jurisdiction: `npx wrangler r2 bucket create <name> --jurisdiction eu`. Set `"jurisdiction": "eu"` in its `r2_buckets` entry in `wrangler.jsonc`. Workers need the key to reach a bucket in a jurisdiction.
+- Create D1 databases and R2 buckets without a data location restriction. Read [WHY.md](../WHY.md#why-no-d1-jurisdiction).
+- Set the location of the D1 primary with a location hint, as in [PERF.md](PERF.md) (Placement).
+- Do not claim in the policy that data stays in the EU or in one region. State the transfer to the United States, as in Privacy policy.
 
 ## Logs
 

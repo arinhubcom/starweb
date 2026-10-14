@@ -19,7 +19,7 @@ Set up a new Starweb project with these steps, in order. Later steps depend on e
 
 7. Log in to Cloudflare with `npx wrangler login`.
 8. Set `compatibility_date` in `wrangler.jsonc` to `2026-08-04` or later, and remove `nodejs_compat` from `compatibility_flags`. The template sets an older date. Follow the rules in [ARCH.md](ARCH.md).
-9. Keep the binding names `DB` and `MEDIA`, and the `src/worker.ts` entrypoint from the template. The EmDash adapters need them. Create the D1 database with `npx wrangler d1 create <name> --jurisdiction=eu` and the R2 bucket with `npx wrangler r2 bucket create <name> --jurisdiction eu`. Set `database_id` and `"jurisdiction": "eu"` in `wrangler.jsonc`. Follow the rules in [PRIVACY.md](PRIVACY.md) (Data residency). Follow the rules in [SAAS.md](SAAS.md) (Architecture).
+9. Keep the binding names `DB` and `MEDIA`, and the `src/worker.ts` entrypoint from the template. The EmDash adapters need them. Create the D1 database with a location hint and set Targeted Placement. Follow the rules in [PERF.md](PERF.md) (Placement). Follow the rules in [SAAS.md](SAAS.md) (Architecture).
 10. Add the `CF_VERSION_METADATA` version metadata binding. Follow the rules in [DEPLOY.md](DEPLOY.md) (Releases).
 11. Keep local secrets in the `.env` file that `create-emdash` writes with `EMDASH_ENCRYPTION_KEY`. Do not add a `.dev.vars` file: when it exists, Wrangler ignores `.env`. Follow the rules in [SECURITY.md](SECURITY.md).
 
@@ -77,6 +77,6 @@ Set up a new Starweb project with these steps, in order. Later steps depend on e
 ### [Cloudflare Workers](https://developers.cloudflare.com/workers/)
 
 28. Back up `EMDASH_ENCRYPTION_KEY` from `.env` in a password manager. Do not commit `.env`: EmDash cannot decrypt plugin secrets without the key.
-29. Add the `env.production` block to `wrangler.jsonc` with its own D1 database and R2 bucket (both created with the EU jurisdiction, as in step 9), `routes`, and `"preview_urls": true`. Follow the rules in [DEPLOY.md](DEPLOY.md) (Environments).
+29. Add the `env.production` block to `wrangler.jsonc` with its own D1 database, R2 bucket, `routes`, and `"preview_urls": true`. Follow the rules in [DEPLOY.md](DEPLOY.md) (Environments).
 30. Set `EMDASH_SITE_URL` to the production URL in `env.production.vars` before you complete the admin setup on prod. Do not set it at the top level: without it, dev and local dev keep the address that the setup runs on.
 31. Set the production secrets (`EMDASH_ENCRYPTION_KEY` and `BETTER_AUTH_SECRET`) and the CI workflows. Follow the rules in [DEPLOY.md](DEPLOY.md) (Secrets, CI).
