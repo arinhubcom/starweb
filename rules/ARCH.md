@@ -1,4 +1,4 @@
-# Architecture
+# ARCH
 
 ## Code
 
@@ -9,7 +9,9 @@
 ### [Zod](https://zod.dev)
 
 - Compile schemas at build time with [zod-compiler](https://github.com/gajus/zod-compiler) (Vite plugin in `astro.config`). Do not use `z.compile()`: it uses `new Function()`, which Cloudflare Workers do not allow.
-- Use Zod for all schemas and validation. In Effect code, use the `decode` helper to turn Zod results into typed errors.
+- Use Zod for all schemas and validation.
+- Validate in Effect code with the `decode` helper in `src/lib/effect/decode.ts`: `decode(schema, input)` returns `Effect<Output, ValidationError>`. Do not call `schema.parse()` in Effect code, because it throws.
+- Define `ValidationError` in the same file as `class ValidationError extends Data.TaggedError("ValidationError")<{ error: z.ZodError }> {}`. In `decode`, call `schema.safeParse(input)`, return `Effect.succeed(result.data)` when `result.success` is `true`, and `Effect.fail(new ValidationError({ error: result.error }))` when it is `false`.
 
 ## Backend
 
@@ -21,13 +23,17 @@
 - Prefer Web APIs (`fetch`, `Request`, `Response`, Web Crypto) over Node.js APIs. Set `compatibility_date` to `2026-08-04` or later: Node.js APIs are then on by default, so do not add the `nodejs_compat` flag.
 - Generate binding types with `wrangler types`. Do not write them by hand.
 
-### Background work
+### [Background work](https://developers.cloudflare.com/queues/)
 
 - Pick the smallest tool that works:
   - `waitUntil()` for small work after the response, such as logs.
   - [Queues](https://developers.cloudflare.com/queues/) for single jobs, such as emails or webhooks. They retry and support a dead letter queue.
   - Cron Triggers (`scheduled()`) for jobs on a schedule.
   - [Workflows](https://developers.cloudflare.com/workflows/) for processes with many steps that can run for minutes, days, or weeks.
+- Configure each Queue consumer in `queues.consumers` in `wrangler.jsonc`: `queue`, `max_batch_size` (default 10), `max_retries` (default 3), and `dead_letter_queue`. Without a `dead_letter_queue`, a message that reaches `max_retries` is deleted for good. Add a consumer for the dead letter queue too: a message in a dead letter queue without a consumer is deleted after 4 days.
+- Call `message.ack()` for each message that succeeded and `message.retry()` for each one that failed, in the `queue(batch, env, ctx)` handler. Do not let one failed message throw: it retries the whole batch. Follow the [batching and retries](https://developers.cloudflare.com/queues/configuration/batching-retries/) docs.
+- Write each Queue consumer to be idempotent, because Queues deliver at least once and can deliver a message twice. Put a unique ID in each message when you send it, and use it as the primary key of the insert or as the idempotency key of the upstream API. See [delivery guarantees](https://developers.cloudflare.com/queues/reference/delivery-guarantees/).
+- Repeat the `queues.producers` and `queues.consumers` entries in `env.production`. Queue bindings are not inherited by environments. Follow the rules in [DEPLOY.md](DEPLOY.md) (Environments).
 - Do not use Vercel Workflow DevKit or TanStack Workflow. They have no stable Cloudflare adapter.
 - Export Workflows, Durable Objects, and the `queue()` handler from the custom entrypoint `src/worker.ts` that the EmDash template writes (`"main": "./src/worker.ts"` in `wrangler.jsonc`).
 - Keep `...handler` from `@emdash-cms/cloudflare/worker` for Astro requests, and `scheduled: createScheduledHandler()` in `src/worker.ts`. Do not replace them with `handle()` from `@astrojs/cloudflare/handler`: the EmDash handler also publishes scheduled entries and purges their cache tags.
@@ -59,7 +65,7 @@
 
 - Use TanStack libraries only in highly interactive React islands, such as app dashboards. Do not use them on content pages or for simple forms: use Astro Actions there. Do not use TanStack Start: Astro is the framework.
 - Islands do not share React context. Do not wrap each island in its own `QueryClientProvider` with a new client. Create one `QueryClient` in a shared module and import it in each island.
-- Router: use it only for a client-side app (SPA) inside one `client:only="react"` island, served by a catch-all Astro route such as `src/pages/app/[...path].astro`. For navigation between Astro pages, use Astro `<ClientRouter />`.
+- Router: use it only for a client-side app (SPA) inside one `client:only="react"` island, served by the app catch-all page `src/apps/app1/pages/[...path].astro`, which the app integration injects at `/app1/[...path]` (see Apps). For navigation between Astro pages, use Astro `<ClientRouter />`.
 - Query: use it for data fetching and caching in islands. Use DB (beta) only when Query is not enough, for example for live queries and optimistic writes on local collections.
 - Form: pass Zod schemas to `validators` directly. It supports Standard Schema, so no adapter is needed.
 - Table: it is headless, so write the markup and styles yourself. Use Virtual for long lists and tables.
@@ -78,6 +84,7 @@
 - Use this layout in each app folder: `integration.ts`, `pages/`, `api/`, `middleware.ts`, `actions.ts`, `components/`, `islands/`, `db/`. Keep the migrations in `migrations/app1/`. Follow the rules in [SAAS.md](SAAS.md) (Multiple apps).
 - Register each app as a local Astro integration in `src/apps/app1/integration.ts`, and add it to `integrations` in `astro.config`: `integrations: [emdash(), app1()]`. To remove an app, remove its folder, its line in `astro.config`, and its bindings.
 - Add the app routes with `injectRoute()` in the `astro:config:setup` hook. Pass the entrypoint as a URL relative to the integration file: `injectRoute({ pattern: "/app1/[...path]", entrypoint: new URL("./pages/[...path].astro", import.meta.url) })`.
+- Inject each API route file the same way, with its full pattern, for example `injectRoute({ pattern: "/app1/api/v1/items", entrypoint: new URL("./api/items.ts", import.meta.url) })`. Export `GET`, `POST`, and the other method handlers from the file.
 - Do not put app pages in `src/pages/`. Keep `src/pages/` for the site: marketing pages and CMS content.
 - Start every route of an app with its prefix: pages at `/app1/...` and API routes at `/app1/api/...`.
 - Add app middleware with `addMiddleware({ entrypoint: new URL("./middleware.ts", import.meta.url), order: "pre" })`. It runs on every request, so return `next()` at once when `context.url.pathname` does not start with the app prefix.

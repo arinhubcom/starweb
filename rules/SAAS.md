@@ -56,9 +56,10 @@ These rules are for a small SaaS app: few tenants, little data per tenant, no re
 - Use one app database for all tenants. Add a `tenant_id` column to each tenant table and an index that starts with `tenant_id`.
 - Filter each query by `tenant_id` from the session. Do not read `tenant_id` from the request body or URL.
 - Put tenant filtering in one data-access module. Do not write raw tenant queries in route handlers.
-- Use `session.activeOrganizationId` from emdash-better-auth as `tenant_id`, and `locals.user.id` as `user_id`.
+- Turn on organizations for any multi-tenant app. Use `session.activeOrganizationId` from emdash-better-auth as `tenant_id`, and `locals.user.id` as `user_id`. Follow the rules in [AUTH.md](AUTH.md) (Organizations).
+- Take `tenant_id` and `user_id` from the key row for API key requests, not from the session or the request. Follow the rules in [API.md](API.md) (API keys).
 - Store `tenant_id` and `user_id` as plain text columns. Do not add foreign keys or joins to EmDash tables: users and organizations live in the EmDash database.
-- Delete app data of a deleted user or organization in your own code, for example in a cron job.
+- Delete app data of a deleted user or organization as described in Cleanup.
 
 ### [Durable Objects](https://developers.cloudflare.com/durable-objects/)
 
@@ -72,7 +73,7 @@ These rules are for a small SaaS app: few tenants, little data per tenant, no re
 ### [EmDash plugins](https://docs.emdashcms.com/plugins/creating-plugins/)
 
 - Use a native plugin for admin pages and dashboard widgets that manage the app.
-- Do not use plugin API routes for customer traffic. Use Astro API routes in `src/pages`.
+- Do not use plugin API routes for customer traffic. Put the customer API routes in the app, in `src/apps/<app>/api/`, under `/<app>/api/`.
 - Use sandboxed plugins only on the Workers Paid plan. Keep each call under 50 ms CPU and 10 subrequests.
 
 ## Building blocks
@@ -139,13 +140,13 @@ These parts are not in the stack. Add them when the app needs them.
 
 - Use Paraglide JS for UI strings in app pages and islands. Use Astro i18n routing for the URLs. For the site, follow the rules in [I18N.md](I18N.md).
 
-### Tests
+### [Tests](TESTING.md)
 
 - Follow the rules in [TESTING.md](TESTING.md), including the tenant isolation test for each repository module.
 
 ## Limits
 
-### [Workers Free plan](https://developers.cloudflare.com/durable-objects/platform/pricing/)
+### [Workers Free plan](https://developers.cloudflare.com/workers/platform/pricing/)
 
 - Expect errors when you go over a free daily limit. Limits reset at 00:00 UTC.
 - Move to the Workers Paid plan before you launch to paying customers.
@@ -155,5 +156,5 @@ These parts are not in the stack. Add them when the app needs them.
 ### [Payments](PAYMENTS.md)
 
 - Follow the rules in [PAYMENTS.md](PAYMENTS.md).
-- Store the subscription plan per organization, not per user.
+- Store the subscription plan per organization, not per user. The `premium` content flag is per user: follow the rules in [PAYMENTS.md](PAYMENTS.md) (Premium content).
 - Check plan limits (for example, number of projects) on the server before each create action.
