@@ -133,12 +133,11 @@ These parts are not in the stack. Add them when the app needs them.
 
 ### Errors and logs: [Sentry for Cloudflare](https://docs.sentry.io/platforms/javascript/guides/cloudflare/)
 
-- Turn on [Workers Logs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/) (`observability` in the Wrangler config).
-- Use `@sentry/cloudflare` for error tracking. Add `tenant_id` and `user_id` to the Sentry scope. Do not send emails or other personal data.
+- Follow the rules in [OBSERVABILITY.md](OBSERVABILITY.md) for Workers Logs and Sentry. Add `tenant_id` and `user_id` to the Sentry scope.
 
 ### App i18n: [Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)
 
-- Use Paraglide JS for UI strings in app pages and islands. Use Astro i18n routing for the URLs.
+- Use Paraglide JS for UI strings in app pages and islands. Use Astro i18n routing for the URLs. For the site, follow the rules in [I18N.md](I18N.md).
 
 ### Tests
 

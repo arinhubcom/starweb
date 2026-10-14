@@ -15,3 +15,4 @@
 - Check that [Workers Cache](https://developers.cloudflare.com/workers/cache/) works on your account before you set `cacheCloudflare()`. It started as a private beta: without access, cached responses are never served and `cache.invalidate()` throws an error. Test a cache hit on the deployed Worker.
 - Use the Cache API for data that is part of a page, such as a slow upstream `fetch`. Use the global `caches.default` (`match()` and `put()`), and run `put()` in `Astro.locals.cfContext.waitUntil()`. This cache stays in one data center.
 - Use Workers KV for small data that many locations read and that changes rarely, such as config or feature flags. Read it with `env.MY_KV.get(key, { cacheTtl })` from `cloudflare:workers`. Writes can take 60 seconds or more to reach other locations, so do not use KV for data that must be fresh.
+- Follow the rules in [MEDIA.md](MEDIA.md) for images and fonts, including the LCP image.

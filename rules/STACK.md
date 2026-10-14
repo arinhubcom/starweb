@@ -66,6 +66,20 @@
 
 - Use Material Design 3 for layout, spacing, states, motion, color, and component sizes. Follow the rules in [MATERIAL.md](MATERIAL.md).
 
+## Site
+
+### [Astro i18n](https://docs.astro.build/en/guides/internationalization/)
+
+- Use Astro i18n routing and Paraglide JS for translated pages. Follow the rules in [I18N.md](I18N.md).
+
+### [Astro images](https://docs.astro.build/en/guides/images/)
+
+- Use `astro:assets` for images and the Astro fonts API for fonts. Follow the rules in [MEDIA.md](MEDIA.md).
+
+### [EmDash SEO](https://docs.emdashcms.com/guides/seo/)
+
+- Use the EmDash SEO fields and `@astrojs/sitemap` for SEO. Follow the rules in [SEO.md](SEO.md).
+
 ## Testing
 
 ### [Vitest](https://vitest.dev)
@@ -95,3 +109,23 @@
 ### [emdash-better-auth](https://github.com/theweekendprojects/emdash-better-auth)
 
 - Use emdash-better-auth for login of site users. Follow the rules in [AUTH.md](AUTH.md).
+
+## Quality
+
+### [ESLint](https://eslint.org/docs/latest/use/configure/configuration-files)
+
+- Use ESLint, Prettier, and Knip. Follow the rules in [QUALITY.md](QUALITY.md).
+
+## Operations
+
+### [Sentry](https://docs.sentry.io/platforms/javascript/guides/cloudflare/)
+
+- Use Workers Logs and Sentry for logs and errors. Follow the rules in [OBSERVABILITY.md](OBSERVABILITY.md).
+
+### [Renovate](https://docs.renovatebot.com/)
+
+- Use Renovate for dependency updates. Follow the rules in [DEPS.md](DEPS.md).
+
+### [Cloudflare Web Analytics](https://developers.cloudflare.com/web-analytics/)
+
+- Use Cloudflare Web Analytics for analytics. Follow the rules in [PRIVACY.md](PRIVACY.md).

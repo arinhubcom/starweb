@@ -30,7 +30,7 @@ Rules for how the UI behaves and how users finish a task. They apply to the site
 
 - Give each view that loads data four states: loading, empty, error, and success. Do not show a blank area.
 - Show a skeleton with the size of the final content while data loads. Do not show a full-page spinner.
-- Set `width` and `height` on each `<img>` and `<video>`, or reserve the space with `aspect-ratio`. Reserve space for late content with `min-height`. Keep CLS at 0.1 or less.
+- Set `width` and `height` on each `<img>` and `<video>`, or reserve the space with `aspect-ratio`. Reserve space for late content with `min-height`. Keep CLS at 0.1 or less. For images, follow the rules in [MEDIA.md](MEDIA.md).
 - Animate only `transform` and `opacity`. Do not animate `width`, `height`, `top`, or `margin`: they move the layout.
 - Show an empty state that says why the view is empty and gives the next action, for example a **Create project** button. Follow the rules in [WRITING.md](WRITING.md) for the text.
 - Show an error state that says what failed and gives a way out, for example a **Try again** button. Keep the rest of the page usable.
