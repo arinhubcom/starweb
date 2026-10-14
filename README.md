@@ -27,18 +27,6 @@ It is built on [Astro](https://astro.build) and
 - `wrangler dev` runs the same runtime (workerd) on your machine.
 - Safe releases with gradual deployments and instant rollback.
 
-## 📐 Spec first
-
-Starweb follows Spec-Driven Development with [Spec Kit](https://github.com/github/spec-kit). Agents write the spec before the code:
-
-1. **Constitution** (once per project): project principles, based on `AGENTS.md` and `rules/`.
-2. **Specify:** what to build and why, with no tech choices.
-3. **Plan:** how to build it with the Starweb stack.
-4. **Tasks:** small steps that can be checked.
-5. **Implement** and **converge:** build the tasks, then check the result against the spec. Repeat until it converges.
-
-Set it up with `uv tool install specify-cli` and `specify init --here --force --integration claude` (existing project). Then run the `/speckit-*` skills in your agent, one at a time, and review each result.
-
 ## 🎨 UX
 
 - Fast first load: HTML is rendered on the server and served from the CDN.
