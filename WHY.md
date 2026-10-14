@@ -170,6 +170,11 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - The 48x48 target is bigger than the WCAG 2.2 target sizes (24x24px for AA in 2.5.8, 44x44px for AAA in 2.5.5), so it passes both.
 - At Google I/O 2026 (May 19, 2026), Material added the Expressive layout scaffold and the new 8dp spacing system. The breakpoints page lists five breakpoints, with large and extra-large for desktop ([What's new at I/O 2026](https://m3.material.io/blog/whats-new-at-io26)).
 
+### Why menu items are 48px and chip rows have 16px between them
+
+- The Expressive segmented menu item is 44px, but the Targets rule needs a 48px target, and stacked items cannot extend their targets into each other. The Compose standard menu item is 48dp (`MenuListItemContainerHeight`).
+- MDC chips are 32dp with a 48dp minimum touch target. Rows need 16px between them so the hit areas do not overlap.
+
 ### What we do not take
 
 - We do not take the MD3 type and shapes. The fonts and the radius come from the Fulldev UI theme.
@@ -231,6 +236,20 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - The Base UI docs do not say that the toast timer pauses on hover or focus. `timeout: 0` keeps the toast open until the user closes it, so the undo has no time limit.
 - A toast without an action only confirms a result. When it closes, the user loses nothing.
 
+### Why the theme lives in `localStorage`
+
+- The CDN caches public pages, so a cookie-based server render would serve the theme of one user to others. The server also cannot know `prefers-color-scheme`.
+- A blocking script in `<head>` sets `.dark` before the first paint, so there is no flash of the wrong theme.
+
+### Why the theme script has a CSP hash
+
+- Astro's CSP hashes only the scripts that it processes. It does not hash `is:inline` scripts (tested with Astro 7.3.8), so the one allowed inline script needs its hash in `csp.scriptDirective.hashes`.
+
+### Why a session flash message
+
+- A toast needs an island. A session survives the POST, redirect, GET cycle on the server.
+- A cached public page must not read the session, or it would show the message of one visitor to another.
+
 ## Payments
 
 ### Why a Merchant of Record for the EU
@@ -253,6 +272,16 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - Creem is the cheapest MoR without a monthly fee. For a $50 order: Creem $2.35, Stripe Managed Payments about $2.77 with an EEA card.
 - Creem is an EU company (Armitage Labs OÜ, Estonia).
 - Creem has a TypeScript SDK, signed webhooks, and an official Better Auth plugin.
+
+### Why the plan is per organization and `premium` is per user
+
+- Billing belongs to the organization, so the plan is stored for the organization.
+- The content gate checks the user, so the `premium` flag is per user. Billing code syncs the flag to the members.
+
+### Why Creem webhooks need an event ID guard
+
+- Creem signs the payload but gives no timestamp for replay checks, and it retries the same event (up to 5 times in 24 hours).
+- The `evt_` ID is the only duplicate guard, so store it with a unique constraint.
 
 ### Risks
 
@@ -376,6 +405,15 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - Astro `security.checkOrigin` blocks cross-site form submissions. It does not check requests with `Content-Type: application/json`, because a browser sends a CORS preflight for them first.
 - When API routes that use the session cookie accept only JSON, a cross-site page cannot send a mutation without a preflight, and the preflight fails without a CORS allow rule for that origin.
 
+### Why API keys take the tenant from the key row
+
+- The key row is the only trusted source of the tenant. A `tenant_id` from the request would let one customer read the data of another customer.
+
+### Why the media type check is not a strict string match
+
+- `Content-Type` often carries `; charset=utf-8`, so a strict string match rejects valid JSON.
+- A `DELETE` without a body has no media type to check.
+
 ## Deploy
 
 ### Why two-step releases
@@ -386,7 +424,7 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - Durable Objects do not split this way: only one version of each Durable Object runs at a time. A Durable Object class change also blocks rollback.
 - `wrangler secret put` creates a version and deploys it at once, so it skips the split. `wrangler versions secret put` keeps the secret inside the gradual release.
 
-### Why Previews use staging databases
+### Why Previews use the dev databases
 
 - A Preview gets its own variables, secrets, and Durable Object namespace, but it uses the same D1 database as production unless you bind a different one. A branch with a new migration could change production data.
 - Version URLs use the bindings of their version, so they also read production data. Use them only for versions that are ready for production.
@@ -416,9 +454,17 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 
 ### Why GitHub Actions and not Workers Builds
 
-- GitHub Actions runs the full flow in one place: PR preview, dev deploy on merge, stage on a release tag, and a prod promotion that a GitHub environment can protect with required reviewers.
+- GitHub Actions runs the full flow in one place: PR preview, dev deploy on each push to `main`, stage on a release tag, and a prod promotion that a GitHub environment can protect with required reviewers.
 - Each step is a workflow file in the repository, so you can review and change it in a PR.
 - With both connected, each push deploys twice.
+
+### Why the CI deploy flow is built this way
+
+- The dev deploy runs on `push` to `main`, not on a `pull_request` `closed` event. GitHub passes no secrets to runs that a fork triggers, and a direct push to `main` would not run the old trigger.
+- PR previews and the dev deploy use `cancel-in-progress: false`. A cancelled `emdash migrate` leaves the D1 migration lock held. A newer pending run replaces an older pending run, which is safe because each run applies all pending migrations of its commit.
+- Stage runs in the `production` GitHub environment, because the tag push applies migrations to the production database before any promotion approval.
+- There are two Cloudflare tokens, and only approved jobs can read the production token. Cloudflare tokens cannot be scoped to one Worker, so the separation is by approval, not by resource.
+- `wrangler versions secret put` changes the latest uploaded version. A secret change after the stage upload creates a version that the release tag does not point to.
 
 ### Why Wrangler and not cf
 
@@ -524,6 +570,26 @@ What this means for tests:
 - Storage is isolated per test file, not per test. `reset()` from `cloudflare:test` deletes all data from all bindings.
 - The D1 setup follows the [`d1` fixture](https://github.com/cloudflare/workers-sdk/tree/main/fixtures/vitest-plugin-examples/d1) in `workers-sdk`: `readD1Migrations()` in the config, and `applyD1Migrations()` in a setup file. It applies only migrations that are not applied yet, so the setup file can run more than once.
 
+### Why Istanbul coverage and not V8
+
+- The Workers Vitest plugin runs tests in workerd, which does not expose V8 coverage. The Cloudflare docs list V8 coverage as a known issue and say to use Istanbul.
+- Coverage thresholds apply only when coverage runs, so the `test` script passes `--coverage`.
+
+### Why the manual workflow also runs `vitest -u`
+
+- Vitest writes no new snapshots when `CI` is set, and a missing snapshot fails the run.
+- Only a manual `vitest run -u` creates the ARIA `.snap` files, in the same workflow that updates the Playwright baselines.
+
+### Why Knip entry globs are not an ignore list
+
+- Pages, middleware, and admin plugin files are registered by path or URL (`injectRoute()`, `addMiddleware()`, `adminEntry`), so no import reaches them.
+- An entry glob says that the file is used and still lets Knip report unused exports and dependencies. An ignore list hides the file from Knip.
+
+### Why the signup end-to-end test runs against `astro dev`
+
+- The EmDash console email provider and `/_emdash/api/dev/emails` exist only in `astro dev`.
+- A production build has no email capture, so `astro preview` cannot read the verification link.
+
 ### What Starweb takes from qset v4
 
 trendaro-fe (qset v4) has four test tiers for each widget: unit tests, DOM snapshots, end-to-end tests, and screenshots. All of them use the stories as the source of states. Starweb keeps this idea and changes these things:
@@ -562,3 +628,100 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - `@storybook-astro/framework` 1.12.0 accepts only `vitest ^4.1.0` and `@astrojs/react ^4.2.3 || ^5.0.0 || ^6.0.0`. Read [Why Vitest 4.1 and not Vitest 5](#why-vitest-41-and-not-vitest-5).
 - Without `ignore`, Dependabot opens major update PRs for these packages, and `@astrojs/react` 7 would arrive in the `astro` group PR. A local install of `@astrojs/react` 7 next to Storybook Astro failed with `ERESOLVE`.
 - Upstream issues: [#192](https://github.com/storybook-astro/storybook-astro/issues/192) (`@astrojs/react` 7) and [#193](https://github.com/storybook-astro/storybook-astro/issues/193) (Vitest 5). Remove the `ignore` items when they are fixed.
+
+## Architecture
+
+### Why `decode` returns a typed error
+
+- `decode` returns a typed `ValidationError` instead of throwing, so Effect code keeps validation failures in the error channel.
+
+### Why Queues need a dead letter queue and per-message `ack()`
+
+- Without a dead letter queue, messages that reach `max_retries` are deleted for good.
+- Queues deliver at least once, so consumers must be idempotent.
+- Throwing in a batch handler retries the whole batch, so use per-message `ack()` and `retry()`.
+- Queue bindings are not inherited by `env.production`.
+
+## Data
+
+### Why one migration system
+
+- Two systems (SQL files and the Kysely `Migrator`) can disagree about which migrations ran. `wrangler d1 migrations apply` is the one that CI and DEPLOY.md use.
+
+### Why D1 queries stay small
+
+- D1 allows 100 bound parameters per query and 100 KB per statement. A `where in` list or a multi-row insert fails above that, so code must split it.
+- Per-row queries (N+1) add one round trip each.
+
+### Why export D1 as well as use Time Travel
+
+- Time Travel keeps 7 days (Free) or 30 days (Paid). Exports give a longer history and a copy that you control.
+- Exports hold personal data, so they stay out of git.
+- A running export blocks other requests, so run it off-peak.
+
+## Security
+
+### Why one CSP module
+
+- Each feature that adds its own CSP directive can overwrite the others. Astro's `scriptDirective.resources` replaces the defaults and drops `'self'` unless you list it.
+- A `connect-src` without `'self'` blocks the same-origin `fetch` calls of islands.
+- One module with each directive once avoids both problems.
+
+### Why check the dev-bypass routes in production
+
+- EmDash allows the dev-bypass routes only when `import.meta.env.DEV` is true. They create an admin user and a session.
+- A build that ships the dev flag would give admin access without a passkey. A post-deploy 403 check catches that.
+
+### Why Turnstile loads only on form pages
+
+- Turnstile is a third-party script, and PRIVACY.md forbids those before consent. Limiting it to pages with a protected form keeps the exception small.
+- The legal basis is the Cloudflare Turnstile Privacy Addendum, not EDPB guidance.
+
+### Why `.env` locally and Worker secrets in production
+
+- Wrangler and the Cloudflare Vite plugin load `.env` into the Worker `env` in local development, but only when no `.dev.vars` file exists.
+- The emdash-better-auth README says that `.env` is not available to the deployed Worker, so production needs a real Worker secret. Set it with `wrangler versions secret put` (see DEPLOY.md).
+
+## Observability
+
+### Why Sentry wraps `src/worker.ts`
+
+- The Sentry Astro guide points `main` at `sentry.server.config.ts` with the plain Astro handler. That drops the scheduled publishing and cache purge of EmDash, and the Workflow, Durable Object, and queue exports.
+- `withSentry` instruments the handler object that you pass (`fetch`, `scheduled`, `email`, `queue`, `tail`), so one wrapper in `src/worker.ts` covers all of them.
+
+### Why only client source maps are deleted
+
+- Wrangler finds server source maps only through their `sourceMappingURL` comments. When `sourcemap` is not set, the `sentry()` integration builds `hidden` maps, which have no comment, so Wrangler finds none.
+- The default deletion of `sentry()` also removes the maps in `dist/server`, which Wrangler needs when it uploads the version. So the build sets `sourcemap: true`, and Sentry deletes only the maps in `dist/client`, which would otherwise be public.
+
+## Email
+
+### Why auth emails do not use the Queue
+
+- emdash-better-auth passes each email to the EmDash email pipeline, which sends it through the active provider plugin.
+- App emails use your own module and a Queue, so failed sends retry.
+
+## Performance
+
+### Why field data over lab data
+
+- web.dev says: "Only field measurement can accurately capture the complete picture."
+- Lighthouse cannot measure INP, because no real user interacts with the page.
+
+## Internationalization
+
+### Why branch on `isPrerendered`
+
+- `setLocale()` with the `globalVariable` strategy sets one variable per isolate. Concurrent on-demand requests share it, so a request can render in the locale of another request. The Paraglide docs warn about cross-request issues with `globalVariable`.
+- `paraglideMiddleware()` isolates each request with AsyncLocalStorage, which Workers support.
+
+### Why `next()` takes no argument
+
+- The request in the callback has the locale prefix removed. Astro treats `next(request)` as a rewrite, so the locale folders in `src/pages/` would be skipped.
+
+## SEO
+
+### Why custom pages pass a canonical URL
+
+- `<EmDashHead>` writes `rel="canonical"` and `og:url` only when the page context or the entry gives a canonical URL.
+- Without it, custom pages have neither, and a hand-written link next to it would duplicate it.

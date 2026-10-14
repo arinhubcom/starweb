@@ -1,4 +1,4 @@
-# Tech Stack Rules
+# STACK
 
 ## Language
 
@@ -34,6 +34,19 @@
 
 - Use Kysely for SQL queries on D1. Do not use an ORM such as Drizzle or Prisma. Follow the rules in [DATA.md](DATA.md).
 
+
+## SaaS
+
+### [Apps](https://docs.astro.build/en/guides/integrations-guide/)
+
+- Build each app in `src/apps/<app>/` in the same Astro project and Worker. Follow the rules in [SAAS.md](SAAS.md).
+
+## Payments
+
+### [Stripe](https://stripe.com/docs/billing) and [Creem](https://docs.creem.io)
+
+- Use Creem for EU sales and Stripe billing otherwise. Follow the rules in [PAYMENTS.md](PAYMENTS.md).
+
 ## Frontend
 
 ### [Astro](https://docs.astro.build/)
@@ -58,6 +71,11 @@
 
 - Use Base UI for interactive components, styled with Tailwind CSS. Follow the rules in [COMPONENTS.md](COMPONENTS.md).
 
+
+### [Kumo](https://github.com/cloudflare/kumo)
+
+- Use Kumo only for admin pages of native EmDash plugins. Follow the rules in [DESIGN.md](DESIGN.md).
+
 ### [shadcn/ui](https://ui.shadcn.com)
 
 - Use shadcn/ui components on Base UI for React islands. Follow the rules in [COMPONENTS.md](COMPONENTS.md).
@@ -65,6 +83,11 @@
 ### [Material Design 3](https://m3.material.io/foundations/layout/layout-overview)
 
 - Use Material Design 3 for layout, spacing, states, motion, color, and component sizes. Follow the rules in [MATERIAL.md](MATERIAL.md).
+
+
+### [WCAG 2.2](https://www.w3.org/TR/WCAG22/)
+
+- Use WCAG 2.2 AA for accessible behavior, states, forms, and theme. Follow the rules in [UI-UX.md](UI-UX.md).
 
 ## Site
 
@@ -122,9 +145,16 @@
 
 - Use Workers Logs and Sentry for logs and errors. Follow the rules in [OBSERVABILITY.md](OBSERVABILITY.md).
 
+
+
 ### [Dependabot](https://docs.github.com/en/code-security/dependabot)
 
 - Use Dependabot for dependency updates. Follow the rules in [DEPS.md](DEPS.md).
+
+
+### [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/)
+
+- Use Turnstile to protect forms from bots. Follow the rules in [SECURITY.md](SECURITY.md).
 
 ### [Cloudflare Web Analytics](https://developers.cloudflare.com/web-analytics/)
 
