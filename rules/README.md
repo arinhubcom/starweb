@@ -36,6 +36,7 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 | File | Contents |
 | --- | --- |
 | [QUALITY.md](QUALITY.md) | TypeScript strict mode and `astro check`. |
+| [TESTING.md](TESTING.md) | Vitest, the Cloudflare Vitest plugin, Storybook with Storybook Astro, ARIA snapshots, screenshot tests, Playwright end-to-end tests, axe, and CI. |
 | [PERF.md](PERF.md) | CPU time budget for Workers, Astro route caching, and the Cache API. |
 | [SECURITY.md](SECURITY.md) | Secrets for Cloudflare Workers. |
 | [DEV.md](DEV.md) | Local dev with `astro dev`, and build tests with `astro preview`. |
@@ -47,9 +48,3 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 | --- | --- |
 | [AGENTS.md](AGENTS.md) | Rules for agents that add or change a rule in this folder. `CLAUDE.md` imports it for Claude Code. |
 | [WRITING.md](WRITING.md) | Rules for docs (Google developer documentation style guide) and UI text (Material Design 3 content design, Mailchimp voice and tone). |
-
-## Empty files
-
-These files have only a heading and no rules:
-
-- [TESTING.md](TESTING.md)

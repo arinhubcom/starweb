@@ -421,3 +421,73 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - CI support is not complete: `cf previews deploy` does not give Workers Builds the Preview URL ([cf#185](https://github.com/cloudflare/cf/issues/185)), and there is no GitHub Action ([cf#138](https://github.com/cloudflare/cf/issues/138)).
 - It has no replacement for `wrangler tail` ([cf#68](https://github.com/cloudflare/cf/issues/68)).
 - Check again when `cf` reaches 1.0 and these issues are closed.
+
+## Testing
+
+### Why ARIA snapshots and not DOM snapshots
+
+- A DOM snapshot stores the full markup with all Tailwind classes. A change of one class, for example `px-4` to `px-5`, fails the test, and the reviewer must read the markup to find out whether anything that a user sees has changed.
+- An ARIA snapshot stores only the accessibility tree: roles, names, and states. It fails when a label, a role, or a heading level changes, which DOM snapshots miss.
+- trendaro-fe (qset v4) uses `toMatchSnapshot()` on the DOM of each story, through `composeStories()` in jsdom.
+- In Vitest, ARIA snapshots are experimental (Vitest 4.1.4+, per the docs). In Playwright, they are stable.
+- In Vitest, ARIA snapshots work only in browser mode. Tested on 2026-10-14: in happy-dom, `toMatchAriaSnapshot()` fails with `Invalid Chai property` in Vitest 4.1.11 and 5.0.4. The matcher lives in `@vitest/browser` (`packages/browser/src/client/tester/aria.ts`).
+
+### Why baselines come only from CI
+
+- Vitest has no default tolerance for screenshot diffs, so the config must set one.
+- Screenshots depend on the OS, the browser build, the GPU, and the fonts. The Vitest and Playwright docs both say to create baselines in the same environment that compares them.
+- trendaro-fe (qset v4) creates baselines on a local machine and compares them on `ubuntu-latest`. It needs a tolerance of `maxDiffPixelRatio: 0.03` to absorb the difference. Such a tolerance also hides small real changes.
+- A manual CI workflow that runs `vitest --update` or `playwright test --update-snapshots` gives baselines that match CI, so the tolerance can stay low.
+- PNG baselines are binary, so they go to Git LFS. `.snap` files are text, so they stay in git and the PR shows a readable diff. trendaro-fe uses the same split in `.gitattributes`.
+
+### Why Storybook Astro
+
+- Storybook does not support Astro officially. Astro is not on the list of supported frameworks.
+- [`@storybook-astro/framework`](https://github.com/storybook-astro/storybook-astro) is a community framework. Version 1.12.0 supports Astro 5, 6, and 7 and Storybook 10. It renders `.astro` components with the Astro Container API and renders React islands next to them, so one Storybook covers the whole UI.
+- Portable stories (`composeStories()`, `renderStory()`) let tests reuse the states from the stories, as qset v4 does with `composeStories()` for React.
+- The Storybook Test addon works with Astro since version 1.11.0 ([PR #174](https://github.com/storybook-astro/storybook-astro/pull/174), released on 2026-08-27). The project roadmap still lists it as unreleased.
+
+### Risks of Storybook Astro
+
+- The project is in active development, and its APIs can change between releases.
+- Its peer dependency is `vitest ^4.1.0`, so it blocks Vitest 5.
+- The docs do not say whether it works with `@astrojs/cloudflare`. Storybook Astro loads the integrations from `astro.config.*`, so check `storybook dev` and `storybook build` when you add it to a project.
+- In static builds, Controls do not change the args of Astro stories.
+- `npm create storybook` does not detect Astro, so the setup is manual.
+- `renderMode: 'server'` needs a Node.js server. Static mode needs no server.
+- Function args do not work in Astro stories, and `astro:assets` imports do not resolve in stories.
+- `@testing-library/user-event` is not reliable in happy-dom, so interaction tests run in a real browser.
+- The Astro Container API does not run `<script>` tags, so client scripts need Playwright.
+- The npm package `storybook-astro` is a different project.
+
+### Astro fonts in Storybook
+
+Storybook Astro does not serve fonts the same way as the site. This is from the source of `vitePluginAstroFonts.ts` in version 1.12.0, and from the roadmap:
+
+- It reads the font families from `fonts` in `astro.config.*` and calls each provider (Google, Bunny, Fontsource, local) to get `@font-face` data.
+- It writes `@font-face` rules with the remote URLs that the provider returns. It does not copy the font files into the Storybook build, as `astro build` does.
+- It does not add preload links, and it does not create the Capsize fallback metrics. Before the font loads, the fallback font has different sizes from the site font, so the layout can shift.
+- The runtime API is a stub: `fontData` is `{}`, and `experimental_getFontFileURL()` returns `undefined`.
+- When a provider fails, it logs a warning and skips the family. The story then renders with the fallback font, and no test fails.
+
+What this means for tests:
+
+- A screenshot test of a story needs network access to the font provider. trendaro-fe blocks all external requests in screenshot tests, so its screenshots never use the web font.
+- A story screenshot can differ from the real page. Take screenshots of full pages with Playwright against `astro preview`, which serves the built font files.
+
+### Why Vitest 4.1 and not Vitest 5
+
+- `@storybook-astro/framework` 1.12.0 accepts only `vitest ^4.1.0`. `@cloudflare/vitest-plugin` 1.4.2 and `@storybook/addon-vitest` 10.6.2 also accept Vitest 5.
+- `@effect/vitest` 4.x needs Vitest 5 (`>=5.0.0 <6.0.0`), so it cannot run next to Storybook Astro. Until Storybook Astro supports Vitest 5, tests run Effect code with `Effect.runPromise()`.
+
+### Why `@cloudflare/vitest-plugin`
+
+- `@cloudflare/vitest-pool-workers` is deprecated on npm: "has been renamed to @cloudflare/vitest-plugin. This package will not receive future updates."
+- The plugin runs tests in workerd with real D1, KV, and R2 bindings from the Wrangler config.
+
+### What Starweb takes from qset v4
+
+trendaro-fe (qset v4) has four test tiers for each widget: unit tests, DOM snapshots, end-to-end tests, and screenshots. All of them use the stories as the source of states. Starweb keeps this idea and changes two things:
+
+- ARIA snapshots instead of DOM snapshots.
+- Baselines from CI instead of from a local machine.

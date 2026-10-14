@@ -66,6 +66,20 @@
 
 - Use Material Design 3 for layout, spacing, states, motion, and component sizes. Follow the rules in [MATERIAL.md](MATERIAL.md).
 
+## Testing
+
+### [Vitest](https://vitest.dev)
+
+- Use Vitest for unit, integration, and component tests. Follow the rules in [TESTING.md](TESTING.md).
+
+### [Storybook](https://storybook.js.org)
+
+- Use Storybook with Storybook Astro for `.astro` components and React islands. Follow the rules in [TESTING.md](TESTING.md).
+
+### [Playwright](https://playwright.dev)
+
+- Use Playwright for end-to-end, screenshot, and accessibility tests of pages. Follow the rules in [TESTING.md](TESTING.md).
+
 ## Email
 
 ### [React Email](https://react.email)

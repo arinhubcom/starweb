@@ -140,10 +140,9 @@ These parts are not in the stack. Add them when the app needs them.
 
 - Use Paraglide JS for UI strings in app pages and islands. Use Astro i18n routing for the URLs.
 
-### Tests: [Vitest Workers pool](https://developers.cloudflare.com/workers/testing/vitest-integration/)
+### Tests
 
-- Test app code with `@cloudflare/vitest-pool-workers`. It runs tests in workerd with real D1, KV, and R2 bindings.
-- Write a test for each repository module that checks a query never returns rows of another tenant.
+- Follow the rules in [TESTING.md](TESTING.md), including the tenant isolation test for each repository module.
 
 ## Limits
 
