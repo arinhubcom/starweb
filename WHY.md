@@ -477,6 +477,7 @@ Tested on 2026-10-14 in a temporary project with Astro 7.3.8, `@astrojs/cloudfla
 - `renderStory()` renders only Astro components. A React story fails with `Story meta.component must be an Astro component factory`.
 - In browser mode, npm hoisted the 3.2.4 copies of `@vitest/expect`, `@vitest/spy`, `@vitest/utils`, and `@vitest/pretty-format` that Storybook depends on, and the tests failed with missing exports (`createDOMElementFilter`, `ChaiStyleAssertions`). Installing them at the Vitest version fixed it.
 - `@storybook/addon-vitest` ran the Card smoke test and the Counter `play` function in Chromium. A wrong expected value made the `play` function fail, so the test really runs.
+- Upstream issues from this test: [#191](https://github.com/storybook-astro/storybook-astro/issues/191) (docs: renderer value, install line, fonts note, roadmap status), [#192](https://github.com/storybook-astro/storybook-astro/issues/192) (`@astrojs/react` 7), and [#193](https://github.com/storybook-astro/storybook-astro/issues/193) (Vitest 5). When one is fixed, update the matching rule in [TESTING.md](rules/TESTING.md) or [DEPS.md](rules/DEPS.md).
 
 ### Risks of Storybook Astro
 
