@@ -26,7 +26,9 @@ Follow the rules in [TESTING.md](TESTING.md) for tests and [DEPLOY.md](DEPLOY.md
 - Spread `eslintPluginAstro.configs.recommended` into the config array. It sets the Astro parser for `.astro` files.
 - Add `js.configs.recommended` (from `@eslint/js`) to the config array.
 - Put `eslintConfigPrettier` (from `eslint-config-prettier/flat`) last in the config array. Do not use `eslint-plugin-prettier`: run Prettier as its own command.
-- Include the `.astro` extension in the lint glob: ESLint targets only `.js` files by default. Use `eslint "src/**/*.{js,ts,tsx,astro}"`.
+- Lint the whole project with `eslint .`. ESLint lints every file that matches a `files` pattern of a config object, so the Astro and typescript-eslint configs cover `.astro`, `.ts`, and `.tsx` files in `src/`, `scripts/`, and the root (such as `sentry.*.config.ts`). Do not pass a `src/**` glob: it skips those files.
+- Add `globalIgnores(['dist/', '.astro/', '.wrangler/'])` (from `eslint/config`) to the config array, so `eslint .` skips build output. ESLint ignores only `node_modules` and `.git` by default.
+- Include every linted `.ts` file in `tsconfig.json` (`include`), such as `scripts/` and `sentry.*.config.ts`. Otherwise typed linting fails with a parsing error for that file.
 - Run `eslint --max-warnings 0` in CI. Fix a warning or turn the rule off. Do not leave warnings in the code.
 - Add `"astro"` to `eslint.validate` in `.vscode/settings.json`, so the editor lints `.astro` files.
 
@@ -49,7 +51,10 @@ Follow the rules in [TESTING.md](TESTING.md) for tests and [DEPLOY.md](DEPLOY.md
 
 - Use Knip to find unused files, exports, and dependencies. Install it with `npm i -D knip`. Its Astro plugin turns on when `astro` is in `package.json`, and it adds `src/pages/**`, `src/content.config.ts`, and `src/middleware.ts` as entry files.
 - Run `knip` in CI. It must report no issues. Delete the unused code or dependency. Do not add it to an ignore list to make the check pass.
-- Add the entry files that Astro does not know, such as `src/worker.ts`, to `entry` in `knip.json`. See the [Knip configuration](https://knip.dev/reference/configuration).
+- Let the Knip Wrangler plugin find the Worker entry. It adds `main` from the Wrangler config (`src/worker.ts`) as a production entry when `wrangler` is in `package.json`. Do not list it.
+- Add the files that the code registers by path or URL to `entry` in `knip.json`. Astro finds only `src/pages/**` and `src/middleware.ts`, so Knip reports app pages, middleware, and admin plugin files as unused. These globs are entry points, not an ignore list. See the [Knip configuration](https://knip.dev/reference/configuration).
+- Set `entry` to at least: `src/apps/*/pages/**/*.astro!`, `src/apps/*/middleware.ts!`, `src/apps/*/admin/{plugin.ts,pages.tsx}!`, and `scripts/*.ts`. Add a glob for each other file kind that you register with `injectRoute()`, `addMiddleware()`, or `adminEntry`. The `!` marks production code for `knip --production`. A value in `entry` replaces the default `index`, `main`, and `cli` entries.
+- Let the Storybook, Vitest, and Playwright plugins find stories, `.storybook/` files, test files, and `playwright.config.ts`. Do not list them in `entry`.
 - Run `knip --production` to find code that is used only by tests and stories.
 
 ## Scripts
@@ -57,7 +62,7 @@ Follow the rules in [TESTING.md](TESTING.md) for tests and [DEPLOY.md](DEPLOY.md
 ### [npm scripts](https://docs.npmjs.com/cli/using-npm/scripts)
 
 - Keep the template scripts `dev`, `build`, and `preview`. Do not rename them. Add `typecheck` (see Checks).
-- Add these scripts to `package.json`: `lint` (`eslint "src/**/*.{js,ts,tsx,astro}" --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), and `test` (`vitest run`). Keep the screenshot and end-to-end tests out of `test` and `check`: run them in CI as in [TESTING.md](TESTING.md#ci).
+- Add these scripts to `package.json`: `lint` (`eslint . --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), and `test` (`vitest run --coverage`, see [TESTING.md](TESTING.md#coverage)). Keep `build`, the API checks, the dependency checks, and the screenshot and end-to-end tests out of `test` and `check`, so `check` stays fast: run them in CI (see Order).
 - Add `check` as the one command for all checks: `npm run format:check && npm run typecheck && npm run lint && npm run knip && npm run test`. Use the order in the Order section.
 
 ## Order
@@ -66,5 +71,9 @@ Follow the rules in [TESTING.md](TESTING.md) for tests and [DEPLOY.md](DEPLOY.md
 
 - Run the checks in this order, from fastest to slowest: `format:check`, `typecheck`, `lint`, `knip`, `test`. Stop at the first failure.
 - Run `npm run check` locally before you commit. Run the same scripts in the PR workflow.
-- Run the end-to-end and screenshot tests in the PR workflow after `check` passes. Follow the rules in [TESTING.md](TESTING.md#ci).
+- Run these checks in the PR workflow, in this order, after `check` passes. Stop at the first failure:
+  1. `npm run build`. The end-to-end and screenshot tests need its output.
+  2. The API checks: generate `openapi.json` again and run `git diff --exit-code`, then `redocly lint`, then `oasdiff breaking`. See [API.md](API.md).
+  3. The dependency checks: `npm audit --omit=dev --audit-level=high` and `npm audit signatures`. See [DEPS.md](DEPS.md).
+  4. The end-to-end tests, then the screenshot tests. See [TESTING.md](TESTING.md#ci).
 - Run `npm run typecheck` before each release. Follow the rules in [DEPLOY.md](DEPLOY.md).

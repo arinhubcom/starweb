@@ -7,7 +7,7 @@
 - Use Vitest 4.1. Do not upgrade to Vitest 5 while `@storybook-astro/framework` accepts only `vitest ^4.1.0` in its peer dependencies. Read [WHY.md](../WHY.md#why-vitest-41-and-not-vitest-5).
 - Install `@vitest/expect`, `@vitest/spy`, `@vitest/utils`, and `@vitest/pretty-format` at the same version as `vitest`. Do not let npm hoist the 3.x copies that Storybook depends on.
 - Do not install `@effect/vitest` 4.x. Run Effect code in a test with `Effect.runPromise()`.
-- Do not run `vitest -u` in the PR workflow. Update snapshots only in the manual workflow (see Screenshots).
+- Do not run `vitest -u` in the PR workflow. Update snapshots only in the manual workflow (see Screenshots). Vitest does not write snapshots when the `CI` environment variable is set, so a missing snapshot fails the PR run. Run `vitest run -u` in the manual workflow to create it.
 
 ## Unit and integration tests
 
@@ -15,10 +15,17 @@
 
 - Test Worker code with `@cloudflare/vitest-plugin`. Do not use `@cloudflare/vitest-pool-workers`. Read [WHY.md](../WHY.md#why-cloudflarevitest-plugin).
 - Add `cloudflareTest({ wrangler: { configPath: './wrangler.jsonc' } })` to `plugins` in `vitest.config.ts`.
-- Read the D1 migrations in `vitest.config.ts` with `readD1Migrations()` from `@cloudflare/vitest-plugin`, and pass them as a `TEST_MIGRATIONS` binding in `miniflare.bindings`.
-- Apply the migrations in a setup file with `applyD1Migrations(env.DB, env.TEST_MIGRATIONS)` from `cloudflare:test`.
+- Read the migrations of each app database in `vitest.config.ts`: call `readD1Migrations()` from `@cloudflare/vitest-plugin` with the `migrations_dir` of that database (see [SAAS.md](SAAS.md) (Multiple apps)), for example `migrations/app1`. Pass each result as its own binding in `miniflare.bindings`, for example `APP1_TEST_MIGRATIONS`.
+- Apply each set in a setup file with `applyD1Migrations()` from `cloudflare:test` to the matching binding, for example `applyD1Migrations(env.APP1_DB, env.APP1_TEST_MIGRATIONS)`. Do not apply app migrations to `env.DB`: it is the EmDash database, and `emdash migrate` manages its schema.
 - Call `reset()` from `cloudflare:test` in `afterEach()` when tests in one file must not share data. Storage is isolated per test file, not per test.
 - Write a test for each repository module that checks that a query never returns rows of another tenant.
+
+### [Coverage](https://vitest.dev/guide/coverage)
+
+- Use the `istanbul` coverage provider: set `test.coverage.provider` to `'istanbul'` and install `@vitest/coverage-istanbul` at the same version as `vitest`. Do not use `v8`: the Workers Vitest plugin does not support it ([known issues](https://developers.cloudflare.com/workers/testing/vitest-integration/known-issues/)).
+- Set `test.coverage.thresholds` to `lines: 80`, `functions: 80`, `branches: 80`, and `statements: 80`. Vitest fails the run when one is lower.
+- Set `test.coverage.include` to `['src/**/*.{ts,tsx}']`. By default Vitest counts only files that a test imports, so an untested file would not lower the result. Exclude stories with `exclude: [...coverageConfigDefaults.exclude, '**/*.stories.*']` (from `vitest/config`).
+- Run the `test` script as `vitest run --coverage`. Coverage thresholds apply only when coverage is on.
 
 ## Components
 
@@ -74,7 +81,7 @@
 - Commit baselines to git. Do not use Git LFS.
 - Set the viewport in `playwright.config.ts`, and hide dynamic content with the `mask` option.
 - Allow requests to the font provider in screenshot tests of stories. Storybook Astro loads fonts from the provider URLs.
-- Create and update baselines only in CI, with a workflow that you start by hand and that runs `npx playwright test --update-snapshots`. Do not commit baselines from a local machine. Read [WHY.md](../WHY.md#why-baselines-come-only-from-ci).
+- Create and update baselines only in CI, with a workflow that you start by hand and that runs `npx vitest run -u` (ARIA `.snap` files) and `npx playwright test --update-snapshots` (screenshots and `.aria.yml` files). Do not commit baselines from a local machine. Read [WHY.md](../WHY.md#why-baselines-come-only-from-ci).
 - Upload the diff images in `test-results/` as a CI artifact when a screenshot test fails.
 
 ## End-to-end tests
@@ -83,16 +90,17 @@
 
 - Run end-to-end tests against `astro preview`. Follow the rules in [DEV.md](DEV.md).
 - Test each critical flow: signup, login, and payment.
+- Run payment tests in provider test mode, never with live keys. For Stripe, use the test API keys of a [sandbox](https://docs.stripe.com/test-mode). For Creem, use a test API key and set `server: "test"` in the `creem` SDK, which uses `https://test-api.creem.io` ([test mode](https://docs.creem.io/getting-started/test-mode)). Pass the test keys as CI secrets.
+- Read the verification link of the signup test from `GET /_emdash/api/dev/emails`. Run this test against `astro dev`, not `astro preview`: the EmDash console email provider and this endpoint exist only in `astro dev` and never in a production build ([EmDash email setup](https://docs.emdashcms.com/guides/email/)).
 
 ## Accessibility
 
 ### [axe for Playwright](https://playwright.dev/docs/accessibility-testing)
 
-- Scan each page with `new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()` from `@axe-core/playwright`, and expect `violations` to equal `[]`.
+- Scan each page with `new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze()` from `@axe-core/playwright`, and expect `violations` to equal `[]`.
 
 ## CI
 
 ### [GitHub Actions](https://docs.github.com/en/actions)
 
-- Run the unit, snapshot, end-to-end, and screenshot tests in the PR workflow. Follow the rules in [DEPLOY.md](DEPLOY.md#ci).
-- Run the baseline update workflow only by hand.
+- Run the unit, snapshot, end-to-end, and screenshot tests in the PR workflow, in the order in [QUALITY.md](QUALITY.md#order). Follow the rules in [DEPLOY.md](DEPLOY.md#ci).
