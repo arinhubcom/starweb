@@ -314,3 +314,15 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 
 - A Preview gets its own variables, secrets, and Durable Object namespace, but it uses the same D1 database as production unless you bind a different one. A branch with a new migration could change production data.
 - Version URLs use the bindings of their version, so they also read production data. Use them only for versions that are ready for production.
+
+### Why Wrangler and not cf
+
+[`cf`](https://github.com/cloudflare/cf) is the new Cloudflare CLI for the whole Cloudflare API, built for agents. It gives JSON output, command search, a `cloudflare.config.ts` config, and Vite as the dev server. We do not use it yet:
+
+- It is an open beta. The repository started on 2026-09-21, and the latest release on 2026-10-14 is `1.0.0-beta.17`.
+- It has no rollback command. You must create a deployment by hand ([cf#106](https://github.com/cloudflare/cf/issues/106)).
+- Secret commands are not safe yet. `secrets update` replaces all secrets, not one ([cf#96](https://github.com/cloudflare/cf/issues/96)), and `secrets bulk` can deploy an empty version to 100 % with no error ([cf#201](https://github.com/cloudflare/cf/issues/201)).
+- D1 has gaps: there is no `d1 export` ([cf#199](https://github.com/cloudflare/cf/issues/199)), and `d1 migrations apply --local` does not exit in a non-TTY pipe ([cf#64](https://github.com/cloudflare/cf/issues/64)).
+- CI support is not complete: `cf previews deploy` does not give Workers Builds the Preview URL ([cf#185](https://github.com/cloudflare/cf/issues/185)), and there is no GitHub Action ([cf#138](https://github.com/cloudflare/cf/issues/138)).
+- It has no replacement for `wrangler tail` ([cf#68](https://github.com/cloudflare/cf/issues/68)).
+- Check again when `cf` reaches 1.0 and these issues are closed.

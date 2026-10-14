@@ -1,5 +1,11 @@
 # DEPLOY
 
+## CLI
+
+### [Wrangler](https://developers.cloudflare.com/workers/wrangler/)
+
+- Use Wrangler for deploy, rollback, secrets, and D1. Do not use the [`cf`](https://github.com/cloudflare/cf) CLI while it is in beta. Read [WHY.md](../WHY.md#why-wrangler-and-not-cf).
+
 ## Releases
 
 ### [Gradual deployments](https://developers.cloudflare.com/workers/configuration/versions-and-deployments/gradual-deployments/)
