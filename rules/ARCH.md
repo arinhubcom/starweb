@@ -86,7 +86,7 @@
 - Do not read the database binding of another app. To use its data, call its API route or send a message to a Queue.
 - Use the shared base layout from `src/layouts/` in all apps, so all apps have the same header, theme, and login.
 - Do not share island state between apps. Each app has its own stores.
-- When an app must deploy on its own, move its folder to a separate Astro project and Worker. Keep the same domain and add a Workers route for the path, for example `example.com/app1/*`: the most specific route wins, and the login cookie still works. Read [WHY.md](../WHY.md#when-to-split-the-app-into-a-separate-worker) first.
+- When an app must deploy on its own, move its folder to a separate Astro project and Worker. Keep the same domain and add a Workers route for the path, for example `example.com/app1/*`: the most specific route wins, and the login cookie still works. Read [WHY.md](../WHY.md#when-to-split-the-app-into-a-separate-worker) first. Follow the rules in [DEPLOY.md](DEPLOY.md) (Separate Workers).
 
 ### App admin: [EmDash native plugins](https://docs.emdashcms.com/plugins/creating-native-plugins/react-admin/)
 

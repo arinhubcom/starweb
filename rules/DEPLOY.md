@@ -23,7 +23,7 @@
 - Pass `--env=""` for dev and `--env production` for prod in each Wrangler command, also `wrangler d1 migrations apply` and `wrangler secret put`. Write `--env=""` as one token: `wrangler-action` drops a separate empty `""`.
 - Do not create a separate stage Worker. Stage is a version of the prod Worker that has no traffic, so prod runs the same build that you tested. Read [WHY.md](../WHY.md#why-three-environments).
 - Bind a separate D1 database, KV namespace, and R2 bucket in each environment, with the same binding names. Bindings and `vars` are not inherited by environments, so define them again in `env.production`. Do not let dev or PR previews use prod data.
-- Give the prod environment its own `routes` with your custom domain. Keep dev on `workers.dev`.
+- Give the prod environment its own `routes` with your custom domain. Keep dev on `workers.dev` while you have one Worker. For more than one Worker, follow Separate Workers.
 - Set `"preview_urls": true` in `env.production`. With `routes`, `workers_dev` defaults to `false`, version URLs follow it, and stage then has no URL. Protect the stage URL with Cloudflare Access (see Version URLs).
 - Expect stage to use the prod bindings: it is a version of the prod Worker. Apply the prod migrations before you upload stage. Follow the order in Migrations.
 
@@ -107,6 +107,33 @@
 - Apply the migrations to the staging databases before you create a Preview.
 - Set Preview secrets with `npx wrangler preview base-config secret put <NAME>`.
 - Protect Preview URLs with Cloudflare Access. They are public by default.
+
+## Separate Workers
+
+These rules apply when you move an app to its own Worker. Follow the rules in [ARCH.md](ARCH.md) (Apps) first.
+
+### [Routes](https://developers.cloudflare.com/workers/configuration/routing/routes/)
+
+- Give the app Worker its own Astro project and `wrangler.jsonc`, for example in `workers/app1/`. Use the same environments as the web Worker: dev at the top level and prod in `env.production`.
+- Add the app path as a prod route of the app Worker: `"routes": [{ "pattern": "example.com/app1/*", "zone_name": "example.com" }]`. Keep `example.com/*` on the web Worker. The most specific route wins.
+- Give both dev Workers a route on one dev hostname, for example `dev.example.com/*` for the web Worker and `dev.example.com/app1/*` for the app Worker. Do not keep them on `workers.dev`: each Worker gets its own host there, and the login cookie does not reach the other Worker. Add a proxied DNS record for the dev hostname.
+- Test the login flow of the app on dev. Its PR previews and stage run on their own `workers.dev` host, where the login cookie of the web Worker does not exist.
+
+### [Static assets on a path](https://developers.cloudflare.com/workers/static-assets/routing/advanced/serving-a-subdirectory/)
+
+- Set `base: "/app1"` in the `astro.config` of the app Worker. Prefix each link and asset URL with `import.meta.env.BASE_URL`.
+- Check that the build puts the static files under `app1/` in the assets directory, for example `app1/_astro/`. A Worker on `example.com/app1/*` looks up each asset with its full path, so it does not serve files from the root of the assets directory. Read [WHY.md](../WHY.md#why-separate-workers-share-one-hostname).
+
+### [Secrets](https://developers.cloudflare.com/workers/configuration/secrets/)
+
+- Set the same `BETTER_AUTH_SECRET` in both Workers, in each environment. Bind the database that stores the Better Auth sessions in the app Worker too, so it can read the login session that the web Worker creates.
+- Apply the migrations of each database from one workflow only: `migrations/app1/` from the app Worker workflow, and the EmDash migrations from the web Worker workflow.
+
+### [GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)
+
+- Add one workflow file per Worker for the PR preview, the dev deploy, and stage. Filter each by `paths`, for example `paths: ["workers/app1/**", "src/shared/**"]`, so a PR builds only the Workers that it changes. Include the paths of the shared code.
+- Name the release tags of the app Worker with its own prefix, `app1-YYYY-MM-DD-rN`, and trigger its stage upload on `tags: ["app1-*"]`.
+- Promote and roll back each Worker on its own. Keep the contract between the Workers compatible with the previous version of the other Worker: the cookie name, the session data, and the links between them.
 
 ## Checks
 

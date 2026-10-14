@@ -330,6 +330,13 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - The `web-` prefix names the Worker. When an app moves to its own Worker, it gets its own prefix and its own tag trigger, for example `app1-*`.
 - The trendaro-fe project uses the same format, for example `trendaro-2026-10-08-r2`.
 
+### Why separate Workers share one hostname
+
+- A path route such as `example.com/app1/*` keeps the app on the same host as the web Worker. The browser sends the same login cookie to both, so the user signs in once.
+- Better Auth stores sessions in the database by default, and sets the session token as a signed cookie with `setSignedCookie` ([`cookies/index.ts`](https://github.com/better-auth/better-auth/blob/main/packages/better-auth/src/cookies/index.ts)). The app Worker needs the same secret and the same database to read the session.
+- On `workers.dev`, each Worker has its own host, and a cookie does not cross hosts. So dev uses a route on a dev hostname, and the login is tested there, not on version URLs.
+- A Worker on a path looks up static assets with the full path, so the files must be in an `app1/` folder in the assets directory. The Astro `base` option sets the URLs, and the Astro docs do not say that it also moves the output files. This setup has not been tested yet. Check the build output of the first split app.
+
 ### Why GitHub Actions and not Workers Builds
 
 - GitHub Actions runs the full flow in one place: PR preview, dev deploy on merge, stage on a release tag, and a prod promotion that a GitHub environment can protect with required reviewers.
