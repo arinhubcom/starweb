@@ -18,7 +18,7 @@ Rules for the packages of a project and how to keep them up to date. For the CI 
 
 ### [Renovate](https://docs.renovatebot.com/)
 
-- Use Renovate to update packages and GitHub Actions. Do not also turn on Dependabot version updates. Install the Renovate GitHub App on the repository, and merge its "Configure Renovate" PR.
+- Use Renovate to update packages and GitHub Actions. Do not also turn on Dependabot version updates. Install the Renovate GitHub App on the repository, and merge its "Configure Renovate" PR. Read [WHY.md](../WHY.md#why-renovate-and-not-dependabot).
 - Keep the configuration in `renovate.json` in the repository root. Add `"$schema": "https://docs.renovatebot.com/renovate-schema.json"`.
 - Extend `config:recommended`. It turns on the Dependency Dashboard and groups monorepo packages.
 - Extend `helpers:pinGitHubActionDigests` to pin GitHub Actions to a commit SHA, as in [DEPLOY.md](DEPLOY.md) (CI).
@@ -26,6 +26,11 @@ Rules for the packages of a project and how to keep them up to date. For the CI 
 - Set `lockFileMaintenance` to `{ "enabled": true, "automerge": true }` to refresh `package-lock.json` every week.
 - Set `timezone` to an IANA time zone, and `schedule` to a cron window of at least 4 hours, for example `["* 0-4 * * 1"]`. Use `*` for the minutes: Renovate does not support minute values in cron schedules.
 - Check the config with `npx -p renovate renovate-config-validator renovate.json`.
+
+### [Renovate allowedVersions](https://docs.renovatebot.com/configuration-options/#packagerulesallowedversions)
+
+- Hold back the test packages that Storybook Astro does not support yet: add `{ "matchPackageNames": ["vitest", "@vitest/*"], "allowedVersions": "<5.0.0" }` and `{ "matchPackageNames": ["@astrojs/react"], "allowedVersions": "<7.0.0" }` to `packageRules`. Follow the rules in [TESTING.md](TESTING.md).
+- Remove an `allowedVersions` entry when `@storybook-astro/framework` supports the new major version in its peer dependencies.
 
 ### [Renovate groups](https://docs.renovatebot.com/configuration-options/#groupname)
 

@@ -525,3 +525,32 @@ trendaro-fe (qset v4) has four test tiers for each widget: unit tests, DOM snaps
 - Baselines from CI instead of from a local machine.
 - Baselines in git instead of Git LFS.
 - Storybook Astro, so stories also cover `.astro` components.
+
+## Dependencies
+
+### Why Renovate and not Dependabot
+
+The rules in [DEPS.md](rules/DEPS.md) use Renovate features that Dependabot does not have, or has only with extra work:
+
+- **Automerge:** Renovate merges a PR by itself with `automerge` after the required checks pass. Dependabot has no automerge option in `dependabot.yml`. It needs a GitHub Actions workflow that reads the PR with `dependabot/fetch-metadata` and runs `gh pr merge --auto`.
+- **Lockfile maintenance:** `lockFileMaintenance` deletes `package-lock.json` and runs npm again, so the versions of transitive packages also move. Dependabot has `versioning-strategy: lockfile-only`, which only skips updates that need a change in `package.json`. It does not refresh the full lockfile.
+- **Dependency Dashboard:** Renovate opens one issue that lists all pending updates, including the PRs that `minimumReleaseAge` holds back. Per the Renovate comparison page, Dependabot has no similar feature.
+- **Monorepo groups:** `config:recommended` includes `group:monorepos`, which updates the packages of one monorepo (for example `@storybook/*`) in one PR. Dependabot has `groups`, but you must write each group yourself.
+- **Schedules per package:** Renovate sets a `schedule` in any `packageRules` entry. Dependabot sets `schedule.interval` per package ecosystem.
+- **GitHub Actions digests:** `helpers:pinGitHubActionDigests` sets `pinDigests: true` for actions, so Renovate pins each action to its SHA digest, not only to a tag, and the version stays immutable.
+
+Both tools can do these things, so they are not a reason:
+
+- **Wait for new releases:** Renovate has `minimumReleaseAge`, and Dependabot has `cooldown`, with a default of 3 days.
+- **Hold back a version:** Renovate has `allowedVersions` in `packageRules`, and Dependabot has `ignore` with `versions`.
+
+Costs of Renovate:
+
+- The Renovate GitHub App is a third-party app. It needs read and write access to code, pull requests, issues, checks, commit statuses, and workflows, per the [Renovate permissions docs](https://docs.renovatebot.com/security-and-permissions/). Dependabot is part of GitHub.
+- Two bots that update the same packages open duplicate PRs, so Dependabot version updates stay off. The source for the feature list is the [Renovate bot comparison](https://docs.renovatebot.com/bot-comparison/), the [Dependabot options reference](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference), and the [Dependabot automerge guide](https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/automate-dependabot-with-actions), checked on 2026-10-14.
+
+### Why Renovate holds back Vitest 5 and `@astrojs/react` 7
+
+- `@storybook-astro/framework` 1.12.0 accepts only `vitest ^4.1.0` and `@astrojs/react ^4.2.3 || ^5.0.0 || ^6.0.0`. Read [Why Vitest 4.1 and not Vitest 5](#why-vitest-41-and-not-vitest-5).
+- Without `allowedVersions`, Renovate opens major update PRs for these packages, and `@astrojs/react` 7 would arrive in the Astro group PR. A local install of `@astrojs/react` 7 next to Storybook Astro failed with `ERESOLVE`.
+- Tested on 2026-10-14: `renovate-config-validator --strict` accepts both `allowedVersions` entries, and it rejects a misspelled option name.
