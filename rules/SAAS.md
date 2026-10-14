@@ -52,7 +52,7 @@ These rules are for a small SaaS app: few tenants, little data per tenant, no re
 - Read the app binding (`APP1_DB`) from `env` in `cloudflare:workers`. Do not use `locals.emdash.db` for app data.
 - Use D1 migrations for app tables (see Multiple apps). Do not change the schema by hand.
 - Query app tables with Kysely (see [DATA.md](DATA.md)).
-- Set EmDash migrations to manual mode. Run `emdash migrate` and the app migrations before `wrangler deploy`.
+- Set EmDash migrations to manual mode. Run `emdash migrate` and the app migrations before each release. Follow the rules in [DEPLOY.md](DEPLOY.md) (Migrations).
 - Use one app database for all tenants. Add a `tenant_id` column to each tenant table and an index that starts with `tenant_id`.
 - Filter each query by `tenant_id` from the session. Do not read `tenant_id` from the request body or URL.
 - Put tenant filtering in one data-access module. Do not write raw tenant queries in route handlers.

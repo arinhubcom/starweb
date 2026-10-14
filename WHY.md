@@ -299,3 +299,18 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 
 - The app needs Better Auth plugins that emdash-better-auth cannot load yet ([emdash-better-auth#22](https://github.com/theweekendprojects/emdash-better-auth/issues/22)).
 - The app grows large, and EmDash upgrades or middleware start to slow it down.
+
+## Deploy
+
+### Why two-step releases
+
+- `wrangler versions upload` creates a version without traffic. `wrangler versions deploy` then splits traffic between two versions, so a bad release reaches only a small share of users.
+- `wrangler rollback` moves traffic back to an older version without a new build.
+- During a split, two versions of the code run at the same time and read the same D1 schema. A rollback does not undo a migration. So each migration must work with the new code and the old code (expand first, contract later).
+- Durable Objects do not split this way: only one version of each Durable Object runs at a time. A Durable Object class change also blocks rollback.
+- `wrangler secret put` creates a version and deploys it at once, so it skips the split. `wrangler versions secret put` keeps the secret inside the gradual release.
+
+### Why Previews use staging databases
+
+- A Preview gets its own variables, secrets, and Durable Object namespace, but it uses the same D1 database as production unless you bind a different one. A branch with a new migration could change production data.
+- Version URLs use the bindings of their version, so they also read production data. Use them only for versions that are ready for production.

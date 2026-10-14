@@ -18,7 +18,7 @@
 
 ### [Cloudflare Workers](https://developers.cloudflare.com/workers/)
 
-- Use Cloudflare Workers to run the site and the app. Follow the rules in [ARCH.md](ARCH.md), [PERF.md](PERF.md), [SECURITY.md](SECURITY.md), and [DEV.md](DEV.md).
+- Use Cloudflare Workers to run the site and the app. Follow the rules in [ARCH.md](ARCH.md), [PERF.md](PERF.md), [SECURITY.md](SECURITY.md), [DEV.md](DEV.md), and [DEPLOY.md](DEPLOY.md).
 
 ### Background work
 

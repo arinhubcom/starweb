@@ -36,6 +36,7 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 | [PERF.md](PERF.md) | CPU time budget for Workers, Astro route caching, and the Cache API. |
 | [SECURITY.md](SECURITY.md) | Secrets for Cloudflare Workers. |
 | [DEV.md](DEV.md) | Local dev with `wrangler dev`. |
+| [DEPLOY.md](DEPLOY.md) | Gradual deployments, version URLs, migration order, D1 Time Travel, rollback, secrets, Workers Builds, and Previews. |
 
 ## Writing
 
@@ -48,7 +49,6 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 These files have only a heading and no rules:
 
 - [API.md](API.md)
-- [DEPLOY.md](DEPLOY.md)
 - [SETUP.md](SETUP.md)
 - [TESTING.md](TESTING.md)
 - [UI-UX.md](UI-UX.md)
