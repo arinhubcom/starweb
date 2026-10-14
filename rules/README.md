@@ -42,6 +42,7 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 
 | File | Contents |
 | --- | --- |
+| [AGENTS.md](AGENTS.md) | Rules for agents that add or change a rule in this folder. `CLAUDE.md` imports it for Claude Code. |
 | [WRITING.md](WRITING.md) | Rules for docs (Google developer documentation style guide) and UI text (Material Design 3 content design, Mailchimp voice and tone). |
 
 ## Empty files
