@@ -4,6 +4,22 @@ Starweb is a template for AI agents. Use it to build websites and web apps.
 It is built on [Astro](https://astro.build) and
 [Cloudflare Workers](https://workers.cloudflare.com), with [EmDash](https://docs.emdashcms.com/) as the CMS. Read [why we chose this stack](WHY.md).
 
+## 🏁 Quick start
+
+To set up a new project, give this prompt to your AI agent (Claude Code, Codex, Gemini CLI, or another agent):
+
+```text
+Set up a new Starweb project named my-site. Clone https://github.com/arinhubcom/starweb into a temporary folder. Read AGENTS.md and rules/SETUP.md there, then do every step in rules/SETUP.md in order. After each step, check the result. If a step fails, stop and report the error.
+```
+
+Replace `my-site` with your project name. With Claude Code, you can run it from the terminal:
+
+```bash
+claude "Set up a new Starweb project named my-site. Clone https://github.com/arinhubcom/starweb into a temporary folder. Read AGENTS.md and rules/SETUP.md there, then do every step in rules/SETUP.md in order. After each step, check the result. If a step fails, stop and report the error."
+```
+
+The steps are in [rules/SETUP.md](rules/SETUP.md).
+
 ## 🚀 Features
 
 - Rules and instructions in `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and `rules/`.
