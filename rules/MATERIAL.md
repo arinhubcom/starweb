@@ -1,4 +1,4 @@
-# MD
+# MATERIAL
 
 Material Design 3 (MD3) rules for layout, spacing, and component sizes.
 

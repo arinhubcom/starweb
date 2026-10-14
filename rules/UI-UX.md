@@ -1,6 +1,6 @@
 # UI-UX
 
-Rules for how the UI behaves and how users finish a task. They apply to the site and the app. For the look, follow [MD.md](MD.md) and [DESIGN.md](DESIGN.md). For components, follow [COMPONENTS.md](COMPONENTS.md). For UI text, follow [WRITING.md](WRITING.md). EmDash admin pages follow Kumo (see [DESIGN.md](DESIGN.md)).
+Rules for how the UI behaves and how users finish a task. They apply to the site and the app. For the look, follow [MATERIAL.md](MATERIAL.md) and [DESIGN.md](DESIGN.md). For components, follow [COMPONENTS.md](COMPONENTS.md). For UI text, follow [WRITING.md](WRITING.md). EmDash admin pages follow Kumo (see [DESIGN.md](DESIGN.md)).
 
 ## Accessibility
 

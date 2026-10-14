@@ -60,7 +60,7 @@
 
 ### [Material Design 3](https://m3.material.io/foundations/layout/layout-overview)
 
-- Use Material Design 3 for layout, spacing, and component sizes. Follow the rules in [MD.md](MD.md).
+- Use Material Design 3 for layout, spacing, and component sizes. Follow the rules in [MATERIAL.md](MATERIAL.md).
 
 ## Email
 
