@@ -435,14 +435,29 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - trendaro-fe (qset v4) uses `toMatchSnapshot()` on the DOM of each story, through `composeStories()` in jsdom.
 - In Vitest, ARIA snapshots are experimental (Vitest 4.1.4+, per the docs). In Playwright, they are stable.
 - In Vitest, ARIA snapshots work only in browser mode. Tested on 2026-10-14: in happy-dom, `toMatchAriaSnapshot()` fails with `Invalid Chai property` in Vitest 4.1.11 and 5.0.4. The matcher lives in `@vitest/browser` (`packages/browser/src/client/tester/aria.ts`).
+- Tested on 2026-10-14 in Vitest 4.1.11 browser mode: a React story rendered with `composeStories()` from `@storybook/react` and `await Story.run()` gives `- button "Increment": "1"`, so the `play` function runs first. In a `play` function, `expect` from `storybook/test` has no ARIA matchers (`Invalid Chai property`).
+- Astro stories cannot use Vitest ARIA snapshots: `renderStory()` needs the Vitest config of Storybook Astro, which fails in browser mode (`Module "module" has been externalized for browser compatibility`). Astro components use `screen.getByRole()` queries in happy-dom, and pages use Playwright ARIA snapshots.
+
+### Why one tool for screenshots
+
+- Vitest `toMatchScreenshot()` needs browser mode, and Astro stories cannot render in browser mode (see above). It would cover only React islands.
+- Playwright takes screenshots of every story in the built Storybook (`iframe.html?id=<story-id>&viewMode=story`) and of full pages on `astro preview`. Tested on 2026-10-14 with Playwright 1.64.1 and Storybook Astro 1.12.0: an Astro story and a React story both give stable baselines.
+- One tool gives one baseline format, one update command, and one CI workflow.
 
 ### Why baselines come only from CI
 
-- Vitest has no default tolerance for screenshot diffs, so the config must set one.
-- Screenshots depend on the OS, the browser build, the GPU, and the fonts. The Vitest and Playwright docs both say to create baselines in the same environment that compares them.
+- Screenshots depend on the OS, the browser build, the GPU, and the fonts. The Playwright docs say: "For consistent screenshots, run tests in the same environment where the baseline screenshots were generated."
 - trendaro-fe (qset v4) creates baselines on a local machine and compares them on `ubuntu-latest`. It needs a tolerance of `maxDiffPixelRatio: 0.03` to absorb the difference. Such a tolerance also hides small real changes.
-- A manual CI workflow that runs `vitest --update` or `playwright test --update-snapshots` gives baselines that match CI, so the tolerance can stay low.
-- PNG baselines are binary, so they go to Git LFS. `.snap` files are text, so they stay in git and the PR shows a readable diff. trendaro-fe uses the same split in `.gitattributes`.
+- A manual CI workflow that runs `playwright test --update-snapshots` gives baselines that match CI, so the tolerance can stay low.
+
+### Why PNG baselines in git
+
+- Git LFS on GitHub Free includes 10 GiB of storage and 10 GiB of bandwidth a month, and each Git LFS download in GitHub Actions uses bandwidth. Without a payment method, GitHub turns off Git LFS until the next month when you go over, and CI then gets pointer files instead of images.
+- trendaro-fe stores its screenshots in Git LFS and has a build check that fails when a fixture is still a Git LFS pointer.
+- Lossless WebP does not help with Playwright. Tested on 2026-10-14 with Playwright 1.64.1 (`type: 'webp'`): 20 qset v4 screenshots at 1280 x 720 took 2.35 MB as WebP and 2.62 MB as PNG (10 % less). Two small story screenshots took 14 KB each as WebP and 1 to 2 KB as PNG.
+- The size depends on the pixel area. A screenshot of `#storybook-root` instead of the full viewport was about half the size in the same test (991 B instead of 1,998 B).
+- GitHub blocks files over 100 MiB and recommends repositories under 1 GB. Small PNG files of components stay far below these limits.
+- `.snap` files are text, so they also stay in git, and the PR shows a readable diff.
 
 ### Why Storybook Astro
 
@@ -451,11 +466,22 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - Portable stories (`composeStories()`, `renderStory()`) let tests reuse the states from the stories, as qset v4 does with `composeStories()` for React.
 - The Storybook Test addon works with Astro since version 1.11.0 ([PR #174](https://github.com/storybook-astro/storybook-astro/pull/174), released on 2026-08-27). The project roadmap still lists it as unreleased.
 
+### Storybook Astro, tested locally
+
+Tested on 2026-10-14 in a temporary project with Astro 7.3.8, `@astrojs/cloudflare` 14.3.4, `@astrojs/react` 6.0.6, React 19.3.1, Storybook 10.6.2, `@storybook-astro/framework` 1.12.0, Vitest 4.1.11, and Playwright 1.64.1:
+
+- `storybook build` and `storybook dev --smoke-test` work with the Cloudflare adapter in `astro.config.mjs`. The build prints a non-fatal `Failed to create the dev server app: transport was disconnected` error.
+- `@astrojs/react` 7.x fails to install with `ERESOLVE`: the peer range of the framework is `^4.2.3 || ^5.0.0 || ^6.0.0`.
+- `storybook build` fails without `@storybook/react` (`failed to resolve import "@storybook/react/entry-preview"`). The README install line does not list it.
+- A React story needs `parameters: { renderer: 'react' }`. The docs show `renderer: '@storybook/react'`, which fails with `Renderer '@storybook/react' not found. Available renderers: react`.
+- `renderStory()` renders only Astro components. A React story fails with `Story meta.component must be an Astro component factory`.
+- In browser mode, npm hoisted the 3.2.4 copies of `@vitest/expect`, `@vitest/spy`, `@vitest/utils`, and `@vitest/pretty-format` that Storybook depends on, and the tests failed with missing exports (`createDOMElementFilter`, `ChaiStyleAssertions`). Installing them at the Vitest version fixed it.
+- `@storybook/addon-vitest` ran the Card smoke test and the Counter `play` function in Chromium. A wrong expected value made the `play` function fail, so the test really runs.
+
 ### Risks of Storybook Astro
 
 - The project is in active development, and its APIs can change between releases.
-- Its peer dependency is `vitest ^4.1.0`, so it blocks Vitest 5.
-- The docs do not say whether it works with `@astrojs/cloudflare`. Storybook Astro loads the integrations from `astro.config.*`, so check `storybook dev` and `storybook build` when you add it to a project.
+- Its peer dependencies block Vitest 5 (`vitest ^4.1.0`) and `@astrojs/react` 7.
 - In static builds, Controls do not change the args of Astro stories.
 - `npm create storybook` does not detect Astro, so the setup is manual.
 - `renderMode: 'server'` needs a Node.js server. Static mode needs no server.
@@ -488,10 +514,14 @@ What this means for tests:
 
 - `@cloudflare/vitest-pool-workers` is deprecated on npm: "has been renamed to @cloudflare/vitest-plugin. This package will not receive future updates."
 - The plugin runs tests in workerd with real D1, KV, and R2 bindings from the Wrangler config.
+- Storage is isolated per test file, not per test. `reset()` from `cloudflare:test` deletes all data from all bindings.
+- The D1 setup follows the [`d1` fixture](https://github.com/cloudflare/workers-sdk/tree/main/fixtures/vitest-plugin-examples/d1) in `workers-sdk`: `readD1Migrations()` in the config, and `applyD1Migrations()` in a setup file. It applies only migrations that are not applied yet, so the setup file can run more than once.
 
 ### What Starweb takes from qset v4
 
-trendaro-fe (qset v4) has four test tiers for each widget: unit tests, DOM snapshots, end-to-end tests, and screenshots. All of them use the stories as the source of states. Starweb keeps this idea and changes two things:
+trendaro-fe (qset v4) has four test tiers for each widget: unit tests, DOM snapshots, end-to-end tests, and screenshots. All of them use the stories as the source of states. Starweb keeps this idea and changes these things:
 
-- ARIA snapshots instead of DOM snapshots.
+- ARIA snapshots and role queries instead of DOM snapshots.
 - Baselines from CI instead of from a local machine.
+- Baselines in git instead of Git LFS.
+- Storybook Astro, so stories also cover `.astro` components.
