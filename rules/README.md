@@ -38,14 +38,14 @@ This folder has the rules for AI agents that build with Starweb. Start with [STA
 
 | File | Contents |
 | --- | --- |
-| [QUALITY.md](QUALITY.md) | TypeScript strict flags, `astro check`, ESLint with `eslint-plugin-astro` and `typescript-eslint`, Prettier, Knip for unused code with entry globs, `package.json` scripts, and the full PR check order. |
-| [TESTING.md](TESTING.md) | Vitest, the Cloudflare Vitest plugin, Istanbul coverage with 80 % thresholds, per-app D1 migrations in tests, Storybook with Storybook Astro, ARIA snapshots, screenshot tests, Playwright end-to-end tests, axe, payment test mode, email capture, and CI. |
+| [QUALITY.md](QUALITY.md) | TypeScript strict flags and the starter type fixes, `astro check`, ESLint with `eslint-plugin-astro` and scoped `typescript-eslint`, Prettier with `.prettierignore`, Knip for unused code with entry globs and named exceptions, `package.json` scripts, and the full PR check order. |
+| [TESTING.md](TESTING.md) | Vitest, the Cloudflare Vitest plugin with `wrangler.test.jsonc`, Istanbul coverage with 80 % thresholds, per-app D1 migrations in tests, Storybook with Storybook Astro, ARIA snapshots, screenshot tests, Playwright end-to-end tests, axe, payment test mode, email capture, and CI. |
 | [PERF.md](PERF.md) | Core Web Vitals targets and field measurement, CPU time budget for Workers, D1 location hint and Targeted Placement, Astro route caching, and the Cache API. |
-| [SECURITY.md](SECURITY.md) | Secrets, security headers (the CSP module, HSTS, `_headers`, middleware), CSRF, input validation, XSS, SQL injection, open redirects, SSRF, auth checks, the dev-bypass check in production, Turnstile and WAF rate limits, and security.txt. |
+| [SECURITY.md](SECURITY.md) | Secrets, security headers (the CSP module, the CSP header versus `<meta>`, HSTS, the `_headers` file that `scripts/write-headers.ts` writes, middleware), CSRF with the `Origin` check in the middleware, input validation, XSS, SQL injection, open redirects, SSRF, auth checks, the dev-bypass check in production, Turnstile and WAF rate limits, and security.txt. |
 | [PRIVACY.md](PRIVACY.md) | Cloudflare Web Analytics, cookie consent (ePrivacy Article 5(3)) with Turnstile, the privacy policy page, data minimization, user data access, export, and delete (GDPR), the processors and the transfer to the United States in the policy, and data residency. |
 | [OBSERVABILITY.md](OBSERVABILITY.md) | Workers Logs, structured logs without personal data, `wrangler tail`, Effect logging and spans, Sentry for Cloudflare and Astro (it wraps the `src/worker.ts` handler), release names and source maps, CSP and privacy policy entries for Sentry, alerts, and a health endpoint. |
-| [DEPS.md](DEPS.md) | npm and `package-lock.json`, `npm ci`, Dependabot (groups, schedule, ignore, automerge workflow, cooldown), `npm audit`, rules for a new package, version sync of Astro, Wrangler, and EmDash, and `compatibility_date`. |
-| [DEV.md](DEV.md) | Local dev with `astro dev`, the remote Images binding, and build tests with `astro preview`. |
+| [DEPS.md](DEPS.md) | npm and `package-lock.json`, `npm ci`, Dependabot (groups, schedule, ignore, automerge workflow, cooldown), `npm audit`, deleting `pnpm-workspace.yaml`, the 3-day wait for new releases, rules for a new package, version sync of Astro, Wrangler, and EmDash, and `compatibility_date`. |
+| [DEV.md](DEV.md) | Local dev with `astro dev`, the remote Images binding, build tests with `astro preview`, and ports and shared local data. |
 | [DEPLOY.md](DEPLOY.md) | Environments (dev, stage, prod) with the `env.production` key list, gradual deployments, version URLs, migration order, EmDash core migrations in CI, shared dev database migrations, D1 Time Travel, rollback, secrets, GitHub Actions (PR previews, dev deploy on push to `main`, stage approval, token permissions), and Previews. |
 
 ## Writing

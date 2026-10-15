@@ -402,7 +402,8 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 
 ### Why JSON-only mutations
 
-- Astro `security.checkOrigin` blocks cross-site form submissions. It does not check requests with `Content-Type: application/json`, because a browser sends a CORS preflight for them first.
+- The EmDash integration sets Astro `security.checkOrigin` to `false`, and the user config cannot turn it on. Nothing checks cross-site form posts to app routes and Actions unless the app middleware does. The middleware compares `Origin` with `context.url.origin` for all unsafe methods (tested: cross-origin `text/plain` and form posts get `403`).
+- A browser sends a CORS preflight for a JSON request, so JSON-only mutations add a second layer.
 - When API routes that use the session cookie accept only JSON, a cross-site page cannot send a mutation without a preflight, and the preflight fails without a CORS allow rule for that origin.
 
 ### Why API keys take the tenant from the key row
@@ -570,6 +571,11 @@ What this means for tests:
 - Storage is isolated per test file, not per test. `reset()` from `cloudflare:test` deletes all data from all bindings.
 - The D1 setup follows the [`d1` fixture](https://github.com/cloudflare/workers-sdk/tree/main/fixtures/vitest-plugin-examples/d1) in `workers-sdk`: `readD1Migrations()` in the config, and `applyD1Migrations()` in a setup file. It applies only migrations that are not applied yet, so the setup file can run more than once.
 
+### Why tests use `wrangler.test.jsonc`
+
+- With the project `wrangler.jsonc`, `main` is `src/worker.ts`. The plugin loads it with the Astro handler and fails with `Cannot find package 'virtual:astro-cloudflare:config'`. A copy without `main` and `triggers` loads only the bindings.
+- `reset()` drops the tables too, so tests apply the migrations in `beforeEach()`.
+
 ### Why Istanbul coverage and not V8
 
 - The Workers Vitest plugin runs tests in workerd, which does not expose V8 coverage. The Cloudflare docs list V8 coverage as a known issue and say to use Istanbul.
@@ -635,6 +641,10 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 - `decode` returns a typed `ValidationError` instead of throwing, so Effect code keeps validation failures in the error channel.
 
+### Why `z.compile()` is not used
+
+- `z.compile()` does not fail on Workers. `new Function()` throws `EvalError` in workerd, and Zod catches it and falls back to the runtime parser. The code works but is slower, so the problem is silent. `zod-compiler` generates the code at build time.
+
 ### Why Queues need a dead letter queue and per-message `ack()`
 
 - Without a dead letter queue, messages that reach `max_retries` are deleted for good.
@@ -667,6 +677,14 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - A `connect-src` without `'self'` blocks the same-origin `fetch` calls of islands.
 - One module with each directive once avoids both problems.
 
+### Why the middleware does not set the CSP header
+
+- Astro 7 sends the `security.csp` policy as an HTTP header on pages that the Worker renders, and as a `<meta>` element on prerendered pages.
+- A `headers.set("Content-Security-Policy", ...)` in the middleware replaces the Astro header, and the page loses its `script-src` policy (observed in a test).
+- Browsers ignore `frame-ancestors` in a `<meta>` element. So on-demand pages get it from `csp.directives`, and prerendered pages get it from `public/_headers`.
+- `_headers` is a static file and cannot import `headers.ts`, so `scripts/write-headers.ts` writes it before the build.
+- Test: use `curl -I` for the header and a `securitypolicyviolation` listener to prove that the browser enforces it. The browser console may not show violations.
+
 ### Why check the dev-bypass routes in production
 
 - EmDash allows the dev-bypass routes only when `import.meta.env.DEV` is true. They create an admin user and a session.
@@ -694,6 +712,30 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - Wrangler finds server source maps only through their `sourceMappingURL` comments. When `sourcemap` is not set, the `sentry()` integration builds `hidden` maps, which have no comment, so Wrangler finds none.
 - The default deletion of `sentry()` also removes the maps in `dist/server`, which Wrangler needs when it uploads the version. So the build sets `sourcemap: true`, and Sentry deletes only the maps in `dist/client`, which would otherwise be public.
 
+### Why a build without the Sentry token loses client maps
+
+- The deletion of `./dist/client/**/*.map` runs even when the upload is skipped (no `SENTRY_AUTH_TOKEN`). The client files keep their `sourceMappingURL` comment, so DevTools reports missing maps.
+- Wrangler does not warn when a server file has no `sourceMappingURL`: it uploads no map. So the rules ask for a check that `dist/server/entry.mjs` ends with `//# sourceMappingURL=entry.mjs.map`.
+- The browser cannot read `env.SENTRY_DSN`, so the client config reads `PUBLIC_SENTRY_DSN` from `.env` at build time.
+
+## Quality
+
+### Why `exactOptionalPropertyTypes` stays on
+
+- The flag catches real mismatches with the EmDash types: `cursor` and `currentLocale` must be absent, not `undefined`. So fix the starter code and keep the flag.
+
+### Why Prettier has no `useTabs`
+
+- The starter is not formatted with Prettier (line width and other rules), so `useTabs` alone leaves 9 of 11 starter files failing (tested). One `prettier . --write` after setup is simpler.
+
+### Why Knip has named exceptions
+
+- Installed components export their full API, and the rules install some packages before any code uses them. Named `ignoreIssues`, `ignore`, and `ignoreDependencies` entries keep real unused code visible.
+
+### Why `strictTypeChecked` is scoped to `.ts` files
+
+- The type-checked preset sets the typescript-eslint parser. Unscoped, it replaces the Astro parser and fails on every `.astro` file with `Parsing error: Expression expected`.
+
 ## Email
 
 ### Why auth emails do not use the Queue
@@ -714,6 +756,10 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 - `setLocale()` with the `globalVariable` strategy sets one variable per isolate. Concurrent on-demand requests share it, so a request can render in the locale of another request. The Paraglide docs warn about cross-request issues with `globalVariable`.
 - `paraglideMiddleware()` isolates each request with AsyncLocalStorage, which Workers support.
+
+### Why `prefixDefaultLocale` stays `false`
+
+- A test showed that `prefixDefaultLocale: true` does not break `/_emdash/admin` (302 to the setup, then 200). `false` stays the default because it gives shorter URLs for the default locale.
 
 ### Why `next()` takes no argument
 
