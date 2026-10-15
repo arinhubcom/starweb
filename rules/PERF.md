@@ -24,7 +24,7 @@
 
 - Create the D1 database with a location hint near most of the users, for example `npx wrangler d1 create <name> --location=weur`. Valid hints are `wnam`, `enam`, `weur`, `eeur`, `apac`, and `oc`. Set its `database_id` in `wrangler.jsonc`.
 - Run the Worker near the D1 primary with Targeted Placement: set `"placement": { "mode": "targeted", "region": "aws:eu-central-1" }` in `wrangler.jsonc`, with the cloud region nearest to the location hint. Follow [EmDash on Cloudflare](https://docs.emdashcms.com/deployment/cloudflare/#place-the-worker-near-d1).
-- Do not turn on D1 read replication with Targeted Placement. Keep the EmDash `session` option of `d1()` at its default, `"disabled"`.
+- Do not turn on D1 read replication with Targeted Placement. Remove the `session: "auto"` that the starter sets in `d1({ binding: "DB", session: "auto" })`, so the EmDash `session` option stays at its default, `"disabled"`.
 
 ## Cache
 

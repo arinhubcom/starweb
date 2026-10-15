@@ -42,7 +42,7 @@
 
 - Export the remote database before each risky change (a destructive migration or a bulk update): `npx wrangler d1 export <db> --remote --output=<file>.sql`. Time Travel keeps only 7 days (Workers Free) or 30 days (Workers Paid), so also export on a schedule.
 - Run the scheduled export from CI, outside peak hours: a running export blocks other requests to the database.
-- Do not keep an export in git. It holds personal data. Store it in private storage with restricted access, outside the repository, and write exports to a folder that `.gitignore` excludes. Delete old exports by the retention rules in [PRIVACY.md](PRIVACY.md).
+- Do not keep an export in git. It holds personal data. Store it in private storage with restricted access, outside the repository, and write exports to the `backups/` folder, which `.gitignore` excludes. Delete old exports by the retention rules in [PRIVACY.md](PRIVACY.md).
 - Do not rely on `d1 export` for a database with virtual tables, such as FTS5 tables: D1 cannot export them. Drop the virtual tables and recreate them after the export, or use Time Travel.
 
 ## Reference

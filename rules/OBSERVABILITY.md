@@ -6,7 +6,7 @@ Related files: [DEPLOY.md](DEPLOY.md) (version metadata and release tags), [SAAS
 
 ### [Workers Logs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/)
 
-- Set `"observability": { "enabled": true }` in `wrangler.jsonc`, and repeat it in `env.production`. Redeploy after you change it.
+- Set `"observability": { "enabled": true }` in `wrangler.jsonc`, `env.production` inherits it (see [DEPLOY.md](DEPLOY.md) (Environments)). Repeat it there only for a different value. Redeploy after you change it.
 - Set `head_sampling_rate` (0 to 1) in `observability` only for a high-traffic Worker. The default is `1` (all requests). Use the same key under `observability.logs` and `observability.traces` for separate rates.
 - Do not rely on Workers Logs for history: retention is 3 days on the Workers Free plan and 7 days on the Workers Paid plan. Export logs for longer retention (see OpenTelemetry export).
 - Keep each log entry under 256 KB. Larger entries are truncated.
@@ -57,7 +57,7 @@ Related files: [DEPLOY.md](DEPLOY.md) (version metadata and release tags), [SAAS
 
 - Use `@sentry/cloudflare` for error tracking in Workers.
 - Set a `compatibility_date` of `2026-08-04` or later in `wrangler.jsonc`, as in [ARCH.md](ARCH.md). Do not add the `nodejs_compat` flag.
-- Store the DSN as a Worker secret or var named `SENTRY_DSN` and read it from `env`. Do not hardcode it for each environment. For production, set it as in [DEPLOY.md](DEPLOY.md) (Secrets).
+- Store the DSN as a Worker secret or var named `SENTRY_DSN` and read it from `env`. Run `wrangler types` after you add a var, so `env.SENTRY_DSN` is typed. Do not hardcode it for each environment. For production, set it as in [DEPLOY.md](DEPLOY.md) (Secrets).
 - Set `environment: env.SENTRY_ENVIRONMENT` in the options, and set the var `SENTRY_ENVIRONMENT` to `production` or `dev` in each Wrangler environment, so Sentry separates the events.
 - Set `tracesSampleRate` below `1.0` in production. Do not send 100% of traces from a high-traffic Worker.
 - Do not use span durations to measure CPU-only work. `Date.now()` and `performance.now()` advance only after I/O in Workers, so such spans show `0ms`.
@@ -69,7 +69,7 @@ Related files: [DEPLOY.md](DEPLOY.md) (version metadata and release tags), [SAAS
 - Wrap the handler object in `src/worker.ts`: `export default Sentry.withSentry((env) => ({ dsn: env.SENTRY_DSN, ... }), { ...handler, scheduled: createScheduledHandler() })`, with `handler` from `@emdash-cms/cloudflare/worker`. `withSentry` instruments `fetch`, `scheduled`, `email`, `queue`, and `tail` on the object you pass, so keep `queue()` in that object.
 - Keep Workflow and Durable Object classes as separate named exports of `src/worker.ts`. `withSentry` does not wrap them. Instrument each class with `Sentry.instrumentWorkflowWithSentry` or `Sentry.instrumentDurableObjectWithSentry` when you want its errors in Sentry.
 - Add `sentry()` from `@sentry/astro` to `integrations` in `astro.config`, next to the Cloudflare adapter.
-- Create `sentry.client.config.ts` for the browser SDK, and call `Sentry.init({ dsn })` in it.
+- Create `sentry.client.config.ts` for the browser SDK, and call `Sentry.init({ dsn: import.meta.env.PUBLIC_SENTRY_DSN })` in it. Set `PUBLIC_SENTRY_DSN` in `.env` for the build: the browser cannot read `env.SENTRY_DSN`.
 - Add the host of the DSN, for example `https://o<orgId>.ingest.sentry.io`, to `connect-src` in the CSP module (see [SECURITY.md](SECURITY.md) (Headers)). Without it the browser blocks the events.
 - List Sentry as a processor in the privacy policy (see [PRIVACY.md](PRIVACY.md)).
 
@@ -88,7 +88,7 @@ Related files: [DEPLOY.md](DEPLOY.md) (version metadata and release tags), [SAAS
 ### [Source maps](https://developers.cloudflare.com/workers/observability/source-maps/)
 
 - Set `"upload_source_maps": true` in `wrangler.jsonc`. Wrangler then uploads the maps on `wrangler deploy` and `wrangler versions upload`.
-- Set `vite: { build: { sourcemap: true } }` in `astro.config`, so the build writes server and client maps with `//# sourceMappingURL=` comments. Wrangler finds the server maps by those comments. Do not leave `sourcemap` unset: `sentry()` then sets `"hidden"`, which writes no comment, and Wrangler uploads no map.
+- Set `vite: { build: { sourcemap: true } }` in `astro.config`, so the build writes server and client maps with `//# sourceMappingURL=` comments. Wrangler finds the server maps by those comments. Do not leave `sourcemap` unset: `sentry()` then sets `"hidden"`, which writes no comment, and Wrangler uploads no map and gives no error or warning. After the build, check that `dist/server/entry.mjs` ends with `//# sourceMappingURL=entry.mjs.map`.
 - Keep the server maps in `dist/server` until `wrangler deploy` or `wrangler versions upload` runs. Do not delete them in the build.
 - Delete only the client maps, because `dist/client` is the public assets directory. Set `sourcemaps: { filesToDeleteAfterUpload: ["./dist/client/**/*.map"] }` in the `sentry()` options. Do not rely on the default: when `sourcemap` is unset, `sentry()` deletes `./dist/**/client/**/*.map` and `./dist/**/server/**/*.map`.
 
@@ -96,6 +96,7 @@ Related files: [DEPLOY.md](DEPLOY.md) (version metadata and release tags), [SAAS
 
 - Set `org`, `project`, and `authToken: process.env.SENTRY_AUTH_TOKEN` in the `sentry()` options of `astro.config`, so the build uploads the maps to Sentry.
 - Store `SENTRY_AUTH_TOKEN` as a GitHub Actions secret for the build, or in `.env.sentry-build-plugin` locally. Do not commit it.
+- Build with `SENTRY_AUTH_TOKEN` set when you need client stack traces. Without it the build skips the upload but still deletes the client maps, and the client files keep their `sourceMappingURL` comment, so DevTools reports missing maps.
 - Check Sentry source maps with a production build, not with `wrangler dev`.
 
 ### [Workers Issues](https://developers.cloudflare.com/workers/observability/issues/)

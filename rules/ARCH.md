@@ -5,10 +5,11 @@
 ### [Effect](https://effect.website)
 
 - Use Effect for typed errors, async code, and dependency injection. Do not use Effect Schema.
+- Use Effect 4 names: catch errors with `Effect.catch`. Do not use `Effect.catchAll`, which is the Effect 3 name.
 
 ### [Zod](https://zod.dev)
 
-- Compile schemas at build time with [zod-compiler](https://github.com/gajus/zod-compiler) (Vite plugin in `astro.config`). Do not use `z.compile()`: it uses `new Function()`, which Cloudflare Workers do not allow.
+- Compile schemas at build time with [zod-compiler](https://github.com/gajus/zod-compiler) (Vite plugin in `astro.config`). Import the plugin as the default export: `import zodCompiler from "zod-compiler/vite"`. Do not use `z.compile()`: it uses `new Function()`, which Workers do not allow, so it silently falls back to the slower runtime parser.
 - Use Zod for all schemas and validation.
 - Validate in Effect code with the `decode` helper in `src/lib/effect/decode.ts`: `decode(schema, input)` returns `Effect<Output, ValidationError>`. Do not call `schema.parse()` in Effect code, because it throws.
 - Define `ValidationError` in the same file as `class ValidationError extends Data.TaggedError("ValidationError")<{ error: z.ZodError }> {}`. In `decode`, call `schema.safeParse(input)`, return `Effect.succeed(result.data)` when `result.success` is `true`, and `Effect.fail(new ValidationError({ error: result.error }))` when it is `false`.
@@ -87,7 +88,7 @@
 - Inject each API route file the same way, with its full pattern, for example `injectRoute({ pattern: "/app1/api/v1/items", entrypoint: new URL("./api/items.ts", import.meta.url) })`. Export `GET`, `POST`, and the other method handlers from the file.
 - Do not put app pages in `src/pages/`. Keep `src/pages/` for the site: marketing pages and CMS content.
 - Start every route of an app with its prefix: pages at `/app1/...` and API routes at `/app1/api/...`.
-- Add app middleware with `addMiddleware({ entrypoint: new URL("./middleware.ts", import.meta.url), order: "pre" })`. It runs on every request, so return `next()` at once when `context.url.pathname` does not start with the app prefix.
+- Add app middleware with `addMiddleware({ entrypoint: new URL("./middleware.ts", import.meta.url), order: "pre" })`. It runs on every request, so return `next()` at once when `context.url.pathname` does not start with the app prefix. Type the handler as `MiddlewareHandler` (`import type { MiddlewareHandler } from "astro"`). Do not use `defineMiddleware` from `astro:middleware`: Vitest cannot import it.
 - Define app actions in `src/apps/app1/actions.ts` as one object (`export const app1 = { create, update }`). Add it to `src/actions/index.ts` as a group: `export const server = { app1 }`. Call it as `actions.app1.create`.
 - Use relative imports inside an app. Use `@/` imports only for shared code.
 - Do not import from another app folder. Share code only through `src/lib/`, `src/layouts/`, and `src/components/ui/`.

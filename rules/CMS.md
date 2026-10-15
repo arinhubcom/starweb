@@ -38,7 +38,7 @@
 
 - Add `"triggers": { "crons": ["* * * * *"] }` to `wrangler.jsonc` for scheduled publishing. On Workers, it needs a Cron Trigger.
 - Export a `scheduled` handler from `src/worker.ts`: `export default { ...handler, scheduled: createScheduledHandler() }`. Import `handler`, `createScheduledHandler`, and `PluginBridge` from `@emdash-cms/cloudflare/worker`, and export `PluginBridge`.
-- Run `npx emdash doctor` to check the trigger and the handler. Watch a run with `wrangler tail`: a publish logs `[scheduled] Published 1 scheduled item(s)`.
+- Run `npx emdash doctor` to check the trigger and the handler. Read only its scheduler line on D1: its database check looks for a local SQLite file and reports `database: not found at ./data.db`. Watch a run with `wrangler tail`: a publish logs `[scheduled] Published 1 scheduled item(s)`.
 - Do not expect scheduled entries to publish on preview deployments: Cron Triggers do not run there.
 
 ## Menus and taxonomies

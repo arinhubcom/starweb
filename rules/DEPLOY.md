@@ -35,6 +35,7 @@
 
 - Name each release tag `<worker>-YYYY-MM-DD-rN`, where `<worker>` is the top-level `name` in `wrangler.jsonc`, not `<worker>-production`. For example, the Worker `mysite` gets `mysite-2026-10-14-r1`. Start `rN` at `r1` each day, and raise it for each further release on that day. Do not use semver tags such as `v1.2.3`. Read [WHY.md](../WHY.md#why-date-based-release-tags).
 - Create an annotated tag on `main` and push it: `git tag -a mysite-2026-10-14-r1 -m "<summary>"`, then `git push origin mysite-2026-10-14-r1`. The push uploads stage (see CI).
+- Remove the `deploy` script `astro build && wrangler deploy` that the template writes to `package.json`, or replace it with a script that runs `astro build` and `wrangler versions upload`. Do not release to prod with `wrangler deploy`: it skips the stage upload and the promote step.
 - Pass the same tag to `wrangler versions upload --tag`, so you can find the version by its tag when you promote it to prod.
 
 ### [Gradual deployments](https://developers.cloudflare.com/workers/configuration/versions-and-deployments/gradual-deployments/)

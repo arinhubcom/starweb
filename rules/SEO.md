@@ -8,6 +8,7 @@ Rules for search engine optimization of the public site. For `hreflang` and tran
 
 - Set `site` in `astro.config` to the final public URL, for example `https://example.com`. Include the scheme. Astro uses it for `Astro.site`, the sitemap, and canonical URLs.
 - Set the same origin for EmDash: **Settings > General > Site URL** in the admin, or `siteUrl` in the `emdash()` options, or `EMDASH_SITE_URL`. EmDash builds the sitemap, `robots.txt`, and JSON-LD URLs from it.
+- Check that `/robots.txt` and the `WebSite` JSON-LD show the public origin, not `localhost`. They do when only the Astro `site` is set, so set the EmDash Site URL too.
 - Build absolute URLs with `new URL(path, Astro.site)`. Do not build them from `Astro.url.origin`: it is a `localhost` URL in dev and can be an internal address behind a proxy.
 
 ### [Trailing slash](https://docs.astro.build/en/reference/configuration-reference/#trailingslash)
@@ -40,7 +41,7 @@ Rules for search engine optimization of the public site. For `hreflang` and tran
 - Add `"seo"` to `supports` of each routable collection, or turn on **SEO** in **Content Types**. Editors then get the SEO panel (title, description, image, canonical URL, and **Hide from search engines**).
 - Render `<EmDashHead page={page} />` from `emdash/ui` in the `<head>` of every public page. Build `page` with `createPublicPageContext()` from `emdash/page`. It renders the description, robots, canonical, Open Graph, and Twitter Card tags.
 - On a content page, pass `content: { collection, id, slug }` to `createPublicPageContext()`, and get the title and canonical URL from `getSeoMeta()`. Use `kind: "custom"` for pages that are not content entries.
-- Render `<EmDashHead>` on custom pages too (home, listings, landing pages). The `WebSite` JSON-LD, `hreflang`, and verification tags depend on it.
+- Render `<EmDashHead>` on custom pages too (home, listings, landing pages). The `WebSite` JSON-LD and verification tags depend on it. It emits no `hreflang` on custom pages: add them as in [I18N.md](I18N.md) (hreflang).
 - Pass `canonical: new URL(Astro.url.pathname, Astro.site).href` to `createPublicPageContext()` on a `kind: "custom"` page. `<EmDashHead>` writes `rel="canonical"` and `og:url` only when the page context or the entry sets a canonical URL: it does not compute one.
 - Skip `<EmDashHead>` only on pages that are not public: private pages and app routes. Add `<meta name="robots" content="noindex">` to them.
 - Render the `<title>` element yourself. `<EmDashHead>` does not render it.

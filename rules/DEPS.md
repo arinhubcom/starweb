@@ -10,7 +10,8 @@ Rules for the packages of a project and how to keep them up to date. For the CI 
 - Commit `package-lock.json` with each change to `package.json`.
 - Add a package with `npm i <package>` or `npm i -D <package>`. Do not edit the versions in `package.json` by hand.
 - Install in CI with `npm ci`, not `npm install`. `npm ci` fails when `package.json` and `package-lock.json` do not match, and it never changes the lockfile.
-- Do not use `--legacy-peer-deps`. Fix the peer dependency conflict instead, for example by upgrading the package that reports it.
+- Do not use `--legacy-peer-deps`. Fix the peer dependency conflict instead, for example by upgrading the package that reports it. Upgrade the pinned peer when the conflict is with a pin from the starter: `emdash-better-auth` needs React 19.2.6 or later, and the starter pins 19.2.4, so run `npm i react@^19.2.6 react-dom@^19.2.6 emdash-better-auth`.
+- Delete `pnpm-workspace.yaml` from the starter. Its presence makes `shadcn init` use pnpm and write `pnpm-lock.yaml`.
 - Set the Node.js version in CI from the same value as local development. Use `actions/setup-node` with `node-version-file` or `node-version`, and `cache: npm`.
 - Use `npm outdated` to list packages with newer versions. Use `npm ls <package>` to see which version is installed and who requires it.
 
@@ -57,6 +58,7 @@ Rules for the packages of a project and how to keep them up to date. For the CI 
 
 - Set `min-release-age=3` in the `.npmrc` file in the repository root. npm then installs only versions that are more than 3 days old, also for `npm i` on a developer machine. Commit `.npmrc`.
 - Keep the value of `min-release-age` the same as `cooldown.default-days` in `.github/dependabot.yml`.
+- Expect a new `emdash` release to wait 3 days: `min-release-age` has no exclude list. Install the newest version that is older than 3 days.
 
 ### [npm audit](https://docs.npmjs.com/cli/v11/commands/npm-audit)
 
