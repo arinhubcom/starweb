@@ -28,11 +28,11 @@
 ### [EmDash email setup](https://docs.emdashcms.com/guides/email/)
 
 - Send auth emails (verification, password reset, magic link, invites) through the EmDash email provider. The plugin hands each link to the EmDash email pipeline. Do not send them from app code.
-- Use one active provider plugin. In `astro dev`, EmDash uses a console provider: it sends nothing and logs each email, with its link, to the terminal.
+- Use only the Cloudflare email provider plugin (`cloudflareEmail`). Do not install other email provider plugins. In `astro dev`, EmDash uses a console provider: it sends nothing and logs each email, with its link, to the terminal.
 - Add a `send_email` binding named `EMAIL` to `wrangler.jsonc` for production. Verify the sender domain in Cloudflare Email Sending, and use a From address on that domain. See [Deploy to Cloudflare](https://docs.emdashcms.com/deployment/cloudflare/).
 - Import `cloudflareEmail` from `@emdash-cms/cloudflare/plugins` and add `cloudflareEmail({ from: { email, name } })` to `plugins` in `emdash()`. Use `replyTo` for a reply address.
 - Open **Settings**, then **Email** in the admin. Select the provider when more than one is installed, and click **Send test email** to catch bad credentials.
-- Set up SPF, DKIM, and DMARC for the sending domain at the email provider. They are not EmDash settings.
+- Set up SPF, DKIM, and DMARC for the sending domain in Cloudflare Email Service. They are not EmDash settings.
 - Set the base URL (`site:` or `BETTER_AUTH_URL`) so the links in the emails use the right host (see Setup).
 
 ## Organizations
