@@ -98,3 +98,14 @@ export function starwebHead() {
   }
   return sha.trim();
 }
+
+// Stop when npm is older than 11: npm 10 fails `npm install` for this stack
+// with "Cannot read properties of null (reading 'edgesOut')".
+export function assertNpm() {
+  const result = spawnSync("npm", ["--version"], { encoding: "utf8" });
+  const version = result.status === 0 ? result.stdout.trim() : "none";
+  if (Number.parseInt(version, 10) >= 11) return;
+  fail(
+    `npm 11 or later is required (found ${version}). Use the Node.js LTS version in template/files/.nvmrc, which ships npm 11.`,
+  );
+}

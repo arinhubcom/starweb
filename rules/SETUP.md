@@ -6,7 +6,7 @@ Set up a new Starweb project with these steps, in order. Later steps depend on e
 
 ### [create-emdash](https://github.com/emdash-cms/emdash/tree/main/packages/create-emdash)
 
-1. Check that `node --version` is 22.16.0 or later.
+1. Use the newest Node.js LTS version, the major version in `template/files/.nvmrc`. Check that `node --version` starts with that major version and that `npm --version` is 11 or later. Follow the rules in [DEPS.md](DEPS.md) (Install).
 2. Create the project from the EmDash Cloudflare starter template at the pinned version: read the version in `devDependencies` of `template/package.json` in the [Starweb repository](https://github.com/arinhubcom/starweb), then run `npm create emdash@<version> my-site -- --template cloudflare:starter --install --yes`. Replace `my-site` with the project name. Add `--sandboxed-plugins` only when the site uses sandboxed plugins: it needs a Workers paid plan. Do not use the `node` platform. Follow the rules in [CMS.md](CMS.md).
 
 ### [setup.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/setup.mjs)

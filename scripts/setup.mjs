@@ -14,6 +14,7 @@ import { dirname, join, resolve } from "node:path";
 import {
   PIN_ONLY_TOOLS,
   REPO_DOCS,
+  assertNpm,
   STATE_FILE,
   fail,
   listFiles,
@@ -203,6 +204,7 @@ Setup done. Next steps (see rules/SETUP.md):
 function main() {
   const options = parseArgs(process.argv.slice(2));
   assertStarter(options.dir);
+  assertNpm();
   const commit = starwebHead();
   const steps = [
     [

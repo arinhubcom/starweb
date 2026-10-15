@@ -18,6 +18,7 @@ import {
   REPO_DOCS,
   STATE_FILE,
   TEMPLATE_FILES,
+  assertNpm,
   fail,
   gitOut,
   readJson,
@@ -261,6 +262,7 @@ function installIfNeeded(dir, pkg) {
 function main() {
   const { dir, dryRun } = parseArgs(process.argv.slice(2));
   const state = readState(dir);
+  if (!dryRun) assertNpm();
   assertCommit(state.commit);
   const head = starwebHead();
   step(

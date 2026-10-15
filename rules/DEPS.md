@@ -13,6 +13,8 @@ Rules for the packages of a project and how to keep them up to date. For the CI 
 - Do not use `--legacy-peer-deps`. Fix the peer dependency conflict instead, for example by upgrading the package that reports it. Upgrade the pinned peer when the conflict is with a pin from the starter: `emdash-better-auth` needs React 19.2.6 or later, and the starter pins 19.2.4. The template pins React 19.3.0, so run `npm i emdash-better-auth`. Without the template, run `npm i react@^19.2.6 react-dom@^19.2.6 emdash-better-auth`.
 - Delete `pnpm-workspace.yaml` from the starter. Its presence makes `shadcn init` use pnpm and write `pnpm-lock.yaml`. `setup.mjs` does it.
 - Delete the starter `package-lock.json` and `node_modules`, and run `npm install` again, after you add `min-release-age`. The starter lockfile can pin versions that are younger than the 3-day limit, and `npm install` then stops. `setup.mjs` does it and writes a new `package-lock.json`.
+- Use the newest Node.js LTS version. Write its major version in `.nvmrc`, for example `24`, and move it to the next LTS major after its release reaches the LTS status on the [Node.js release schedule](https://github.com/nodejs/release#release-schedule). Do not use a version that is not LTS yet.
+- Use npm 11 or later. Do not use npm 10: `npm install` fails for this stack with `Cannot read properties of null (reading 'edgesOut')`. Node.js 24 ships npm 11.
 - Set the Node.js version in CI from the same value as local development. Use `actions/setup-node` with `node-version-file` or `node-version`, and `cache: npm`.
 - Use `npm outdated` to list packages with newer versions. Use `npm ls <package>` to see which version is installed and who requires it.
 
