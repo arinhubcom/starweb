@@ -20,3 +20,4 @@ These rules apply when you add or change a rule in this folder. Also follow the 
 - Do not edit a file in `template/files/` without the rule that describes it. Add or change the rule first.
 - Keep every version in `template/package.json` exact, with no `^` or `~`.
 - Run `bash scripts/test-template.sh <tmp-dir>` before you commit a change to `template/`, `scripts/`, or a rule that they implement. Use a new folder outside the repository for `<tmp-dir>`.
+- Run `bash scripts/test-update.sh <tmp-dir>` too, with another new folder, when the change touches `scripts/update.mjs`, `scripts/setup.mjs`, `scripts/lib.mjs`, `.starweb.json`, or the files that `update.mjs` merges.

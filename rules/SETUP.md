@@ -11,7 +11,7 @@ Set up a new Starweb project with these steps, in order. Later steps depend on e
 
 ### [setup.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/setup.mjs)
 
-3. Run `node <starweb>/scripts/setup.mjs my-site --name <name> --site <url>`, where `<starweb>` is your clone of the Starweb repository. It renames `AGENTS.md` to `EMDASH.md`, deletes `pnpm-workspace.yaml`, copies the agent files and `rules/` ([DEPS.md](DEPS.md)), copies the config, security, test, CI, and Dependabot files of `template/files/` ([QUALITY.md](QUALITY.md), [SECURITY.md](SECURITY.md), [TESTING.md](TESTING.md), [DEPLOY.md](DEPLOY.md), [DEPS.md](DEPS.md)), patches the starter files and the Tailwind, Zod, and Effect setup ([ARCH.md](ARCH.md), [DESIGN.md](DESIGN.md), [UI-UX.md](UI-UX.md)), pins the package versions, deletes the starter lockfile and runs `npm install`, runs `npx wrangler types` and `prettier`, and runs `git init`. Stop and report when it prints `Starter changed`.
+3. Run `node <starweb>/scripts/setup.mjs my-site --name <name> --site <url>`, where `<starweb>` is your clone of the Starweb repository. Keep the clone in a folder outside the project (for example `~/starweb`), not in a temporary folder: the script reads it, and `update.mjs` needs it later (see Update). The script writes `.starweb.json` with the clone commit, the name, and the site. Commit this file with the project. It renames `AGENTS.md` to `EMDASH.md`, deletes `pnpm-workspace.yaml`, copies the agent files and `rules/` ([DEPS.md](DEPS.md)), copies the config, security, test, CI, and Dependabot files of `template/files/` ([QUALITY.md](QUALITY.md), [SECURITY.md](SECURITY.md), [TESTING.md](TESTING.md), [DEPLOY.md](DEPLOY.md), [DEPS.md](DEPS.md)), patches the starter files and the Tailwind, Zod, and Effect setup ([ARCH.md](ARCH.md), [DESIGN.md](DESIGN.md), [UI-UX.md](UI-UX.md)), pins the package versions, deletes the starter lockfile and runs `npm install`, runs `npx wrangler types` and `prettier`, and runs `git init`. Stop and report when it prints `Starter changed`.
 
 ## Cloudflare
 
@@ -32,7 +32,7 @@ Set up a new Starweb project with these steps, in order. Later steps depend on e
 
 ### [Fulldev UI](https://ui.full.dev)
 
-9. Set up Fulldev UI with `npx shadcn@latest init https://ui.full.dev/r/styles/base-vega/base.json`, then install `@base-ui/react` and `lucide-react`. Add the Knip exceptions for Fulldev. Follow the rules in [COMPONENTS.md](COMPONENTS.md) and [QUALITY.md](QUALITY.md) (Unused code).
+9. Set up Fulldev UI with `npx shadcn@<version> init https://ui.full.dev/r/styles/base-vega/base.json`, where `<version>` is `shadcn` in `devDependencies` of `template/package.json`. The init adds `shadcn` to the project. Then install `@base-ui/react` and `lucide-react`. Add the Knip exceptions for Fulldev. Follow the rules in [COMPONENTS.md](COMPONENTS.md) and [QUALITY.md](QUALITY.md) (Unused code).
 10. Generate `src/styles/theme.css` from the brand seed color with `npx tsx scripts/theme.ts`, and import it in `src/styles/global.css`. Follow the rules in [MATERIAL.md](MATERIAL.md) (Color).
 
 ## Auth
@@ -47,7 +47,7 @@ Set up a new Starweb project with these steps, in order. Later steps depend on e
 
 12. Create `src/apps/<app>/` with its pages, API routes, and `db/` folder, and its own D1 database and migrations folder, if the site has an app. Follow the rules in [SAAS.md](SAAS.md) (Multiple apps) and [ARCH.md](ARCH.md) (Apps).
 13. Add `src/apps/<app>/db/seed.sql` and a `db:seed` npm script, if the app has a database. Follow the rules in [DATA.md](DATA.md) (Seed data).
-14. Add `scripts/openapi.ts` and the route `src/apps/<app>/api/openapi.json.ts`, if the app has an API. Follow the rules in [API.md](API.md) (Contract).
+14. Add `scripts/openapi.ts` and the route `src/apps/app1/api/openapi.ts`, injected in `integration.ts` with `injectRoute({ pattern: "/app1/api/openapi.json", ... })`, if the app has an API. Follow the rules in [API.md](API.md) (Contract).
 15. Add a table with a unique constraint for processed webhook event IDs, if the site sells with Creem. Follow the rules in [PAYMENTS.md](PAYMENTS.md) (EU sales).
 
 ## Observability
@@ -94,3 +94,14 @@ Set up a new Starweb project with these steps, in order. Later steps depend on e
 30. Do the first dev deploy: run `npm run build`, `npx emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""` for each app database, then `wrangler deploy --env=""`. After this, each push to `main` deploys dev. Follow the rules in [DEPLOY.md](DEPLOY.md) (Migrations, CI).
 31. Do the first release: push the tag `<worker>-YYYY-MM-DD-r1`, approve the `production` job, test the stage URL, then run the promotion workflow to raise traffic in steps. Follow the rules in [DEPLOY.md](DEPLOY.md) (Releases, CI).
 32. Check that the dev-bypass routes return `403` on prod. Follow the rules in [SECURITY.md](SECURITY.md) (Auth).
+
+## Update
+
+Bring the Starweb changes into an existing project with [update.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/update.mjs). It uses `.starweb.json` and the Starweb clone that you kept.
+
+1. Run `git -C <starweb> pull`.
+2. Run `node <starweb>/scripts/update.mjs <project> --dry-run` and read the plan. It changes nothing.
+3. Run `node <starweb>/scripts/update.mjs <project>` without `--dry-run`. It merges the agent files, `rules/`, and the template files, updates the unchanged `package.json` versions and scripts, and runs `npm install`.
+4. Resolve each conflict: the file has the markers `<<<<<<< project`, `||||||| base`, and `>>>>>>> starweb`. Then set `commit` in `.starweb.json` to the commit that the script prints.
+5. Run `npm run check` and `npm run build`. Both must pass.
+6. Commit the project.

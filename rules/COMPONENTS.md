@@ -27,9 +27,9 @@
 
 - Use Fulldev UI for `.astro` components and page blocks (sections, hero, features, pricing, FAQ). They are plain Astro components with no client JavaScript.
 - Add the `@/*` path alias before init: `"baseUrl": "."` and `"paths": { "@/*": ["./src/*"] }` in `compilerOptions` of `tsconfig.json`. Without it, `shadcn init` stops at "Validating import alias".
-- Set it up once with `npx shadcn@latest init https://ui.full.dev/r/styles/base-vega/base.json`. It writes `components.json` with the `@fulldev` registry, adds the theme tokens to `src/styles/global.css`, adds `cn()` in `src/lib/utils.ts`, and installs `shadcn` (for `shadcn/tailwind.css`), `cn`, `class-variance-authority`, and `tw-animate-css`.
+- Set it up once with `npx shadcn@<version> init https://ui.full.dev/r/styles/base-vega/base.json`, where `<version>` is `shadcn` in `devDependencies` of `template/package.json`. It writes `components.json` with the `@fulldev` registry, adds the theme tokens to `src/styles/global.css`, adds `cn()` in `src/lib/utils.ts`, and installs `shadcn` (for `shadcn/tailwind.css`), `cn`, `class-variance-authority`, and `tw-animate-css`.
 - Add `class="@container"` to `<body>` in the base layout. Fulldev UI uses container query variants such as `@2xl:`.
-- Install each component or block with the shadcn CLI, for example `npx shadcn@latest add @fulldev/button`. Do not copy the code by hand.
+- Install each component or block with the shadcn CLI, for example `npx shadcn add @fulldev/button`. It runs the `shadcn` version that init installed in the project. Do not use `@latest`. Do not copy the code by hand.
 - Keep Fulldev UI and other `.astro` components in `src/components/ui/`, one folder per component (for example `ui/button/` with `button.astro`, `button-variants.ts`, and `index.ts`). Import them from the folder: `import { Button } from "@/components/ui/button"`. Edit them there: they are your code after install, not a package.
 - Change the theme in the CSS variables that the init step adds. Do not hardcode colors in components.
 - Install the agent skills: `npx skills add shadcn/ui` and `npx skills add fulldotdev/ui --skill fulldev-ui`.
@@ -65,7 +65,7 @@
 - Use shadcn/ui components for React islands, such as dialog, dropdown menu, popover, tabs, and select. They are Base UI wrappers with Tailwind classes in the same theme as Fulldev UI. Do not use them for static UI: use Fulldev UI `.astro` components there.
 - Start from the shadcn/ui component when one exists. Do not write a Base UI wrapper by hand.
 - Keep `"style": "base-vega"` in `components.json`, as the Fulldev init writes it. The style cannot change after init. Do not install from a `radix-*` style: those components import `radix-ui`.
-- Install React components with `--path`, for example `npx shadcn@latest add dialog --path src/components/ui/react`. The default path is `src/components/ui/`, which is for `.astro` components. The CLI puts registry dependencies (for example `button.tsx` for `dialog`) in the same folder and rewrites their imports to `@/components/ui/react/...`.
+- Install React components with `--path`, for example `npx shadcn add dialog --path src/components/ui/react`. The default path is `src/components/ui/`, which is for `.astro` components. The CLI puts registry dependencies (for example `button.tsx` for `dialog`) in the same folder and rewrites their imports to `@/components/ui/react/...`.
 - Install `@base-ui/react` and `lucide-react` yourself before the first React component: `npm i @base-ui/react lucide-react`. The Fulldev init and the `base-vega` registry items do not install them.
 - Run `npx astro check` (needs `@astrojs/check`) after each install. Install each missing package that it reports.
 - Check `package.json` after each install. Remove `radix-ui` or `@radix-ui/*` if the CLI added it, and install the component again from `base-vega`.
