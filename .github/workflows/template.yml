@@ -31,3 +31,4 @@ jobs:
         with:
           node-version-file: template/files/.nvmrc
       - run: bash scripts/test-template.sh "$RUNNER_TEMP"
+      - run: bash scripts/test-update.sh "$RUNNER_TEMP/update"
