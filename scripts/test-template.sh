@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Test the Starweb template end to end: create the pinned starter, run
-# setup.mjs, run the checks and the build, then test the built Worker.
+# setup.mjs, check that update.mjs has nothing to change, run the checks and
+# the build, then test the built Worker.
 # Usage: bash scripts/test-template.sh <workdir>
 set -euo pipefail
 
@@ -108,6 +109,14 @@ rm -rf "$APP_DIR"
 
 step "Run setup.mjs"
 node "$REPO_ROOT/scripts/setup.mjs" "$APP_DIR" --name tpl-test --site https://example.com
+
+step "Run update.mjs --dry-run: nothing to change"
+UPDATE_OUTPUT="$(node "$REPO_ROOT/scripts/update.mjs" "$APP_DIR" --dry-run)"
+printf '%s\n' "$UPDATE_OUTPUT"
+if printf '%s\n' "$UPDATE_OUTPUT" | grep -E '^[A-Za-z].*: [1-9][0-9]*$'; then
+  fail "update.mjs --dry-run reports changes right after setup"
+fi
+echo "ok: update.mjs reports nothing to change"
 
 step "Run npm run check"
 (cd "$APP_DIR" && npm run check)

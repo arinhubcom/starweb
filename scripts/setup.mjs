@@ -6,43 +6,37 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
-  readdirSync,
-  readFileSync,
   renameSync,
   rmSync,
-  statSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import {
+  PIN_ONLY_TOOLS,
+  REPO_DOCS,
+  STATE_FILE,
+  fail,
+  listFiles,
+  readJson,
+  readText,
+  repoRoot,
+  sortKeys,
+  starwebHead,
+  step,
+  substitute,
+  withEmdashRule,
+  writeJson,
+} from "./lib.mjs";
 import { starterPatches } from "./setup-patches.mjs";
 
-const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const templateDir = join(repoRoot, "template");
 const DEFAULT_SITE = "https://example.com";
-const REPO_DOCS = ["AGENTS.md", "CLAUDE.md", "GEMINI.md", "WHY.md", "rules"];
 const GITIGNORE_LINES = [
   "test-results/",
   "coverage/",
   "backups/",
   "public/_headers",
 ];
-const EMDASH_RULE =
-  "- Follow the rules in [EMDASH.md](EMDASH.md) for the EmDash template.";
-
-const fail = (message) => {
-  console.error(`Error: ${message}`);
-  process.exit(1);
-};
-
-const step = (message) => console.log(`\n==> ${message}`);
-
-const readText = (path) => readFileSync(path, "utf8");
-
-const readJson = (path) => JSON.parse(readText(path));
-
-const writeJson = (path, value) =>
-  writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
 
 function parseArgs(argv) {
   const options = { dir: undefined, name: undefined, site: DEFAULT_SITE };
@@ -117,27 +111,7 @@ function prepareAgentFiles(dir) {
     cpSync(join(repoRoot, entry), join(dir, entry), { recursive: true });
   }
   const agentsPath = join(dir, "AGENTS.md");
-  const agents = readText(agentsPath);
-  const rulesStart = agents.indexOf("## Rules");
-  const rulesEnd = agents.indexOf("\n\n", rulesStart + "## Rules\n\n".length);
-  if (rulesStart === -1 || rulesEnd === -1) {
-    throw new Error(
-      "Starweb AGENTS.md has no ## Rules list. Update scripts/setup.mjs.",
-    );
-  }
-  writeFileSync(
-    agentsPath,
-    `${agents.slice(0, rulesEnd)}\n${EMDASH_RULE}${agents.slice(rulesEnd)}`,
-  );
-}
-
-function listFiles(root, base = root) {
-  return readdirSync(root).flatMap((name) => {
-    const path = join(root, name);
-    return statSync(path).isDirectory()
-      ? listFiles(path, base)
-      : [path.slice(base.length + 1)];
-  });
+  writeFileSync(agentsPath, withEmdashRule(readText(agentsPath)));
 }
 
 function copyOverlay(dir, values) {
@@ -145,17 +119,9 @@ function copyOverlay(dir, values) {
   for (const relative of listFiles(filesDir)) {
     const target = join(dir, relative);
     mkdirSync(dirname(target), { recursive: true });
-    const text = readText(join(filesDir, relative))
-      .replaceAll("__NAME__", values.name)
-      .replaceAll("__SITE__", values.site);
-    writeFileSync(target, text);
+    const text = readText(join(filesDir, relative));
+    writeFileSync(target, substitute(text, values));
   }
-}
-
-function sortKeys(object) {
-  return Object.fromEntries(
-    Object.entries(object).sort(([a], [b]) => a.localeCompare(b)),
-  );
 }
 
 function mergePackageJson(dir, name) {
@@ -163,8 +129,11 @@ function mergePackageJson(dir, name) {
   const project = readJson(projectPath);
   const template = readJson(join(templateDir, "package.json"));
   const { deploy: _deploy, ...starterScripts } = project.scripts ?? {};
-  const { "create-emdash": _pinned, ...templateDevDeps } =
-    template.devDependencies;
+  const templateDevDeps = Object.fromEntries(
+    Object.entries(template.devDependencies).filter(
+      ([tool]) => !PIN_ONLY_TOOLS.includes(tool),
+    ),
+  );
   writeJson(projectPath, {
     ...project,
     name,
@@ -212,6 +181,14 @@ function installAndFormat(dir) {
   if (!existsSync(join(dir, ".git"))) run(dir, "git", ["init", "--quiet"]);
 }
 
+function writeState(dir, values, commit) {
+  writeJson(join(dir, STATE_FILE), {
+    commit,
+    name: values.name,
+    site: values.site,
+  });
+}
+
 function printNextSteps() {
   console.log(`
 Setup done. Next steps (see rules/SETUP.md):
@@ -226,6 +203,7 @@ Setup done. Next steps (see rules/SETUP.md):
 function main() {
   const options = parseArgs(process.argv.slice(2));
   assertStarter(options.dir);
+  const commit = starwebHead();
   const steps = [
     [
       "Rename AGENTS.md and copy the Starweb rules",
@@ -233,6 +211,7 @@ function main() {
     ],
     ["Copy the template files", () => copyOverlay(options.dir, options)],
     ["Patch the starter files", () => applyStarterPatches(options.dir)],
+    ["Write .starweb.json", () => writeState(options.dir, options, commit)],
     ["Merge package.json", () => mergePackageJson(options.dir, options.name)],
     ["Update .gitignore", () => updateGitignore(options.dir)],
     [
