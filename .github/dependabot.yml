@@ -1,0 +1,31 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/template"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "02:00"
+      timezone: "Europe/Prague"
+    cooldown:
+      default-days: 3
+    groups:
+      stack:
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "vitest"
+        versions: [">=5.0.0"]
+      - dependency-name: "@vitest/*"
+        versions: [">=5.0.0"]
+      - dependency-name: "@astrojs/react"
+        versions: [">=7.0.0"]
+  - package-ecosystem: "github-actions"
+    directories:
+      - "/"
+      - "/template/files"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "02:00"
+      timezone: "Europe/Prague"
