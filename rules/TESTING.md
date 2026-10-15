@@ -14,10 +14,14 @@
 ### [Cloudflare Vitest plugin](https://developers.cloudflare.com/workers/testing/vitest-integration/get-started/)
 
 - Test Worker code with `@cloudflare/vitest-plugin`. Do not use `@cloudflare/vitest-pool-workers`. Read [WHY.md](../WHY.md#why-cloudflarevitest-plugin).
-- Add `cloudflareTest({ wrangler: { configPath: './wrangler.jsonc' } })` to `plugins` in `vitest.config.ts`.
+- Create `wrangler.test.jsonc` as a copy of `wrangler.jsonc` without `main` and `triggers`. With `main`, the plugin loads `src/worker.ts` and the Astro handler, and fails with `Cannot find package 'virtual:astro-cloudflare:config'`.
+- Add `cloudflareTest({ wrangler: { configPath: './wrangler.test.jsonc' } })` to `plugins` in `vitest.config.ts`.
+- Add `@cloudflare/vitest-plugin/types` to `compilerOptions.types` and the test folder to `include` in `tsconfig.json`. Otherwise `astro check` reports `Cannot find module 'cloudflare:test'`.
+- Do not import `astro:*` modules (such as `astro:middleware`) in code that a test imports: Vitest cannot resolve them. Use `import type`, or `vi.mock()` the module.
 - Read the migrations of each app database in `vitest.config.ts`: call `readD1Migrations()` from `@cloudflare/vitest-plugin` with the `migrations_dir` of that database (see [SAAS.md](SAAS.md) (Multiple apps)), for example `migrations/app1`. Pass each result as its own binding in `miniflare.bindings`, for example `APP1_TEST_MIGRATIONS`.
-- Apply each set in a setup file with `applyD1Migrations()` from `cloudflare:test` to the matching binding, for example `applyD1Migrations(env.APP1_DB, env.APP1_TEST_MIGRATIONS)`. Do not apply app migrations to `env.DB`: it is the EmDash database, and `emdash migrate` manages its schema.
-- Call `reset()` from `cloudflare:test` in `afterEach()` when tests in one file must not share data. Storage is isolated per test file, not per test.
+- Apply each set in `beforeEach()` of a setup file with `applyD1Migrations()` from `cloudflare:test` to the matching binding, for example `applyD1Migrations(env.APP1_DB, env.APP1_TEST_MIGRATIONS)`. Do not apply app migrations to `env.DB`: it is the EmDash database, and `emdash migrate` manages its schema.
+- Call `reset()` from `cloudflare:test` in `afterEach()` when tests in one file must not share data. It drops the tables too, so apply the migrations again in `beforeEach()`. Storage is isolated per test file, not per test.
+- Set `test.exclude` to `[...configDefaults.exclude, 'e2e/**']` (from `vitest/config`), so Vitest does not run the Playwright tests.
 - Write a test for each repository module that checks that a query never returns rows of another tenant.
 
 ### [Coverage](https://vitest.dev/guide/coverage)
@@ -25,6 +29,7 @@
 - Use the `istanbul` coverage provider: set `test.coverage.provider` to `'istanbul'` and install `@vitest/coverage-istanbul` at the same version as `vitest`. Do not use `v8`: the Workers Vitest plugin does not support it ([known issues](https://developers.cloudflare.com/workers/testing/vitest-integration/known-issues/)).
 - Set `test.coverage.thresholds` to `lines: 80`, `functions: 80`, `branches: 80`, and `statements: 80`. Vitest fails the run when one is lower.
 - Set `test.coverage.include` to `['src/**/*.{ts,tsx}']`. By default Vitest counts only files that a test imports, so an untested file would not lower the result. Exclude stories with `exclude: [...coverageConfigDefaults.exclude, '**/*.stories.*']` (from `vitest/config`).
+- Write a test for each starter file under `src/` that you keep, or add it to `test.coverage.exclude`, such as `src/live.config.ts`, `src/middleware.ts`, and `src/utils/site-identity.ts`. Add re-export files such as `index.ts` to the same list.
 - Run the `test` script as `vitest run --coverage`. Coverage thresholds apply only when coverage is on.
 
 ## Components
@@ -89,6 +94,9 @@
 ### [Playwright](https://playwright.dev/docs/intro)
 
 - Run end-to-end tests against `astro preview`. Follow the rules in [DEV.md](DEV.md).
+- Install the browser with `npx playwright install chromium`.
+- Start the server with the `webServer` option and a fixed port: `command: 'npm run preview -- --port <port>'`, with the same port in `url`. Set `reuseExistingServer: !process.env.CI`, so CI never reuses a stale server.
+- Run `astro build` before the tests. Do not delete `.wrangler/deploy/config.json`: `astro preview` stops with `No build output found` without it.
 - Test each critical flow: signup, login, and payment.
 - Run payment tests in provider test mode, never with live keys. For Stripe, use the test API keys of a [sandbox](https://docs.stripe.com/test-mode). For Creem, use a test API key and set `server: "test"` in the `creem` SDK, which uses `https://test-api.creem.io` ([test mode](https://docs.creem.io/getting-started/test-mode)). Pass the test keys as CI secrets.
 - Read the verification link of the signup test from `GET /_emdash/api/dev/emails`. Run this test against `astro dev`, not `astro preview`: the EmDash console email provider and this endpoint exist only in `astro dev` and never in a production build ([EmDash email setup](https://docs.emdashcms.com/guides/email/)).
