@@ -25,7 +25,8 @@
 - Write the contract as Zod schemas in `src/apps/app1/api/schemas.ts`. Validate requests in the API routes with the same schemas. Do not write the OpenAPI document by hand.
 - Set `description` and `example` with `.meta({ description, example })`. Set `id` in `.meta()` only on schemas that you reuse: it moves the schema to `components` with a `$ref`, and a duplicate `id` throws an error.
 - Declare parameters with `requestParams: { path, query, header, cookie }`, with one `z.object()` for each location.
-- Build the document with `createDocument()` in a Node script, for example `scripts/openapi.ts`, and write it to `src/apps/app1/api/openapi.json`. Do not import `createDocument()` in Worker code.
+- Build the document with `createDocument()` in a Node script, `scripts/openapi.ts`, and write it to `src/apps/app1/api/openapi.json`. Run it with `npx tsx scripts/openapi.ts`. Do not import `createDocument()` in Worker code.
+- Declare the operations (`paths`, with `requestParams`, `requestBody`, and `responses`) in `scripts/openapi.ts`. Import the schemas from `src/apps/app1/api/schemas.ts`. Do not declare operations in `schemas.ts`.
 - Commit the generated file. In CI, generate it again and fail when `git diff --exit-code` shows a change.
 
 ### [Redocly CLI](https://redocly.com/docs/cli/)
@@ -53,7 +54,7 @@
 
 - Use Astro Actions for forms and mutations from the pages of the app. Use API routes for the operations in the contract: calls from islands, external clients, agents, and webhooks. Follow the rules in [ARCH.md](ARCH.md) (Astro).
 - Put API routes under the app prefix, for example `/app1/api/v1/`. Follow the rules in [ARCH.md](ARCH.md) (Apps).
-- Export one handler for each method, typed with `satisfies APIRoute`. Add an `ALL` handler that returns `405` with an `Allow` header. Without it, Astro redirects a request with another method to the 404 page.
+- Export one handler for each method, typed with `satisfies APIRoute`. Add an `ALL` handler that returns `405` with an `Allow` header. Without it, Astro returns `404` for a request with another method.
 - Validate the path parameters, query, headers, and body with the contract schemas before any other work. Return `400` with the invalid fields when the input does not match.
 - Return only the status codes and response shapes that the contract defines for the operation.
 
@@ -70,7 +71,7 @@
 ### [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html)
 
 - Return each error as problem details: `Content-Type: application/problem+json` with `type`, `title`, `status`, and `detail`. Do not use another error shape.
-- Put field errors in an `errors` extension member, with one item for each field: `pointer` (for example `#/email`) and `detail`.
+- Put field errors in an `errors` extension member, with one item for each field: `pointer` (for example `#/email`) and `detail`. Use `#/` for an error about the whole body.
 - Define each error `type` URI and its status in the contract, as a reused response in `components`.
 - Map each typed Effect error to one status and `type` in one module, for example `src/lib/api/errors.ts`.
 - Do not put stack traces, SQL, or internal IDs in `detail`. Log them on the server.
@@ -95,8 +96,8 @@
 
 ### [Astro security](https://docs.astro.build/en/reference/configuration-reference/#securitycheckorigin)
 
-- Keep `security.checkOrigin` on (the default). It checks only on-demand requests with an unsafe method (`POST`, `PATCH`, `DELETE`, `PUT`) and no `Content-Type`, or `application/x-www-form-urlencoded`, `multipart/form-data`, or `text/plain`. It does not check JSON.
-- Return `415` for a `POST`, `PUT`, `PATCH`, or `DELETE` request that has a body, to a route that uses the session cookie, when its `Content-Type` media type (without parameters) is not `application/json`, so `application/json; charset=utf-8` passes. Do not check requests without a body, such as most `DELETE` requests. A cross-site page cannot send JSON without a CORS preflight, so the browser blocks it, and `security.checkOrigin` covers the other content types.
+- Do not rely on `security.checkOrigin`: the EmDash integration sets it to `false`. Check the `Origin` header in the app middleware, for all unsafe methods and all content types, and return `403` on a cross-origin request. Follow the rules in [SECURITY.md](SECURITY.md) (CSRF).
+- Return `415` for a `POST`, `PUT`, `PATCH`, or `DELETE` request that has a body, to a route that uses the session cookie, when its `Content-Type` media type (without parameters) is not `application/json`, so `application/json; charset=utf-8` passes. Do not check requests without a body, such as most `DELETE` requests. A cross-site page cannot send JSON without a CORS preflight, so the browser blocks it, and the origin check in the app middleware covers the other content types.
 - Set CORS headers in the app middleware, only for a list of allowed origins, and answer `OPTIONS`. Astro has no CORS option. Do not send `Access-Control-Allow-Origin: *` on routes that use cookies.
 
 ## Limits

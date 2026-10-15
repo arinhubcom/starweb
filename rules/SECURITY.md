@@ -11,16 +11,18 @@
 ### [Astro Content Security Policy](https://docs.astro.build/en/reference/configuration-reference/#securitycsp)
 
 - Set `security: { csp: true }` in `astro.config`. It is a stable option since Astro 6, not an experimental flag. Add other sources with `csp.directives`, `csp.scriptDirective`, and `csp.styleDirective`, or per page with `Astro.csp.insertDirective()`, `insertScriptResource()`, and `insertStyleResource()`.
-- Define all CSP sources in one module, `src/lib/security/csp.ts`. Export `scriptDirective` (`resources` and `hashes`) and `directives` from it, and pass them to `security.csp` in `astro.config`. Each feature (Turnstile, Web Analytics, Sentry) adds its sources to this module, and the theme script adds its hash to `scriptDirective.hashes` (see [COMPONENTS.md](COMPONENTS.md) (Astro components)). Do not add a CSP value in any other file.
+- Define all CSP sources in one module, `src/lib/security/csp.ts`. Export `scriptDirective` (`resources` and `hashes`), `directives`, and `frameAncestors` (`"frame-ancestors 'none'"`, or `'self'` where the site embeds its own pages) from it, and pass them to `security.csp` in `astro.config`. Each feature (Turnstile, Web Analytics, Sentry) adds its sources to this module, and the theme script adds its hash to `scriptDirective.hashes` (see [COMPONENTS.md](COMPONENTS.md) (Astro components)). Do not add a CSP value in any other file.
+- Add `frameAncestors` to `directives`. Astro sends it in the header of on-demand pages. Browsers ignore `frame-ancestors` in a `<meta>` element, so prerendered pages get it from `public/_headers` (see Workers headers).
 - Write each directive once in `directives`, for example one `connect-src` entry that lists all sources, such as `"connect-src 'self' https://example.com"`. Always keep `'self'` in `connect-src`: without it the browser blocks the same-origin `fetch` calls of islands. Keep `'self'` in `scriptDirective.resources` too: Astro replaces its default sources with this list.
-- Test the policy with `astro build` and `astro preview`. CSP does not work in `astro dev`.
-- Do not expect an HTTP header from `security.csp`. Astro writes the policy as a `<meta http-equiv="content-security-policy">` element. Send `frame-ancestors` as a header (see Workers headers below): browsers ignore it in a `<meta>` element.
+- Expect the policy in an HTTP header on on-demand pages and in a `<meta http-equiv="content-security-policy">` element on prerendered pages.
+- Test the policy with `astro build` and `astro preview`. CSP does not work in `astro dev`. Check the header of an on-demand page with `curl -I`, and the `<meta>` element of a prerendered page with `curl`. Prove that the browser enforces the policy with a `securitypolicyviolation` event listener: the browser console may not show violations.
 
 ### [Workers headers](https://developers.cloudflare.com/workers/static-assets/headers/)
 
-- Set the security headers for pages and API routes that the Worker renders in the app middleware. Copy the response before you change it: `const original = await next(); const response = new Response(original.body, original)`, then `response.headers.set(name, value)`. Return the copy.
-- Set the same headers for prerendered pages and other static assets in `public/_headers`. The file applies only to static asset responses, not to responses from Worker code. Keep it to 100 rules and 2,000 characters per line.
-- Define the header values once, in one module, for example `src/lib/security/headers.ts`. Use it in the middleware and when you write `_headers`. Do not copy the values by hand.
+- Set the security headers for pages and API routes that the Worker renders in the app middleware, except `Content-Security-Policy`. Do not set `Content-Security-Policy` in the middleware: `set` replaces the policy that Astro sends, and the page loses its `script-src`. Copy the response before you change it: `const original = await next(); const response = new Response(original.body, original)`, then `response.headers.set(name, value)`. Return the copy.
+- Set the same headers for prerendered pages and other static assets in `public/_headers`, and add `Content-Security-Policy: frame-ancestors 'none'` there. The file applies only to static asset responses, not to responses from Worker code. Keep it to 100 rules and 2,000 characters per line.
+- Define the header values once, in one module, for example `src/lib/security/headers.ts` (without `Content-Security-Policy`). Use it in the middleware. Do not copy the values by hand.
+- Write `public/_headers` with `scripts/write-headers.ts`: import `securityHeaders` from `headers.ts` and `frameAncestors` from the CSP module, and write the file with `writeFileSync`. A static file cannot import a module. Install `tsx` (`npm i -D tsx`), and run the script before the build: `"build": "tsx scripts/write-headers.ts && astro build"`. Do not edit `_headers` by hand.
 
 ### [HTTP headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers)
 
@@ -28,13 +30,16 @@
 - Set `X-Content-Type-Options: nosniff` on all responses.
 - Set `Referrer-Policy: strict-origin-when-cross-origin` on all responses.
 - Set `Permissions-Policy` with an empty allowlist for each feature that the site does not use, for example `camera=(), microphone=(), geolocation=()`. Allow a feature only for the origin that needs it, for example `geolocation=(self)`.
-- Set `Content-Security-Policy: frame-ancestors 'none'` on all responses, or `'self'` where the site embeds its own pages. Do not use `X-Frame-Options` alone.
+- Send `frame-ancestors 'none'` on all responses, or `'self'` where the site embeds its own pages: in `csp.directives` for on-demand pages, and in `public/_headers` for prerendered pages (see Headers). Do not use `X-Frame-Options` alone.
 
 ## CSRF
 
 ### [Astro security](https://docs.astro.build/en/reference/configuration-reference/#securitycheckorigin)
 
-- Keep `security.checkOrigin` on and require JSON for mutating API calls. Follow the rules in [API.md](API.md) (Security).
+- Do not rely on `security.checkOrigin`. The EmDash integration sets it to `false`, and the user config cannot turn it on. EmDash checks the `Origin` header itself only on its own routes under `/_emdash/`.
+- Check the origin in the app middleware (`src/middleware.ts`). For a `POST`, `PUT`, `PATCH`, or `DELETE` request, return `403` when an `Origin` header is present and is not equal to `context.url.origin`. This includes `Origin: null`. Allow a request without `Origin`: it does not come from a cross-site browser page.
+- Apply the check to every route outside `/_emdash/`: API routes, Astro Actions (`/_actions/...`), and form posts. Skip `/_emdash/`: EmDash checks those routes, and its OAuth endpoints are cross-origin by design.
+- Require JSON for mutating API calls. Follow the rules in [API.md](API.md) (Security).
 
 ## Input
 
