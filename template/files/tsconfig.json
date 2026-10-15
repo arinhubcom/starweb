@@ -1,0 +1,27 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "types": ["node", "@cloudflare/vitest-plugin/types"],
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] },
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "include": [
+    "src",
+    "scripts",
+    "test",
+    "e2e",
+    ".storybook/**/*",
+    "*.config.ts",
+    "sentry.*.config.ts",
+    ".astro/types.d.ts",
+    "emdash-env.d.ts",
+    "worker-configuration.d.ts"
+  ]
+}

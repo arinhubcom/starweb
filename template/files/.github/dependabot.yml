@@ -1,0 +1,38 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "02:00"
+      timezone: "Europe/Prague"
+    cooldown:
+      default-days: 3
+    groups:
+      astro:
+        patterns:
+          - "astro"
+          - "@astrojs/*"
+          - "wrangler"
+          - "emdash"
+          - "@emdash-cms/*"
+      dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "vitest"
+        versions: [">=5.0.0"]
+      - dependency-name: "@vitest/*"
+        versions: [">=5.0.0"]
+      - dependency-name: "@astrojs/react"
+        versions: [">=7.0.0"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "02:00"
+      timezone: "Europe/Prague"

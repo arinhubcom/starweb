@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/live.config.ts",
+    "src/apps/*/pages/**/*.astro!",
+    "src/apps/*/middleware.ts!",
+    "src/apps/*/admin/{plugin.ts,pages.tsx}!",
+    "scripts/*.ts"
+  ]
+}

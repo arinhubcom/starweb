@@ -1,0 +1,51 @@
+{
+  "name": "starweb-template",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "tsx scripts/write-headers.ts && astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check --minimumFailingSeverity warning",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "knip": "knip",
+    "test": "vitest run --coverage",
+    "check": "npm run format:check && npm run typecheck && npm run lint && npm run knip && npm run test"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "14.3.4",
+    "@astrojs/react": "6.0.6",
+    "@emdash-cms/cloudflare": "1.2.0",
+    "@tailwindcss/vite": "4.3.3",
+    "astro": "7.3.8",
+    "effect": "4.0.3",
+    "emdash": "1.2.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "tailwindcss": "4.3.3",
+    "zod": "4.6.6",
+    "zod-compiler": "2.0.7"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@cloudflare/vitest-plugin": "1.4.0",
+    "@cloudflare/workers-types": "5.20261012.1",
+    "@eslint/js": "10.0.1",
+    "@vitest/coverage-istanbul": "4.1.11",
+    "create-emdash": "1.2.0",
+    "eslint": "10.12.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-astro": "3.2.1",
+    "knip": "6.41.0",
+    "prettier": "3.9.10",
+    "prettier-plugin-astro": "1.1.1",
+    "prettier-plugin-tailwindcss": "0.8.1",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.1",
+    "vitest": "4.1.11",
+    "wrangler": "4.149.0"
+  }
+}
