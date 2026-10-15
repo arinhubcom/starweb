@@ -10,8 +10,9 @@ Rules for the packages of a project and how to keep them up to date. For the CI 
 - Commit `package-lock.json` with each change to `package.json`.
 - Add a package with `npm i <package>` or `npm i -D <package>`. Do not edit the versions in `package.json` by hand.
 - Install in CI with `npm ci`, not `npm install`. `npm ci` fails when `package.json` and `package-lock.json` do not match, and it never changes the lockfile.
-- Do not use `--legacy-peer-deps`. Fix the peer dependency conflict instead, for example by upgrading the package that reports it. Upgrade the pinned peer when the conflict is with a pin from the starter: `emdash-better-auth` needs React 19.2.6 or later, and the starter pins 19.2.4, so run `npm i react@^19.2.6 react-dom@^19.2.6 emdash-better-auth`.
-- Delete `pnpm-workspace.yaml` from the starter. Its presence makes `shadcn init` use pnpm and write `pnpm-lock.yaml`.
+- Do not use `--legacy-peer-deps`. Fix the peer dependency conflict instead, for example by upgrading the package that reports it. Upgrade the pinned peer when the conflict is with a pin from the starter: `emdash-better-auth` needs React 19.2.6 or later, and the starter pins 19.2.4. The template pins React 19.3.0, so run `npm i emdash-better-auth`. Without the template, run `npm i react@^19.2.6 react-dom@^19.2.6 emdash-better-auth`.
+- Delete `pnpm-workspace.yaml` from the starter. Its presence makes `shadcn init` use pnpm and write `pnpm-lock.yaml`. `setup.mjs` does it.
+- Delete the starter `package-lock.json` and `node_modules`, and run `npm install` again, after you add `min-release-age`. The starter lockfile can pin versions that are younger than the 3-day limit, and `npm install` then stops. `setup.mjs` does it and writes a new `package-lock.json`.
 - Set the Node.js version in CI from the same value as local development. Use `actions/setup-node` with `node-version-file` or `node-version`, and `cache: npm`.
 - Use `npm outdated` to list packages with newer versions. Use `npm ls <package>` to see which version is installed and who requires it.
 

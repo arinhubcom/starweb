@@ -6,6 +6,7 @@
 
 - Use Vitest 4.1. Do not upgrade to Vitest 5 while `@storybook-astro/framework` accepts only `vitest ^4.1.0` in its peer dependencies. Read [WHY.md](../WHY.md#why-vitest-41-and-not-vitest-5).
 - Install `@vitest/expect`, `@vitest/spy`, `@vitest/utils`, and `@vitest/pretty-format` at the same version as `vitest`. Do not let npm hoist the 3.x copies that Storybook depends on.
+- Use relative imports in tests and in the code that tests import. The `@/` alias of `tsconfig.json` does not resolve in Vitest. If you need `@/`, add `resolve.alias` for `@` to `vitest.config.ts`. The template uses relative imports.
 - Do not install `@effect/vitest` 4.x. Run Effect code in a test with `Effect.runPromise()`.
 - Do not run `vitest -u` in the PR workflow. Update snapshots only in the manual workflow (see Screenshots). Vitest does not write snapshots when the `CI` environment variable is set, so a missing snapshot fails the PR run. Run `vitest run -u` in the manual workflow to create it.
 
@@ -96,6 +97,7 @@
 - Run end-to-end tests against `astro preview`. Follow the rules in [DEV.md](DEV.md).
 - Install the browser with `npx playwright install chromium`.
 - Start the server with the `webServer` option and a fixed port: `command: 'npm run preview -- --port <port>'`, with the same port in `url`. Set `reuseExistingServer: !process.env.CI`, so CI never reuses a stale server.
+- Start the server by hand, in a script, or from an agent with `--background`, and stop it by PID. Follow the rules in [DEV.md](DEV.md) (Local dev).
 - Run `astro build` before the tests. Do not delete `.wrangler/deploy/config.json`: `astro preview` stops with `No build output found` without it.
 - Test each critical flow: signup, login, and payment.
 - Run payment tests in provider test mode, never with live keys. For Stripe, use the test API keys of a [sandbox](https://docs.stripe.com/test-mode). For Creem, use a test API key and set `server: "test"` in the `creem` SDK, which uses `https://test-api.creem.io` ([test mode](https://docs.creem.io/getting-started/test-mode)). Pass the test keys as CI secrets.

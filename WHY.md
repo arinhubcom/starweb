@@ -743,6 +743,19 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - emdash-better-auth passes each email to the EmDash email pipeline, which sends it through the active provider plugin.
 - App emails use your own module and a Queue, so failed sends retry.
 
+## Setup
+
+### Why a template, setup.mjs, and CI
+
+- A list of 60 manual steps gave a different result each time: an agent could skip a step, change a version, or copy a config with a mistake. Files in `template/files/` are the same each time and carry the config that a test project proved.
+- `template/package.json` pins every version, including the `create-emdash` version. So the starter and the added packages are the ones that were tested together, and not the newest ones of the day.
+- `scripts/setup.mjs` does the mechanical part: it copies the files, patches the starter files, merges the pinned versions, and installs. The manual steps in [SETUP.md](rules/SETUP.md) keep only the work that needs a decision or an account: Cloudflare, optional features, and deploy.
+- The patches of starter files use exact string replacements. When a new starter version changes a patched text, `setup.mjs` stops with `Starter changed` and names the file, so the change fails loudly and does not leave a half-patched project. A fuzzy match could patch the wrong place without a sign.
+- The starter lockfile can pin versions that are younger than `min-release-age`, so `setup.mjs` deletes it and installs again with the new `.npmrc`.
+- CI runs `scripts/test-template.sh` on each change to `template/`, `scripts/`, or `rules/`, and every Monday. The script creates the pinned starter, runs `setup.mjs`, and runs `npm run check`, `npm run build`, and `npm run preview` with checks of the responses. The weekly run finds a change in the starter or in a registry package that no commit in this repository caused.
+- Dependabot groups the whole template in one group, `stack`, in the Starweb repository. One PR updates the set, and one CI run tests the set together. Separate PRs would test each package alone, and a pair that must match (for example `astro` and `@astrojs/cloudflare`) could fail in both.
+- The project `dependabot.yml` in `template/files/` uses the groups from [DEPS.md](rules/DEPS.md), because a project has its own review flow.
+
 ## Performance
 
 ### Why field data over lab data

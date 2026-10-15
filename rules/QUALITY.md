@@ -8,8 +8,8 @@ Follow the rules in [TESTING.md](TESTING.md) for tests and [DEPLOY.md](DEPLOY.md
 
 - Use TypeScript in strict mode. Extend `astro/tsconfigs/strict` (or `strictest`) in `tsconfig.json`.
 - Add `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noUnusedLocals`, and `noUnusedParameters` to `compilerOptions` when you extend `strict`. Do not add them when you extend `astro/tsconfigs/strictest`: it sets all of them.
-- Fix each `exactOptionalPropertyTypes` error in the starter code. Do not remove the flag. Spread an optional value only when it is set: `...(cursor ? { cursor } : {})` for `cursor` in `getEmDashCollection()`, and `...(Astro.currentLocale ? { currentLocale: Astro.currentLocale } : {})` for `currentLocale` in `createPublicPageContext()`. Pass `canonical ?? null` and `image ?? null`, and spread `content` the same way.
-- Remove `satisfies ExportedHandler` from `src/worker.ts`: `handler.fetch` is optional, so the check fails.
+- Keep `exactOptionalPropertyTypes` on. `setup.mjs` fixes the starter pages and `Base.astro` for it. Fix the same error in your own code. Do not remove the flag. Spread an optional value only when it is set: `...(cursor ? { cursor } : {})` for `cursor` in `getEmDashCollection()`, and `...(Astro.currentLocale ? { currentLocale: Astro.currentLocale } : {})` for `currentLocale` in `createPublicPageContext()`. Pass `canonical ?? null` and `image ?? null`, and spread `content` the same way.
+- Do not use `satisfies ExportedHandler` in `src/worker.ts`: `handler.fetch` is optional, so the check fails. The template `src/worker.ts` does not use it.
 
 ## Checks
 
@@ -59,9 +59,11 @@ Follow the rules in [TESTING.md](TESTING.md) for tests and [DEPLOY.md](DEPLOY.md
 - Let the Knip Wrangler plugin find the Worker entry. It adds `main` from the Wrangler config (`src/worker.ts`) as a production entry when `wrangler` is in `package.json`. Do not list it.
 - Add the files that the code registers by path or URL to `entry` in `knip.json`. Astro finds only `src/pages/**` and `src/middleware.ts`, so Knip reports app pages, middleware, and admin plugin files as unused. These globs are entry points, not an ignore list. See the [Knip configuration](https://knip.dev/reference/configuration).
 - Set `entry` to at least: `src/live.config.ts`, `src/apps/*/pages/**/*.astro!`, `src/apps/*/middleware.ts!`, `src/apps/*/admin/{plugin.ts,pages.tsx}!`, and `scripts/*.ts`. Add a glob for each other file kind that you register with `injectRoute()`, `addMiddleware()`, or `adminEntry`. The `!` marks production code for `knip --production`. A value in `entry` replaces the default `index`, `main`, and `cli` entries.
-- Add `"ignoreIssues": { "src/components/ui/**": ["exports", "types"] }` to `knip.json`. Installed components export their full API, and Knip would report the exports that the site does not use. Do not ignore other folders.
-- Add `"ignore": [".agents/**", "src/lib/utils.ts"]` to `knip.json`. Knip reports the installed agent skills, and `src/lib/utils.ts` until a component imports `cn`. Remove `src/lib/utils.ts` from `ignore` when code uses it.
-- Add a dependency that these rules install before any code uses it to `ignoreDependencies` in `knip.json` (for example `@base-ui/react`, `lucide-react`, `class-variance-authority`, `cn`, `@storybook/builder-vite`, `@vitest/expect`, `@vitest/spy`, `@vitest/utils`, and `@vitest/pretty-format`). Remove each entry when code uses the package. Do not add other packages.
+- Keep the `knip.json` of the template. It sets `entry` only, and Knip passes with no ignore list on a new project.
+- Add the Fulldev exceptions to `knip.json` only after you install Fulldev UI: `"ignoreIssues": { "src/components/ui/**": ["files", "exports", "types"], "src/lib/utils.ts": ["files"] }` and `"ignoreDependencies": ["cn", "class-variance-authority"]`. Installed components export their full API, and Knip reports the component files, `src/lib/utils.ts`, and these two packages until a page imports `Button`. Do not ignore other folders.
+- Remove `"files"` from the `ignoreIssues` entries, and the two packages from `ignoreDependencies`, when pages use the components and `cn`. Knip then reports them as used.
+- Add the dependencies that you install before any code uses them to `ignoreDependencies` only after you install them: `@base-ui/react` and `lucide-react` (React components), `@storybook/builder-vite` (Storybook), and `@vitest/expect`, `@vitest/spy`, `@vitest/utils`, and `@vitest/pretty-format` (Storybook with Vitest). Remove each entry when code uses the package. Do not add other packages.
+- Do not add `.agents/**` to `ignore`: Knip does not report the agent skills.
 - Let the Storybook, Vitest, and Playwright plugins find stories, `.storybook/` files, test files, and `playwright.config.ts`. Do not list them in `entry`.
 - Run `knip --production` to find code that is used only by tests and stories.
 
