@@ -9,7 +9,7 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 - npm only ([SETUP](SETUP.md)); no pnpm/Yarn/Bun; only `package-lock.json` in the repository. Commit it with each `package.json` change.
 - Add with `npm i <package>` / `npm i -D <package>`; never edit versions by hand.
 - CI: `npm ci`, not `npm install`.
-- No `--legacy-peer-deps`; fix the conflict. `emdash-better-auth` needs React ≥ 19.2.6 and the starter pins 19.2.4: template pins 19.3.0 → `npm i emdash-better-auth`; without the template → `npm i react@^19.2.6 react-dom@^19.2.6 emdash-better-auth`.
+- No `--legacy-peer-deps`; fix the conflict. `emdash-better-auth` needs React ≥ 19.2.6 and the starter pins 19.2.4: template pins 19.3.1 → `npm i emdash-better-auth`; without the template → `npm i react@^19.2.6 react-dom@^19.2.6 emdash-better-auth`.
 - Delete `pnpm-workspace.yaml` from the starter (else `shadcn init` uses pnpm, writes `pnpm-lock.yaml`). `setup.mjs` does it.
 - After adding `min-release-age`: delete the starter `package-lock.json` and `node_modules`, run `npm install` (starter lock may pin versions younger than 3 days). `setup.mjs` does it.
 - Node.js: newest LTS; major in `.nvmrc` (`24`); move up once the next major reaches LTS on the [Node.js release schedule](https://github.com/nodejs/release#release-schedule). No non-LTS.
