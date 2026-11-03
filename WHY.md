@@ -61,6 +61,7 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - Runs on the same stack: Cloudflare Workers, D1 for data, and R2 for media. No separate CMS hosting.
 - Live content: editors publish without a rebuild. Queries return a `cacheHint` for Astro route caching, so pages stay in the CDN cache.
 - Sandboxed plugins: each plugin runs in its own Worker isolate with only the capabilities it declares.
+- Modular back end: each plugin adds its own API routes, hooks, storage collections, KV store, and admin pages. You build the back end from plugins instead of one large app. See [Plugins](https://docs.emdashcms.com/plugins/overview/).
 - Structured content: rich text is Portable Text (JSON), not HTML, so it can render to web, email, or an API.
 - Built for agents: agent skills, a CLI, and a built-in MCP server.
 - Passkey-first auth with roles (Administrator, Editor, Author, Contributor).
