@@ -33,7 +33,7 @@
     "@cloudflare/vitest-plugin": "1.4.11",
     "@cloudflare/workers-types": "5.20261031.1",
     "@eslint/js": "10.0.1",
-    "@vitest/coverage-istanbul": "4.1.11",
+    "@vitest/coverage-istanbul": "4.1.12",
     "create-emdash": "1.4.0",
     "eslint": "10.14.0",
     "eslint-config-prettier": "10.1.8",
@@ -44,9 +44,9 @@
     "prettier-plugin-tailwindcss": "0.8.1",
     "shadcn": "4.23.0",
     "tsx": "4.23.15",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "typescript-eslint": "8.72.1",
-    "vitest": "4.1.11",
+    "vitest": "4.1.12",
     "wrangler": "4.156.0"
   }
 }
