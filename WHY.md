@@ -122,6 +122,24 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 
 - **class-variance-authority (`cva`):** what Fulldev UI and shadcn/ui generate. Smaller, but no slots and no class merge. Each added component needs a short conversion to `tv()`.
 
+### Class merge
+
+The project keeps two merge engines: the built-in one in `tv()` (default `tailwind-variants` entry), and the [`cn`](https://github.com/shadcn-ui/cn) package for `cn()` calls.
+
+- `tv()` can use the `twMerge` from `cn`: `createTV({ twMerge })` from `tailwind-variants/lite` (type `(classList: string) => string`). The output is the same, but it is slower.
+- The "30× faster" claim in the `cn` README compares `cn` with `clsx` + `tailwind-merge`, not with the built-in engine of tailwind-variants 4.
+- A local test (tailwind-variants 4.0.1, cn 0.5.2, Node.js 22) ran the Fulldev UI button with 500 different `class` overrides, 40 runs each, and gave the same classes in all 500 calls:
+
+| Setup | Time for 500 calls |
+| --- | --- |
+| `tv()`, default entry (built-in merge) | 0.36–0.40 ms |
+| `tv()`, `/lite` with `twMerge` from `cn` | 1.91–1.94 ms |
+| `cn()` from `tailwind-variants` | 0.17–0.18 ms |
+| `cn()` from the `cn` package | 0.18–0.21 ms |
+
+- `cn()` from the `cn` package stays: it is as fast as the `cn()` from tailwind-variants, and shadcn/ui components import it from `"cn"` directly, so a switch would add an import rewrite after each `shadcn add`.
+- The two engines differ on a few classes. Of 12 common pairs, only `font-sans font-[Inter]` differed: tailwind-variants keeps `font-[Inter]` (a font family in Tailwind CSS v4), and `cn` keeps both.
+
 ## [Fulldev UI](https://ui.full.dev)
 
 ### Why
