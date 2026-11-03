@@ -75,7 +75,7 @@ Images, video, fonts, icons, uploads. Layout shift → [UI-UX](UI-UX.md) (Cumula
 ### Astro fonts
 
 - `fonts` in `astro.config` (Astro 6+) with `fontProviders` from `astro/config`. No `@font-face`, no `<link>` to a font provider.
-- Per font: `name`, `provider`, `cssVariable`; `weights`, `styles`, `subsets` only as used.
+- Per font: `name`, `provider`, `cssVariable`; `weights`, `styles`, `subsets` only as used. Fix each build warning about a value the provider cannot serve.
 - `fallbacks: ["sans-serif"]`-style generic; keep `optimizedFallbacks: true`. Keep `display: swap`.
 - Self-hosted: `fontProviders.local()`, WOFF2 in `src/assets/fonts/`. Many weights → variable font (`weights: ["100 900"]`).
 - `<Font cssVariable="--font-sans" />` from `astro:assets` in the base layout `<head>`, once per font; `preload` only for first-view fonts.

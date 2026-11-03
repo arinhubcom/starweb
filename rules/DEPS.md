@@ -12,7 +12,7 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 - No `--legacy-peer-deps`; fix the conflict. `emdash-better-auth` needs React ≥ 19.2.6 and the starter pins 19.2.4: template pins 19.3.1 → `npm i emdash-better-auth`; without the template → `npm i react@^19.2.6 react-dom@^19.2.6 emdash-better-auth`.
 - Delete `pnpm-workspace.yaml` from the starter (else `shadcn init` uses pnpm, writes `pnpm-lock.yaml`). `setup.mjs` does it.
 - After adding `min-release-age`: delete the starter `package-lock.json` and `node_modules`, run `npm install` (starter lock may pin versions younger than 3 days). `setup.mjs` does it.
-- Node.js: newest LTS; major in `.nvmrc` (`24`); move up once the next major reaches LTS on the [Node.js release schedule](https://github.com/nodejs/release#release-schedule). No non-LTS.
+- Node.js: newest LTS; major in `.nvmrc` (`24`); move up once the next major reaches LTS on the [Node.js release schedule](https://github.com/nodejs/release#release-schedule). No non-LTS. Astro ≥ 7.4.2 needs Node.js ≥ 22.23.4.
 - npm ≥ 11; npm 10 fails with `Cannot read properties of null (reading 'edgesOut')`. Node.js 24 ships npm 11.
 - CI Node.js: `actions/setup-node` with `node-version-file` or `node-version` from the same value as local, `cache: npm`.
 - `npm outdated`; `npm ls <package>`.
