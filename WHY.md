@@ -93,8 +93,14 @@ Content and UI strings use two tools: [PolyStella](https://github.com/cloudflare
 
 ### Why not PolyStella for UI strings
 
-- `polystella translate-ui` protects only `{{name}}` placeholders. Paraglide uses `{name}`, which the model can change, and the CLI translates the `$schema` key.
+- `polystella translate-ui` protects only `{{name}}` placeholders. Paraglide uses `{name}`, which the model can change, and the CLI translates the `$schema` key. [cloudflare/polystella#66](https://github.com/cloudflare/polystella/issues/66) proposes support for Paraglide message files.
 - `polystellaEmdashAstro()` would add a second runtime (`Astro.locals.t`) next to Paraglide.
+
+### How they work together
+
+- Each text has one owner: editors own EmDash text, developers own `messages/`. A text in both places drifts apart.
+- One list of locales and one glossary keep content and UI strings in the same terms.
+- Until PolyStella supports `{name}`, the agent translates `messages/` by hand. `inlang check` catches what PolyStella's validator misses for Paraglide files: a missing or renamed variable fails the check (tested on 2026-11-03 with `@inlang/cli` 3.5.0).
 
 ### Risks
 

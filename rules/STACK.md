@@ -436,7 +436,7 @@ Web platform reference: HTML, `Intl`, `dir`, `prefers-color-scheme`, `console`, 
 
 ### Paraglide JS
 
-UI strings. → [I18N](I18N.md), [SAAS](SAAS.md)
+UI strings; `inlang check` (`@inlang/cli`) for missing translations and variables. → [I18N](I18N.md), [SAAS](SAAS.md)
 
 - llms: https://paraglidejs.com/llms.txt
 - context7: https://context7.com/opral/paraglide-js/llms.txt?tokens=10000
