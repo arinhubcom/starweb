@@ -45,7 +45,7 @@
 
 - State layer: overlay in content color (`currentColor`) over the container; never change the container color. Opacities: hover 8%, focus 10%, pressed 10%, dragged 16%.
 - Via `::before`: `relative before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10`.
-- Add once in the `cva()` base class; on an installed component remove its own hover color (`hover:bg-primary/90`).
+- Add once in the `tv()` `base`; on an installed component remove its own hover color (`hover:bg-primary/90`).
 - Disabled 38%: `disabled:opacity-38` (Base UI `data-disabled:opacity-38`); replace [shadcn/ui](STACK.md#shadcnui) `disabled:opacity-50`; no state layer.
 - Focus ring 3px, offset 2px: `focus-visible:outline-3 focus-visible:outline-offset-2 outline-ring` (theme color).
 

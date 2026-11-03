@@ -354,6 +354,15 @@ v4 styles. → [DESIGN](DESIGN.md), [UI-UX](UI-UX.md)
 - github: https://github.com/tailwindlabs/tailwindcss
 - skills: https://skills.sh/lombiq/tailwind-agent-skills/tailwind-4-docs
 
+### Tailwind Variants
+
+`tv()` variants and slots, built-in class merge. Replaces `class-variance-authority`. → [DESIGN](DESIGN.md), [COMPONENTS](COMPONENTS.md), [MATERIAL](MATERIAL.md)
+
+- llms: https://www.tailwind-variants.org/llms.txt · https://www.tailwind-variants.org/llms-full.txt
+- context7: https://context7.com/websites/tailwind-variants/llms.txt?tokens=10000
+- github: https://github.com/heroui-inc/tailwind-variants
+- mcp: https://www.tailwind-variants.org/api/mcp
+
 ### Fulldev UI
 
 `.astro` components and blocks via the shadcn CLI. → [COMPONENTS](COMPONENTS.md), [SETUP](SETUP.md)

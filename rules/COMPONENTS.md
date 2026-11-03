@@ -25,6 +25,8 @@
 - Source of `.astro` components and page blocks (sections, hero, features, pricing, FAQ); no client JS.
 - Before init add the alias to `tsconfig.json` `compilerOptions`: `"baseUrl": "."`, `"paths": { "@/*": ["./src/*"] }`; else `shadcn init` stops at "Validating import alias".
 - Init once: `npx shadcn@<version> init https://ui.full.dev/r/styles/base-vega/base.json`; `<version>` = `shadcn` in `devDependencies` of `template/package.json`. Writes `components.json` (`@fulldev` registry), theme tokens in `src/styles/global.css`, `cn()` in `src/lib/utils.ts`; installs `shadcn`, `cn`, `class-variance-authority`, `tw-animate-css`.
+- Right after init: `npm i tailwind-variants && npm rm class-variance-authority`.
+- After each `shadcn add` (Fulldev or shadcn/ui): convert every `cva()` in the added files to `tv()`. `cva("<base>", { variants, defaultVariants })` → `tv({ base: "<base>", variants, defaultVariants })`; `import { tv, type VariantProps } from "tailwind-variants"`. Call sites stay. Registry items import `class-variance-authority` without listing it; `npx astro check` reports each file left. → [DESIGN](DESIGN.md)
 - `class="@container"` on `<body>` in the base layout (container query variants such as `@2xl:`).
 - Install with `npx shadcn add @fulldev/button` (uses the project's `shadcn`). No `@latest`, no hand copy.
 - Location: `src/components/ui/<name>/` (`button.astro`, `button-variants.ts`, `index.ts`); `import { Button } from "@/components/ui/button"`. Your code after install; edit there.

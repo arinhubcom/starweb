@@ -32,7 +32,7 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 
 ### [Fulldev UI](STACK.md#fulldev-ui)
 
-9. `npx shadcn@<version> init https://ui.full.dev/r/styles/base-vega/base.json`; `<version>` = `shadcn` in `devDependencies` of `template/package.json` (init adds `shadcn`). Install `@base-ui/react`, `lucide-react`. Add the [Knip](STACK.md#knip) exceptions for Fulldev. → [COMPONENTS](COMPONENTS.md), [QUALITY](QUALITY.md) (Unused code)
+9. `npx shadcn@<version> init https://ui.full.dev/r/styles/base-vega/base.json`; `<version>` = `shadcn` in `devDependencies` of `template/package.json` (init adds `shadcn`). Install `@base-ui/react`, `lucide-react`, `tailwind-variants`; `npm rm class-variance-authority`. Add the [Knip](STACK.md#knip) exceptions for Fulldev. → [COMPONENTS](COMPONENTS.md), [QUALITY](QUALITY.md) (Unused code)
 10. `npx tsx scripts/theme.ts` generates `src/styles/theme.css` from the brand seed color; import it in `src/styles/global.css`. → [MATERIAL](MATERIAL.md) (Color)
 
 ## Auth

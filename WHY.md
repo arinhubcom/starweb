@@ -109,6 +109,19 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - Better Auth UI also has a shadcn/ui variant (Tailwind components copied into the project) and a headless package, `@better-auth-ui/react`. Both let the auth pages use the site theme.
 - This needs a plugin option to turn off the built-in pages ([emdash-better-auth#25](https://github.com/theweekendprojects/emdash-better-auth/issues/25)). Until then, the HeroUI pages stay.
 
+## [Tailwind Variants](https://www.tailwind-variants.org)
+
+### Why
+
+- `tv()` covers what `cva()` does (`base`, `variants`, `defaultVariants`, `compoundVariants`, `VariantProps`) and adds `slots` for multi-part components and `extend` to build one recipe on another.
+- It merges conflicting Tailwind classes itself, so a `class` override on a variant call wins without an extra merge step.
+- Version 4 has no dependencies and supports Tailwind CSS v4 with no extra setup.
+- A local test converted the Fulldev UI `button-variants.ts` from `cva()` to `tv()`: all 126 variant, size, and class override combinations gave the same classes as `cn(cva(...))`, and `VariantProps` typed the same props.
+
+### Alternatives
+
+- **class-variance-authority (`cva`):** what Fulldev UI and shadcn/ui generate. Smaller, but no slots and no class merge. Each added component needs a short conversion to `tv()`.
+
 ## [Fulldev UI](https://ui.full.dev)
 
 ### Why
