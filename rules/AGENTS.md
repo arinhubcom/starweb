@@ -26,6 +26,7 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project
 - `llms.txt`: try `<docs-origin>/llms.txt` and `/llms-full.txt`. Add only a URL that returns 200 with `text/plain` or `text/markdown`.
 - Skills: find with `https://skills.sh/api/search?q=<name>`. Prefer the vendor's own skill, then the most installed one. Link `https://skills.sh/<owner>/<repo>/<skill>`.
 - Check every URL before you add it. A URL that fails is not added.
+- Context7 rate-limits `llms.txt` checks (429); verify a Context7 ID through the search API instead.
 
 ## Template
 
