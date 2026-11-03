@@ -26,7 +26,7 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 
 ### [Astro](STACK.md#astro) i18n
 
-8. Multilingual → Astro i18n routing, [Paraglide JS](STACK.md#paraglide-js) plugin, `isPrerendered` branch in `src/middleware.ts` with `sequence()`. → [I18N](I18N.md), [SECURITY](SECURITY.md) (CSRF)
+8. Multilingual → Astro i18n routing, [Paraglide JS](STACK.md#paraglide-js) plugin for UI strings, `isPrerendered` branch in `src/middleware.ts` with `sequence()`; [PolyStella](STACK.md#polystella) EmDash plugin and the `AI` binding for content. → [I18N](I18N.md), [SECURITY](SECURITY.md) (CSRF), [DEPLOY](DEPLOY.md)
 
 ## UI
 

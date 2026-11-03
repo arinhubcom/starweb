@@ -211,6 +211,14 @@ CMS, plugins, SEO fields, i18n, media. Reference for Kysely on D1. → [CMS](CMS
 - github: https://github.com/emdash-cms/emdash
 - skills: https://skills.sh/emdash-cms/emdash/building-emdash-site · https://skills.sh/emdash-cms/emdash/emdash-cli · https://skills.sh/emdash-cms/skills/upgrading-emdash
 
+### PolyStella
+
+AI translation of EmDash content (`@cloudflare/polystella-emdash` plugin, Workers AI). Not for UI strings. → [I18N](I18N.md), [SETUP](SETUP.md)
+
+- context7: https://context7.com/cloudflare/polystella/llms.txt?tokens=10000
+- github: https://github.com/cloudflare/polystella
+- skills: https://skills.sh/cloudflare/polystella/polystella-consumer
+
 ### emdash-better-auth
 
 Site user login, organizations, Stripe billing, access. → [AUTH](AUTH.md), [PAYMENTS](PAYMENTS.md)

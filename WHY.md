@@ -73,6 +73,34 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 - **Headless SaaS CMS (Contentful, Sanity):** a separate service with its own cost, limits, and API calls on each request.
 - **Markdown in Git (Astro content collections):** good for developers, but editors cannot publish without Git and a rebuild.
 
+## Translation
+
+Content and UI strings use two tools: [PolyStella](https://github.com/cloudflare/polystella) translates EmDash content, and [Paraglide JS](https://paraglidejs.com) holds UI strings.
+
+### Why PolyStella for content
+
+- The `@cloudflare/polystella-emdash` plugin adds an AI translation panel to the EmDash editor. It translates the enabled fields with Workers AI and saves the result as an EmDash translation draft, so an editor reviews it before publishing.
+- It runs on the same Worker through the `AI` binding: no other service and no API key.
+- A glossary per locale keeps product names and preferred terms.
+- Tested on 2026-11-03 with EmDash 1.4.0 and PolyStella 0.3.0: the plugin installs without peer conflicts, and `astro check` and `astro build` pass.
+
+### Why Paraglide JS for UI strings
+
+- Typed message functions: `m.key({ name })` fails type checking for a missing key or parameter. PolyStella's `t("key")` is a string lookup.
+- Messages are plain functions, so React islands import them too. PolyStella's `Astro.locals.t` exists only on the server.
+- The client bundle gets only the messages it uses.
+- One catalog for the site and the app.
+
+### Why not PolyStella for UI strings
+
+- `polystella translate-ui` protects only `{{name}}` placeholders. Paraglide uses `{name}`, which the model can change, and the CLI translates the `$schema` key.
+- `polystellaEmdashAstro()` would add a second runtime (`Astro.locals.t`) next to Paraglide.
+
+### Risks
+
+- PolyStella is 0.x and changes often; its README calls it work in progress. Review its changelog before each update ([DEPS](rules/DEPS.md) does not automerge 0.x).
+- Only Workers AI models. Workers AI bills the account also in `astro dev`.
+
 ## [Kysely](https://kysely.dev)
 
 ### Why
