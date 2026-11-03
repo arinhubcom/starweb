@@ -139,6 +139,7 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 
 - `cn()` from the `cn` package stays: it is as fast as the `cn()` from tailwind-variants, and shadcn/ui components import it from `"cn"` directly, so a switch would add an import rewrite after each `shadcn add`.
 - The two engines differ on a few classes. Of 12 common pairs, only `font-sans font-[Inter]` differed: tailwind-variants keeps `font-[Inter]` (a font family in Tailwind CSS v4), and `cn` keeps both.
+- Upstream proposal for one shared engine, with these measurements and bundle sizes: [tailwind-variants#321](https://github.com/heroui-inc/tailwind-variants/discussions/321). If it lands, switch `tv()` to that engine and drop the second one.
 
 ## [Fulldev UI](https://ui.full.dev)
 
