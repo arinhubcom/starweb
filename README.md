@@ -88,6 +88,7 @@ The CMS gives auth, i18n, custom content types, sandboxed plugins, agent integra
 - The emdash-better-auth plugin gives login, 2FA, organizations, and Stripe billing. You do not build them from zero.
 - App data lives in its own D1 database, queried with Kysely. EmDash content stays separate.
 - Multi-app support: run many apps on one domain, for example `/app1` and `/app2`. Each app has its own D1 database and migrations, and all apps share one login and the same organizations. See [rules/SAAS.md](rules/SAAS.md).
+- Modular back end: each EmDash plugin adds its own API routes, hooks, storage, and admin pages.
 - Sandboxed plugins add custom logic with only the capabilities they declare.
 - Built-in data services: KV, D1, R2, Queues, Durable Objects, and Workers AI.
 - Low start cost: the free plan covers early users, then you pay for use.
