@@ -110,7 +110,7 @@ Read the Cloudflare platform limits in [WHY.md](WHY.md#limits).
 - **Astro:** SSR with zero JavaScript by default, islands for interactive parts, and content collections.
 - **Cloudflare Workers:** edge compute with no slow cold starts, built-in data services, and a CDN cache that serves SSR pages without running the Worker.
 - **Generous free plan:** 100,000 Worker requests per day, and requests for static assets are free. You can start without cost.
-- **EmDash:** an Astro-native CMS on the same stack (D1 + R2), with live content, sandboxed plugins, and tools for agents.
+- **EmDash:** an Astro-native CMS on the same stack (D1 + R2), with live content, sandboxed plugins, a modular back end built from plugins, and tools for agents.
 - **No lock-in:** Astro and EmDash can also run on Node.js as a fallback. Astro uses the `@astrojs/node` adapter, and EmDash runs on Node.js 22.16 or later with SQLite, PostgreSQL, or libSQL, and local or S3-compatible storage.
 - **One backer:** Cloudflare funds the development of Astro and EmDash, so all three parts are built to work together.
 
