@@ -2,16 +2,15 @@
 
 ## Transactional email
 
-### [React Email](https://react.email)
+### [React Email](STACK.md#react-email)
 
-- Write transactional emails with React Email components.
-- Send all email only through [Cloudflare Email Service](https://developers.cloudflare.com/email-service/). Do not use other email providers or SMTP services.
-- Send app emails through one email module. Call `send()` on the same `send_email` binding (`EMAIL`) and sender domain as the EmDash email provider, so auth and app emails share one setup. See the [Workers API](https://developers.cloudflare.com/email-service/api/send-emails/workers-api/) and set up the binding as in [AUTH.md](AUTH.md) (Email).
-- Do not send auth emails (verification, password reset, magic link, invites) from app code. emdash-better-auth sends them through the EmDash email provider.
-- Send app emails from a Queue consumer, not in the request. A Queue retries failed sends. This rule covers app emails only, not auth emails.
+- Transactional emails as React Email components.
+- Send all email only through [Cloudflare Email Service](STACK.md#cloudflare-email-service). No other provider or SMTP.
+- One email module for app emails: `send()` on the same `send_email` binding (`EMAIL`) and sender domain as the EmDash email provider. Binding setup → [AUTH](AUTH.md) (Email). Docs: [Workers API](https://developers.cloudflare.com/email-service/api/send-emails/workers-api/).
+- No auth emails (verification, password reset, magic link, invites) from app code; emdash-better-auth sends them via the EmDash email provider.
+- App emails (not auth) sent from a [Queues](STACK.md#queues) consumer, not in the request (retries).
 
-### [emailcn](https://emailcn.run/docs)
+### [emailcn](STACK.md#emailcn)
 
-- Start email templates from emailcn components and blocks. Use the React Email variant, so they match the React Email rule above.
-- Install them with the shadcn CLI and the `@emailcn` registry, for example `npx shadcn@latest add @emailcn/react-email/block-onboarding-default`. Do not copy the code by hand.
-- Edit the installed components in your project to match the brand. They are your code after install, not a package.
+- Start templates from emailcn components and blocks, React Email variant.
+- `npx shadcn@latest add @emailcn/react-email/block-onboarding-default`; no hand copy. Your code after install; edit to the brand.

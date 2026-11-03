@@ -2,108 +2,83 @@
 
 ## Docs
 
-### [Google developer documentation style guide](https://developers.google.com/style)
+### [Google developer documentation style guide](STACK.md#google-developer-documentation-style-guide)
 
-- Follow the Google developer documentation style guide for docs, rules, code comments, and commit messages. For UI text, follow the UI text rules below first.
-- Follow the project rules in `AGENTS.md` and `rules/` when they differ from the guide. Follow the guide for everything that the project rules do not cover.
-- Check the [word list](https://developers.google.com/style/word-list) for the spelling and use of terms.
-
-### [Voice and tone](https://developers.google.com/style/tone)
-
-- Use a friendly, conversational voice. Do not be flippant.
-- Write for readers around the world with different levels of English. Write simple and consistent text. Do not use slang, jargon, clichés, figurative language, or culturally specific references.
-- Do not announce future features or changes in docs.
-
-### [Highlights](https://developers.google.com/style/highlights)
-
-- Address the reader as "you". Do not use "we" for instructions.
-- Use active voice, so it is clear who does each action.
-- Use present tense for general behavior. Use future tense ("will") only for an action that happens later, for example during the next backup.
-- Use standard American spelling and punctuation.
-- State a condition before the instruction that it applies to: "To install the package, run `npm i`."
-
-### [Formatting and organization](https://developers.google.com/style/highlights#formatting-punctuation-and-organization)
-
-- Use sentence case for document titles and headings: "Write rules", not "Write Rules".
-- Use numbered lists for steps in order. Use bulleted lists for other lists. Use description lists for pairs of related items.
-- Use the serial (Oxford) comma: "pages, routes, and actions".
-- Put code, file names, commands, and API names in code font: `astro.config`, `npm i`, `injectRoute()`.
-- Put UI elements in bold: Click **Save**.
-- Use unambiguous dates, for example 2026-10-14 or October 14, 2026. Do not use 10/14/26.
-
-### [Link text](https://developers.google.com/style/link-text)
-
-- Write link text that makes sense without the text around it. Do not use "click here", "this document", or "this article".
-- Give each image in docs alt text.
-- Use high-resolution or vector images, such as SVG, when you can.
-- Write so that people with disabilities can use the docs.
+- Applies to docs, rules, code comments, commit messages. UI text: UI text rules first. `AGENTS.md` and `rules/` win where they differ.
+- Word list for spelling and term use: https://developers.google.com/style/word-list
+- Friendly, conversational voice; not flippant.
+- Global readers: simple, consistent text; no slang, jargon, clichés, figurative language, culture-specific references.
+- No announcements of future features or changes.
+- "You"; no "we" in instructions. Active voice. Present tense; "will" only for a later action (next backup). American spelling and punctuation.
+- Condition before instruction: "To install the package, run `npm i`."
+- Sentence case for titles and headings.
+- Numbered lists for ordered steps, bulleted for others, description lists for pairs.
+- Serial (Oxford) comma.
+- Code font: code, file names, commands, API names (`astro.config`, `npm i`, `injectRoute()`). UI elements bold: Click **Save**.
+- Unambiguous dates: 2026-10-14 or October 14, 2026; not 10/14/26.
+- Link text readable alone; no "click here", "this document", "this article".
+- Alt text on every image; vector or high-resolution images (SVG). Accessible to people with disabilities.
 
 ## UI text
 
-### [Material Design 3 content design](https://m3.material.io/foundations/content-design/overview)
+### [Material Design 3](STACK.md#material-design-3) content design
 
-- Follow the MD3 content design rules for all text in the UI: labels, buttons, menus, headings, dialogs, errors, emails, and alt text. Follow the Google developer documentation style guide for everything that MD3 does not cover. When the two differ, follow MD3.
+- MD3 content design for all UI text: labels, buttons, menus, headings, dialogs, errors, emails, alt text. Gaps → Google style guide. Conflicts → MD3.
 
-### [UX writing best practices](https://m3.material.io/foundations/content-design/style-guide/ux-writing-best-practices)
+### UX writing best practices
 
-- Tell users what happens when they take an action and how they can undo it. Use neutral, direct words. Do not use alarming or condescending warnings.
-- Do not misrepresent consequences, and do not try to influence the user's decision, for example when they cancel a subscription.
-- Use specific titles and headings that users can scan. Use headings and subheads to prioritize and group information.
-- Use sentence case for all UI text: titles, headings, labels, menu items, navigation, app bars, and buttons. Capitalize only product and brand names.
-- Do not use all caps.
-- Spell out words. Do not use Latin abbreviations such as "e.g." and "etc.": write "for example" and "and more".
+- Say what happens on an action and how to undo it. Neutral, direct words; no alarming or condescending warnings.
+- No misrepresented consequences, no steering the decision (cancel subscription).
+- Specific, scannable titles; headings and subheads prioritize and group.
+- Sentence case for all UI text (titles, headings, labels, menu items, navigation, app bars, buttons); capitalize only product and brand names. No all caps.
+- Spelled-out words; no "e.g.", "etc." → "for example", "and more".
 
-### [Word choice](https://m3.material.io/foundations/content-design/style-guide/word-choice)
+### Word choice
 
-- Address the user as "you" and "your".
-- Do not mix "me" or "my" with "you" or "your" on one screen.
-- Do not use "we", "our", or "I" to speak for the product. Use "I" or "my" only where the user agrees to something, for example "I agree to the terms of service".
+- "You" and "your". No "me"/"my" mixed with "you"/"your" on one screen.
+- No "we", "our", "I" for the product. "I"/"my" only where the user agrees ("I agree to the terms of service").
 
-### [Conversation mining](https://uxwritinghub.com/leveraging-conversation-mining-for-ux-writing-research/)
+### Conversation mining
 
-- Before you write UI text for a feature, find the words that its users use: support requests, customer feedback, reviews, forums, and social media.
-- Set a goal before you search, for example the name of a feature or the words for one problem. Use positive conversations for new text and negative conversations to find pain points.
-- Use the users' words for things and actions in labels, buttons, headings, and search. Do not copy slang, idioms, or hashtags: follow Global writing below.
-- Record each chosen term in a glossary. Use the same term for the same thing in all UI text.
+- Before writing UI text for a feature, find users' words: support requests, feedback, reviews, forums, social media.
+- Set a goal first (feature name, one problem's words). Positive conversations for new text, negative for pain points.
+- Use users' words for things and actions in labels, buttons, headings, search; no slang, idioms, hashtags → Global writing.
+- Glossary of chosen terms; same term for the same thing everywhere.
 
-### [Mailchimp voice and tone](https://styleguide.mailchimp.com/voice-and-tone/)
+### [Mailchimp content style guide](STACK.md#mailchimp-content-style-guide) voice and tone
 
-- Use this section only for voice and tone. Follow MD3 for all other UI text rules, also when the Mailchimp guide differs, for example on "we".
-- Keep one voice in all UI text, from the home page to system alerts: plain, warm, and human. Change only the tone.
-- Before you write, think about the user's state of mind, for example relieved after a task, or confused by an error. Match the tone to it.
-- Put clarity before fun. Use humor only when it fits and comes naturally. Do not force jokes. When you are not sure, write without humor.
-- Write positively: say what the user can do, not what they cannot do.
-- Do not use hype, over-promises, or upsell language. Do not use emotional tricks to make users act.
-- Explain hard concepts in plain words, without condescension.
+- Voice and tone only; MD3 wins elsewhere (for example "we").
+- One voice in all UI text, home page to system alerts: plain, warm, human. Vary only tone, matched to the user's state of mind (relieved, confused).
+- Clarity before fun; humor only when natural; unsure → none.
+- Positive: what the user can do, not cannot.
+- No hype, over-promises, upsell, emotional tricks.
+- Hard concepts in plain words, no condescension.
 
-### [Grammar and punctuation](https://m3.material.io/foundations/content-design/style-guide/grammar-and-punctuation)
+### Grammar and punctuation
 
-- Do not end a single sentence with a period in labels, tooltips, bulleted lists, dialog body text, and link text. Use periods when the text has more than one sentence.
-- Use contractions ("don't", "can't"). Use "do not" only when you need more emphasis for a caution.
-- Use the serial comma, except before "&".
-- Use commas in numbers from 1,000 to 1 million. Do not use them in years, street addresses, and similar IDs. Use "M" for rounded millions, for example "2M downloads".
-- Do not use colons in headings. Use a colon before a list in body text.
-- Use exclamation points only for celebrations and greetings. Do not use them for empty states and common tasks.
-- Use an ellipsis only for an action in progress, with no space before it. Do not put an ellipsis in buttons or menu items.
-- Use parentheses only to define terms and acronyms. Do not use them for side notes.
-- Use "&" only in headlines, table and column headers, navigation labels, and buttons when space is short. Write "and" in sentences.
-- Do not use em dashes. Use an en dash with no spaces for ranges, for example "9 AM–5 PM". Do not put spaces around hyphens.
-- When you are not sure if a compound adjective or noun needs a hyphen, check [AP Style](https://www.apstylebook.com). Do not use AP Style for other rules.
-- Use bold for emphasis. Use italics only for one word or a name, never for a sentence.
+- No period on a single sentence in labels, tooltips, bulleted lists, dialog body, link text; periods when more than one sentence.
+- Contractions ("don't", "can't"); "do not" only for emphasis in a caution.
+- Serial comma, except before "&".
+- Commas in numbers 1,000 to 1 million; none in years, street addresses, similar IDs. "M" for rounded millions (2M downloads).
+- No colons in headings; colon before a list in body text.
+- Exclamation points only for celebrations and greetings; not empty states or common tasks.
+- Ellipsis only for action in progress, no space before; none in buttons or menu items.
+- Parentheses only to define terms and acronyms, not side notes.
+- "&" only in headlines, table and column headers, navigation labels, buttons when space is short; "and" in sentences.
+- No em dashes. En dash without spaces for ranges (9 AM–5 PM). No spaces around hyphens.
+- Unsure about a compound hyphen: [AP Style](https://www.apstylebook.com), for that only.
+- Bold for emphasis; italics only for one word or a name, never a sentence.
 
-### [Global writing](https://m3.material.io/foundations/content-design/global-writing/word-choice)
+### Global writing
 
-- Use global examples. Do not refer to one country's holidays, places, or companies.
-- Write short, simple sentences. Plan for space: translated text is on average 1.5 times longer than English.
-- Do not use abbreviations, except common time abbreviations.
-- Repeat the noun instead of "it" when the noun is not clear. Do not start a sentence with "this" or "that" unless the noun follows.
-- Do not use idioms, colloquial phrases, and technical jargon.
-- Do not use "please", "sorry", and "thank you", especially in error messages. Use "please" only when you ask the user to do something inconvenient.
-- Add a description for translators to each message that has a local reference (name, place, currency, temperature, date format) or an abbreviation.
+- Global examples; no one country's holidays, places, companies.
+- Short, simple sentences; plan space for translations (about 1.5 times longer).
+- No abbreviations except common time abbreviations.
+- Repeat the noun instead of an unclear "it"; no sentence start with "this"/"that" without a noun.
+- No idioms, colloquial phrases, jargon.
+- No "please", "sorry", "thank you", especially in errors; "please" only for an inconvenient request.
+- Translator description on each message with a local reference (name, place, currency, temperature, date format) or abbreviation.
 
-### [Alt text](https://m3.material.io/foundations/content-design/alt-text)
+### Alt text
 
-- Describe the meaning and context of an image, not its details.
-- Keep alt text to 140 characters or less.
-- Do not start alt text with "image of": screen readers already say "image".
-- Set `alt=""` on decorative images, which give no information.
+- Meaning and context, not details. 140 characters or less. No "image of" start. `alt=""` for decorative images.

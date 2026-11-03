@@ -2,112 +2,111 @@
 
 ## Code
 
-### [Effect](https://effect.website)
+### [Effect](STACK.md#effect)
 
-- Use Effect for typed errors, async code, and dependency injection. Do not use Effect Schema.
-- Use Effect 4 names: catch errors with `Effect.catch`. Do not use `Effect.catchAll`, which is the Effect 3 name.
+- Typed errors, async, DI. No Effect Schema.
+- Effect 4 names: `Effect.catch`, not `Effect.catchAll` (Effect 3).
 
-### [Zod](https://zod.dev)
+### [Zod](STACK.md#zod)
 
-- Compile schemas at build time with [zod-compiler](https://github.com/gajus/zod-compiler) (Vite plugin in `astro.config`). Import the plugin as the default export: `import zodCompiler from "zod-compiler/vite"`. Do not use `z.compile()`: it uses `new Function()`, which Workers do not allow, so it silently falls back to the slower runtime parser.
-- Use Zod for all schemas and validation.
-- Validate in Effect code with the `decode` helper in `src/lib/effect/decode.ts`: `decode(schema, input)` returns `Effect<Output, ValidationError>`. Do not call `schema.parse()` in Effect code, because it throws.
-- Define `ValidationError` in the same file as `class ValidationError extends Data.TaggedError("ValidationError")<{ error: z.ZodError }> {}`. In `decode`, call `schema.safeParse(input)`, return `Effect.succeed(result.data)` when `result.success` is `true`, and `Effect.fail(new ValidationError({ error: result.error }))` when it is `false`.
+- All schemas and validation in Zod.
+- Compile at build time with [zod-compiler](https://github.com/gajus/zod-compiler): Vite plugin in `astro.config`, default import `import zodCompiler from "zod-compiler/vite"`. No `z.compile()` (`new Function()` is blocked on Workers, silently falls back to the slow runtime parser).
+- Effect code: `decode(schema, input): Effect<Output, ValidationError>` in `src/lib/effect/decode.ts`. No `schema.parse()` (throws).
+- Same file: `class ValidationError extends Data.TaggedError("ValidationError")<{ error: z.ZodError }> {}`. `decode` uses `safeParse`: `Effect.succeed(result.data)` or `Effect.fail(new ValidationError({ error: result.error }))`.
 
 ## Backend
 
-### [Cloudflare Workers](https://developers.cloudflare.com/workers/)
+### [Workers](STACK.md#workers)
 
-- Use bindings (KV, D1, R2) from the `env` object. Do not call Cloudflare services over public HTTP when a binding exists.
-- Do not keep request state in global variables. An isolate serves many requests.
-- Use `ctx.waitUntil()` for work after the response, such as logs or analytics. In Astro code, use `Astro.locals.cfContext.waitUntil()`.
-- Prefer Web APIs (`fetch`, `Request`, `Response`, Web Crypto) over Node.js APIs. Set `compatibility_date` to `2026-08-04` or later: Node.js APIs are then on by default, so do not add the `nodejs_compat` flag.
-- Generate binding types with `wrangler types`. Do not write them by hand.
+- Bindings (KV, D1, R2) from `env`; no public HTTP to a Cloudflare service that has a binding.
+- No request state in globals.
+- `ctx.waitUntil()` for post-response work; in Astro `Astro.locals.cfContext.waitUntil()`.
+- Web APIs over Node.js APIs. `compatibility_date` ≥ `2026-08-04` (Node.js APIs on by default); no `nodejs_compat` flag.
+- Binding types: `wrangler types`, never by hand.
 
-### [Background work](https://developers.cloudflare.com/queues/)
+### Background work
 
-- Pick the smallest tool that works:
-  - `waitUntil()` for small work after the response, such as logs.
-  - [Queues](https://developers.cloudflare.com/queues/) for single jobs, such as emails or webhooks. They retry and support a dead letter queue.
-  - Cron Triggers (`scheduled()`) for jobs on a schedule.
-  - [Workflows](https://developers.cloudflare.com/workflows/) for processes with many steps that can run for minutes, days, or weeks.
-- Configure each Queue consumer in `queues.consumers` in `wrangler.jsonc`: `queue`, `max_batch_size` (default 10), `max_retries` (default 3), and `dead_letter_queue`. Without a `dead_letter_queue`, a message that reaches `max_retries` is deleted for good. Add a consumer for the dead letter queue too: a message in a dead letter queue without a consumer is deleted after 4 days.
-- Call `message.ack()` for each message that succeeded and `message.retry()` for each one that failed, in the `queue(batch, env, ctx)` handler. Do not let one failed message throw: it retries the whole batch. Follow the [batching and retries](https://developers.cloudflare.com/queues/configuration/batching-retries/) docs.
-- Write each Queue consumer to be idempotent, because Queues deliver at least once and can deliver a message twice. Put a unique ID in each message when you send it, and use it as the primary key of the insert or as the idempotency key of the upstream API. See [delivery guarantees](https://developers.cloudflare.com/queues/reference/delivery-guarantees/).
-- Repeat the `queues.producers` and `queues.consumers` entries in `env.production`. Queue bindings are not inherited by environments. Follow the rules in [DEPLOY.md](DEPLOY.md) (Environments).
-- Do not use Vercel Workflow DevKit or TanStack Workflow. They have no stable Cloudflare adapter.
-- Export Workflows, Durable Objects, and the `queue()` handler from the custom entrypoint `src/worker.ts` that the EmDash template writes (`"main": "./src/worker.ts"` in `wrangler.jsonc`).
-- Keep `...handler` from `@emdash-cms/cloudflare/worker` for Astro requests, and `scheduled: createScheduledHandler()` in `src/worker.ts`. Do not replace them with `handle()` from `@astrojs/cloudflare/handler`: the EmDash handler also publishes scheduled entries and purges their cache tags.
-- Write each workflow as a class that extends `WorkflowEntrypoint` from `cloudflare:workers`. Add it to the `workflows` array in `wrangler.jsonc` (`name`, `binding`, `class_name`). Start it from Astro with `env.MY_WORKFLOW.create({ id, params })`.
-- Follow the [rules of Workflows](https://developers.cloudflare.com/workflows/build/rules-of-workflows/):
-  - Put each side effect in its own `step.do()`, and make it idempotent: a step can run more than once.
-  - Give steps fixed names. Do not put timestamps or random values in them.
-  - Do not keep state outside of steps. Pass data to the next step as the return value of a step.
+- Smallest tool that works:
+  - `waitUntil()`: small post-response work (logs).
+  - [Queues](STACK.md#queues): single jobs (email, webhooks).
+  - Cron Triggers (`scheduled()`): schedules.
+  - [Workflows](STACK.md#workflows): multi-step, minutes to weeks.
+- Consumer in `queues.consumers` (`wrangler.jsonc`): `queue`, `max_batch_size` (10), `max_retries` (3), `dead_letter_queue`. Without a DLQ, messages are deleted after `max_retries`. DLQ needs its own consumer (deleted after 4 days otherwise).
+- `queue(batch, env, ctx)`: `message.ack()` per success, `message.retry()` per failure. Never throw per message (retries the whole batch).
+- Idempotent consumers (at-least-once): unique ID per message as insert primary key or upstream idempotency key.
+- Repeat `queues.producers` and `queues.consumers` in `env.production` (not inherited). → [DEPLOY](DEPLOY.md) (Environments)
+- No Vercel Workflow DevKit or TanStack Workflow (no stable Cloudflare adapter).
+- Export Workflows, Durable Objects, `queue()` from custom entrypoint `src/worker.ts` (EmDash template; `"main": "./src/worker.ts"`).
+- Keep `...handler` from `@emdash-cms/cloudflare/worker` and `scheduled: createScheduledHandler()`. No `handle()` from `@astrojs/cloudflare/handler` (EmDash handler also publishes scheduled entries and purges cache tags).
+- Workflow = class extending `WorkflowEntrypoint` (`cloudflare:workers`); register in `workflows` (`name`, `binding`, `class_name`); start with `env.MY_WORKFLOW.create({ id, params })`.
+- Workflows rules:
+  - One side effect per `step.do()`, idempotent.
+  - Fixed step names (no timestamps or random values).
+  - No state outside steps; pass data as step return values.
   - `await` every step.
-  - Use a unique instance ID, such as an order ID (up to 100 characters: letters, digits, `-`, `_`). `create()` throws an error when the ID is already in use, so handle that error.
+  - Unique instance ID (order ID; ≤ 100 chars: letters, digits, `-`, `_`); handle `create()` throwing on a duplicate.
 
 ## Frontend
 
-### [Astro](https://docs.astro.build/)
+### [Astro](STACK.md#astro)
 
-- Use `output: "server"` with the `@astrojs/cloudflare` adapter. Add `export const prerender = true` to pages that do not change per request.
-- Send as little JavaScript to the browser as possible. Astro renders components to HTML and CSS and removes client JavaScript by default. Keep it that way, and add JavaScript only for a part that must be interactive.
-- Pick the first option that works, in this order: static `.astro` HTML and CSS, native HTML (`<details>`, `popover` with `popovertarget`, a `<form>` with an Astro Action), a `<script>` in the component, a server island, and a React island last.
-- Write UI as `.astro` components by default. Use a UI framework island only when the part must be interactive. Follow the rules in [COMPONENTS.md](COMPONENTS.md).
-- Submit forms with `<form method="POST" action={actions.name}>` and read the result with `Astro.getActionResult()`. Do not add an island only to send a form. The page must render on demand (no `prerender`).
-- Use a server island (`server:defer`) for slow or per-user parts of a page, such as an avatar or a cart count. Do not fetch them with client JavaScript.
-- Pick the lowest hydration directive that works: `client:visible`, `client:idle`, or `client:media` before `client:load`. Use `client:only` only when the component cannot render on the server.
-- Use content collections for Markdown and MDX content. Do not render Markdown per request.
-- Use Astro Actions for forms and mutations. Validate input with Zod.
-- Read Cloudflare bindings and secrets with `import { env } from "cloudflare:workers"`. Do not use `process.env` or the removed `Astro.locals.runtime` API.
-- Use `astro:assets` (`<Image />`) for images. Keep the adapter default `imageService: "cloudflare-binding"`.
+- `output: "server"` + `@astrojs/cloudflare`. `export const prerender = true` on static pages.
+- Minimal client JS. Order: static `.astro` HTML/CSS → native HTML (`<details>`, `popover`/`popovertarget`, `<form>` + Action) → component `<script>` → server island → React island.
+- `.astro` components by default; islands only for interactivity. → [COMPONENTS](COMPONENTS.md)
+- Forms: `<form method="POST" action={actions.name}>` + `Astro.getActionResult()`. No island just to submit. Page must render on demand.
+- Server islands (`server:defer`) for slow or per-user parts (avatar, cart count); no client fetch.
+- Lowest hydration directive: `client:visible`, `client:idle`, `client:media` before `client:load`. `client:only` only when SSR is impossible.
+- Content collections for Markdown and MDX; no per-request Markdown rendering.
+- Actions for forms and mutations, Zod input.
+- Bindings and secrets: `import { env } from "cloudflare:workers"`. No `process.env`, no `Astro.locals.runtime`.
+- Images: `astro:assets` `<Image />`, keep `imageService: "cloudflare-binding"`.
 
-### [TanStack](https://tanstack.com)
+### [TanStack](STACK.md#tanstack)
 
-- Use TanStack libraries only in highly interactive React islands, such as app dashboards. Do not use them on content pages or for simple forms: use Astro Actions there. Do not use TanStack Start: Astro is the framework.
-- Islands do not share React context. Do not wrap each island in its own `QueryClientProvider` with a new client. Create one `QueryClient` in a shared module and import it in each island.
-- Router: use it only for a client-side app (SPA) inside one `client:only="react"` island, served by the app catch-all page `src/apps/app1/pages/[...path].astro`, which the app integration injects at `/app1/[...path]` (see Apps). For navigation between Astro pages, use Astro `<ClientRouter />`.
-- Query: use it for data fetching and caching in islands. Use DB (beta) only when Query is not enough, for example for live queries and optimistic writes on local collections.
-- Form: pass Zod schemas to `validators` directly. It supports Standard Schema, so no adapter is needed.
-- Table: it is headless, so write the markup and styles yourself. Use Virtual for long lists and tables.
-- Store: use it for state that more than one island shares. It is framework agnostic.
-- Pacer: use it to debounce, throttle, or rate-limit calls, for example search as you type.
-- Hotkeys (alpha): use it only for apps that need keyboard shortcuts, such as a command palette.
-- Charts: use it for charts in dashboards. It renders SVG and supports server rendering.
-- AI: use it for streaming chat and tool calls. Use the `@tanstack/ai-cloudflare` adapter for Workers AI.
-- Markdown and Highlight: use them only for Markdown that arrives at runtime, such as streamed AI output. For site content, use content collections and Astro code highlighting at build time.
+- Only in highly interactive [React](STACK.md#react) islands (dashboards). Not on content pages or simple forms (Actions). No TanStack Start.
+- Islands share no React context: one `QueryClient` in a shared module imported by each island; no per-island `QueryClientProvider` with a new client.
+- Router: only for an SPA in one `client:only="react"` island at the app catch-all `src/apps/app1/pages/[...path].astro` (injected at `/app1/[...path]`, see Apps). Between Astro pages: `<ClientRouter />`.
+- Query: fetching and caching. DB (beta) only when Query is not enough (live queries, optimistic writes on local collections).
+- Form: Zod schemas straight into `validators` (Standard Schema).
+- Table: headless; Virtual for long lists.
+- Store: state shared across islands.
+- Pacer: debounce, throttle, rate-limit (search as you type).
+- Hotkeys (alpha): only for apps needing shortcuts (command palette).
+- Charts: dashboard charts (SVG, SSR).
+- AI: streaming chat and tool calls; `@tanstack/ai-cloudflare` for Workers AI.
+- Markdown and Highlight: only runtime Markdown (streamed AI output). Site content: collections + Astro build-time highlighting.
 
 ## Apps
 
-### Micro frontends: [Astro integrations](https://docs.astro.build/en/reference/integrations-reference/)
+### Micro frontends: Astro integrations
 
-- Build each app as a vertical micro frontend: one folder, for example `src/apps/app1/`, that owns all of the app: pages, API routes, middleware, actions, components, islands, repositories, and the `Database` interface.
-- Use this layout in each app folder: `integration.ts`, `pages/`, `api/`, `middleware.ts`, `actions.ts`, `components/`, `islands/`, `db/`. Keep the migrations in `migrations/app1/`. Follow the rules in [SAAS.md](SAAS.md) (Multiple apps).
-- Register each app as a local Astro integration in `src/apps/app1/integration.ts`, and add it to `integrations` in `astro.config`: `integrations: [emdash(), app1()]`. To remove an app, remove its folder, its line in `astro.config`, and its bindings.
-- Add the app routes with `injectRoute()` in the `astro:config:setup` hook. Pass the entrypoint as a URL relative to the integration file: `injectRoute({ pattern: "/app1/[...path]", entrypoint: new URL("./pages/[...path].astro", import.meta.url) })`.
-- Inject each API route file the same way, with its full pattern, for example `injectRoute({ pattern: "/app1/api/v1/items", entrypoint: new URL("./api/items.ts", import.meta.url) })`. Export `GET`, `POST`, and the other method handlers from the file.
-- Do not put app pages in `src/pages/`. Keep `src/pages/` for the site: marketing pages and CMS content.
-- Start every route of an app with its prefix: pages at `/app1/...` and API routes at `/app1/api/...`.
-- Add app middleware with `addMiddleware({ entrypoint: new URL("./middleware.ts", import.meta.url), order: "pre" })`. It runs on every request, so return `next()` at once when `context.url.pathname` does not start with the app prefix. Type the handler as `MiddlewareHandler` (`import type { MiddlewareHandler } from "astro"`). Do not use `defineMiddleware` from `astro:middleware`: Vitest cannot import it.
-- Define app actions in `src/apps/app1/actions.ts` as one object (`export const app1 = { create, update }`). Add it to `src/actions/index.ts` as a group: `export const server = { app1 }`. Call it as `actions.app1.create`.
-- Use relative imports inside an app. Use `@/` imports only for shared code.
-- Do not import from another app folder. Share code only through `src/lib/`, `src/layouts/`, and `src/components/ui/`.
-- Do not read the database binding of another app. To use its data, call its API route or send a message to a Queue.
-- Use the shared base layout from `src/layouts/` in all apps, so all apps have the same header, theme, and login.
-- Do not share island state between apps. Each app has its own stores.
-- When an app must deploy on its own, move its folder to a separate Astro project and Worker. Keep the same domain and add a Workers route for the path, for example `example.com/app1/*`: the most specific route wins, and the login cookie still works. Read [WHY.md](../WHY.md#when-to-split-the-app-into-a-separate-worker) first. Follow the rules in [DEPLOY.md](DEPLOY.md) (Separate Workers).
+- Vertical micro frontend per app: one folder `src/apps/app1/` owns pages, API routes, middleware, actions, components, islands, repositories, `Database` interface.
+- Layout: `integration.ts`, `pages/`, `api/`, `middleware.ts`, `actions.ts`, `components/`, `islands/`, `db/`. Migrations in `migrations/app1/`. → [SAAS](SAAS.md) (Multiple apps)
+- Local Astro integration `src/apps/app1/integration.ts`, in `integrations: [emdash(), app1()]`. Removing an app = folder + `astro.config` line + bindings.
+- Routes: `injectRoute()` in `astro:config:setup`, entrypoint relative: `injectRoute({ pattern: "/app1/[...path]", entrypoint: new URL("./pages/[...path].astro", import.meta.url) })`.
+- API route files likewise, full pattern: `injectRoute({ pattern: "/app1/api/v1/items", entrypoint: new URL("./api/items.ts", import.meta.url) })`; export `GET`, `POST`, etc.
+- No app pages in `src/pages/` (site only: marketing, CMS content).
+- Every route starts with the prefix: pages `/app1/...`, API `/app1/api/...`.
+- Middleware: `addMiddleware({ entrypoint: new URL("./middleware.ts", import.meta.url), order: "pre" })`. Runs on every request → `next()` at once when `context.url.pathname` lacks the prefix. Type `MiddlewareHandler` (`import type { MiddlewareHandler } from "astro"`); no `defineMiddleware` from `astro:middleware` (Vitest cannot import it).
+- Actions: `src/apps/app1/actions.ts` as one object (`export const app1 = { create, update }`); in `src/actions/index.ts`: `export const server = { app1 }`; call `actions.app1.create`.
+- Relative imports inside an app; `@/` only for shared code.
+- No imports from another app folder. Share via `src/lib/`, `src/layouts/`, `src/components/ui/`.
+- Never read another app's database binding → its API route or a Queue message.
+- Shared base layout from `src/layouts/` (same header, theme, login).
+- No island state shared between apps; own stores.
+- Independent deploy → separate Astro project + Worker, same domain, Workers route (`example.com/app1/*`; most specific wins, login cookie works). Read [WHY.md](../WHY.md#when-to-split-the-app-into-a-separate-worker) first. → [DEPLOY](DEPLOY.md) (Separate Workers)
 
-### App admin: [EmDash native plugins](https://docs.emdashcms.com/plugins/creating-native-plugins/react-admin/)
+### App admin: [EmDash](STACK.md#emdash) native plugins
 
-- Build the admin of each app as a native EmDash plugin in the app folder: `src/apps/app1/admin/` with `descriptor.ts`, `plugin.ts`, and `pages.tsx`. Do not make a separate npm package.
-- Register it in the EmDash integration, next to the app integration: `integrations: [emdash({ plugins: [app1Admin()] }), app1()]`.
-- Put the descriptor factory in `descriptor.ts` and import only that file in `astro.config`. Return `id`, `version`, `format: "native"`, `entrypoint`, and `adminEntry`.
-- Put the runtime in `plugin.ts`: `export default function createPlugin() { return definePlugin({ ... }) }` with `routes` and `admin.pages`.
-- Set `entrypoint` and `adminEntry` as paths from the project root: `"/src/apps/app1/admin/plugin.ts"` and `"/src/apps/app1/admin/pages.tsx"`. Do not build them with `import.meta.url`: `plugin.ts` runs in the Worker, where `new URL(..., import.meta.url)` throws "Invalid URL string", EmDash does not start, and all `/_emdash` routes return 404.
-- Export the admin entry path as a constant from `descriptor.ts`, and use it for both `adminEntry` and `admin.entry`. The two values must be the same.
-- Name the plugin `<app>-admin`, for example `app1-admin`. Its pages are at `/_emdash/admin/plugins/app1-admin/<path>` and its routes at `/_emdash/api/plugins/app1-admin/<route>`.
-- Put all pages of an app in one sidebar group with the app name: `pages: [{ path: "/items", label: "Items", group: "App1" }]`.
-- Import the app repositories in the route handler with `await import("../db/items")`. Do not use `Astro.locals` in handlers: they get the plugin context.
-- Set a `permission` on each route. The default `plugins:manage` allows only administrators. Call the routes from admin pages with `apiFetch()` from `emdash/plugin-utils`.
-- Use plugin routes only for staff. Keep the routes for customers in the app (`/app1/api/...`).
-- Test admin pages locally after you log in with `/_emdash/api/auth/dev-bypass`.
+- Admin = native EmDash plugin in the app folder `src/apps/app1/admin/`: `descriptor.ts`, `plugin.ts`, `pages.tsx`. No separate npm package. UI: [Kumo](STACK.md#kumo). → [DESIGN](DESIGN.md)
+- Register: `integrations: [emdash({ plugins: [app1Admin()] }), app1()]`.
+- `descriptor.ts` holds the factory (only file imported in `astro.config`): returns `id`, `version`, `format: "native"`, `entrypoint`, `adminEntry`.
+- `plugin.ts`: `export default function createPlugin() { return definePlugin({ ... }) }` with `routes` and `admin.pages`.
+- `entrypoint`/`adminEntry` = project-root paths: `"/src/apps/app1/admin/plugin.ts"`, `"/src/apps/app1/admin/pages.tsx"`. No `import.meta.url` (`new URL` throws "Invalid URL string" in the Worker; EmDash fails, `/_emdash` routes 404).
+- Admin entry path as one constant in `descriptor.ts`, used for both `adminEntry` and `admin.entry` (must match).
+- Name `<app>-admin` (`app1-admin`). Pages `/_emdash/admin/plugins/app1-admin/<path>`, routes `/_emdash/api/plugins/app1-admin/<route>`.
+- One sidebar group per app: `pages: [{ path: "/items", label: "Items", group: "App1" }]`.
+- Repositories in route handlers via `await import("../db/items")`. No `Astro.locals` (handlers get the plugin context).
+- `permission` on each route (default `plugins:manage` = administrators only). Admin pages call routes with `apiFetch()` from `emdash/plugin-utils`.
+- Plugin routes for staff only; customer routes in `/app1/api/...`.
+- Test admin pages locally after login via `/_emdash/api/auth/dev-bypass`.

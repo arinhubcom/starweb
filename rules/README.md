@@ -1,57 +1,13 @@
 # README
 
-This folder has the rules for AI agents that build with Starweb. Start with [STACK.md](STACK.md). It lists the tools and links to the topic file for each tool.
+Starweb rules for agents that know the stack: names only, sources in [STACK.md](STACK.md). Reasons and alternatives: [WHY.md](../WHY.md).
 
-## Stack
+Start with [STACK.md](STACK.md): every lib, tool, and spec with its `llms.txt`, Context7, GitHub, MCP, and skills.sh links.
 
-| File | Contents |
+| Area | Files |
 | --- | --- |
-| [STACK.md](STACK.md) | The tools of the stack, with a link to the topic file for each tool. |
-| [SETUP.md](SETUP.md) | Steps to set up a new project, in order: `create-emdash` at the pinned version, `scripts/setup.mjs` (the tested files of `template/files/`), updates with `scripts/update.mjs`, Cloudflare (login, D1, Placement), optional i18n, Fulldev UI and the MD3 theme, auth, apps, Sentry, Storybook, Playwright, agent skills, checks, and the first dev deploy and release. |
-| [Template](https://github.com/arinhubcom/starweb/tree/main/template/files) | The tested config, security, test, CI, and Dependabot files that `scripts/setup.mjs` copies into a new project, and that `scripts/update.mjs` merges into an existing project. `template/package.json` pins the versions. [`scripts/test-template.sh`](https://github.com/arinhubcom/starweb/blob/main/scripts/test-template.sh), [`scripts/test-update.sh`](https://github.com/arinhubcom/starweb/blob/main/scripts/test-update.sh), and the `Template` workflow test it. Change a rule and its file together (see [AGENTS.md](AGENTS.md)). |
-| [ARCH.md](ARCH.md) | Architecture: Effect, Zod and the `decode` helper, Cloudflare Workers, background work (Queues with a dead letter queue), Astro, TanStack, micro frontends, and app admin pages. |
-| [SAAS.md](SAAS.md) | Rules for a small SaaS app in one Astro project and one Worker: multiple apps, data, plugins, building blocks, limits, and billing. |
-
-## Backend and data
-
-| File | Contents |
-| --- | --- |
-| [CMS.md](CMS.md) | EmDash as the CMS: setup, content types, content queries, Portable Text, drafts and preview, scheduled publishing, menus, taxonomies, EmDash migrations, WordPress import, and plugins. |
-| [API.md](API.md) | OpenAPI as the contract for all interfaces, one purpose for each field, zod-openapi, serving the OpenAPI document, API routes, errors (RFC 9457), API keys with the tenant mapping, CORS, rate limits, and webhooks. |
-| [DATA.md](DATA.md) | D1 limits (100 parameters, 100 KB), Kysely queries, D1 migrations, seed data, and backups with export. |
-| [AUTH.md](AUTH.md) | Site user login with emdash-better-auth, email provider setup, users, organizations, role checks, and the last login method plugin. |
-| [PAYMENTS.md](PAYMENTS.md) | Payment providers: Stripe billing, Creem for EU sales with webhook idempotency, x402 agent payments, and premium content (plan per organization, `premium` flag per user). |
-| [EMAIL.md](EMAIL.md) | Transactional email with React Email and emailcn, and auth emails versus app emails. |
-
-## Frontend and design
-
-| File | Contents |
-| --- | --- |
-| [DESIGN.md](DESIGN.md) | Where each UI system applies (Tailwind CSS, Base UI, Kumo) and Tailwind CSS styling. |
-| [COMPONENTS.md](COMPONENTS.md) | Astro components, the theme `is:inline` script and its CSP hash, Fulldev UI, React components, Astro islands, shadcn/ui, and Base UI. |
-| [MATERIAL.md](MATERIAL.md) | Material Design 3 layout, spacing, targets, states, motion, color from a seed color, and component sizes, with MD3 Expressive values. |
-| [MEDIA.md](MEDIA.md) | Astro images (Image, Picture, LCP priority, remote images), the Cloudflare adapter image service, the Cloudflare Images binding, EmDash media on R2, user uploads, video, Astro fonts, and SVG icons. |
-| [SEO.md](SEO.md) | Site URL and trailing slash, title and meta description, canonical URLs, EmDash SEO fields, `EmDashHead` on all public pages with a canonical URL for custom pages, Open Graph, sitemaps, robots.txt, noindex, JSON-LD, 404 and 410 pages, redirects, and llms.txt. |
-| [I18N.md](I18N.md) | Astro i18n routing and `astro:i18n` links, hreflang and x-default, the `lang` attribute, EmDash content translation, Paraglide JS UI strings with the middleware for on-demand and prerendered pages, `Intl` dates and numbers, and RTL. |
-| [UI-UX.md](UI-UX.md) | How the UI behaves: WCAG 2.2 AA accessibility, loading, empty, and error states, forms, toasts, form results without an island (session flash message), motion, navigation, and theme in `localStorage`. |
-
-## Quality and operations
-
-| File | Contents |
-| --- | --- |
-| [QUALITY.md](QUALITY.md) | TypeScript strict flags and the starter type fixes, `astro check`, ESLint with `eslint-plugin-astro` and scoped `typescript-eslint`, Prettier with `.prettierignore`, Knip for unused code with entry globs and named exceptions, `package.json` scripts, and the full PR check order. |
-| [TESTING.md](TESTING.md) | Vitest, the Cloudflare Vitest plugin with `wrangler.test.jsonc`, Istanbul coverage with 80 % thresholds, per-app D1 migrations in tests, Storybook with Storybook Astro, ARIA snapshots, screenshot tests, Playwright end-to-end tests, axe, payment test mode, email capture, and CI. |
-| [PERF.md](PERF.md) | Core Web Vitals targets and field measurement, CPU time budget for Workers, D1 location hint and Targeted Placement, Astro route caching, and the Cache API. |
-| [SECURITY.md](SECURITY.md) | Secrets, security headers (the CSP module, the CSP header versus `<meta>`, HSTS, the `_headers` file that `scripts/write-headers.ts` writes, middleware), CSRF with the `Origin` check in the middleware, input validation, XSS, SQL injection, open redirects, SSRF, auth checks, the dev-bypass check in production, Turnstile and WAF rate limits, and security.txt. |
-| [PRIVACY.md](PRIVACY.md) | Cloudflare Web Analytics, cookie consent (ePrivacy Article 5(3)) with Turnstile, the privacy policy page, data minimization, user data access, export, and delete (GDPR), the processors and the transfer to the United States in the policy, and data residency. |
-| [OBSERVABILITY.md](OBSERVABILITY.md) | Workers Logs, structured logs without personal data, `wrangler tail`, Effect logging and spans, Sentry for Cloudflare and Astro (it wraps the `src/worker.ts` handler), release names and source maps, CSP and privacy policy entries for Sentry, alerts, and a health endpoint. |
-| [DEPS.md](DEPS.md) | npm and `package-lock.json`, `npm ci`, Dependabot (groups, schedule, ignore, automerge workflow, cooldown), `npm audit`, deleting `pnpm-workspace.yaml`, the 3-day wait for new releases, rules for a new package, version sync of Astro, Wrangler, and EmDash, and `compatibility_date`. |
-| [DEV.md](DEV.md) | Local dev with `astro dev`, the remote Images binding, build tests with `astro preview`, and ports and shared local data. |
-| [DEPLOY.md](DEPLOY.md) | Environments (dev, stage, prod) with the `env.production` key list, gradual deployments, version URLs, migration order, EmDash core migrations in CI, shared dev database migrations, D1 Time Travel, rollback, secrets, GitHub Actions (PR previews, dev deploy on push to `main`, stage approval, token permissions), and Previews. |
-
-## Writing
-
-| File | Contents |
-| --- | --- |
-| [AGENTS.md](AGENTS.md) | Rules for agents that add or change a rule in this folder. `CLAUDE.md` imports it for Claude Code. |
-| [WRITING.md](WRITING.md) | Rules for docs (Google developer documentation style guide) and UI text (Material Design 3 content design, Mailchimp voice and tone). |
+| Stack | [STACK](STACK.md), [SETUP](SETUP.md), [ARCH](ARCH.md), [SAAS](SAAS.md) |
+| Backend and data | [CMS](CMS.md), [API](API.md), [DATA](DATA.md), [AUTH](AUTH.md), [PAYMENTS](PAYMENTS.md), [EMAIL](EMAIL.md) |
+| Frontend and design | [DESIGN](DESIGN.md), [COMPONENTS](COMPONENTS.md), [MATERIAL](MATERIAL.md), [MEDIA](MEDIA.md), [SEO](SEO.md), [I18N](I18N.md), [UI-UX](UI-UX.md) |
+| Quality and operations | [QUALITY](QUALITY.md), [TESTING](TESTING.md), [PERF](PERF.md), [SECURITY](SECURITY.md), [PRIVACY](PRIVACY.md), [OBSERVABILITY](OBSERVABILITY.md), [DEPS](DEPS.md), [DEV](DEV.md), [DEPLOY](DEPLOY.md) |
+| Writing | [AGENTS](AGENTS.md), [WRITING](WRITING.md) |

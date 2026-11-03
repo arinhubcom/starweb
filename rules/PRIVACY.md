@@ -1,86 +1,84 @@
 # PRIVACY
 
-Technical rules for personal data, cookies, analytics, and logs. These rules are not legal advice. For user data and tenants, follow [SAAS.md](SAAS.md) and [AUTH.md](AUTH.md). For logs and errors, follow [OBSERVABILITY.md](OBSERVABILITY.md). For security, follow [SECURITY.md](SECURITY.md).
+Technical rules, not legal advice. → [SAAS](SAAS.md), [AUTH](AUTH.md) (users, tenants), [OBSERVABILITY](OBSERVABILITY.md) (logs, errors), [SECURITY](SECURITY.md).
 
 ## Analytics
 
-### [Cloudflare Web Analytics](https://developers.cloudflare.com/web-analytics/)
+### [Web Analytics](STACK.md#web-analytics)
 
-- Use Cloudflare Web Analytics as the only analytics tool by default.
-- Use the automatic setup when the site is proxied through Cloudflare: add the site on the Web Analytics page and select the hostname.
-- Use the manual JS snippet for sites that are not proxied, such as a `workers.dev` host. Add the snippet before the closing `</body>` tag in the base layout in `src/layouts/`.
-- Do not send `Cache-Control: public, no-transform` on pages when you use the automatic setup. It blocks the beacon injection. Remove `no-transform` or use the manual snippet.
-- Do not set the automatic setup to "Enable, excluding EU visitor data" unless you want no data from EU visitors. Choose "Enable with JS Snippet installation" to control the snippet in code.
-- Set `"spa": false` in the `data-cf-beacon` attribute of a manual snippet only when you do not want route changes of single page apps tracked. Tracking is on by default.
-- Allow the beacon in the CSP when `security.csp` is on: add the sources to the CSP module (see [SECURITY.md](SECURITY.md) (Headers)). Add `https://static.cloudflareinsights.com/beacon.min.js` to `scriptDirective.resources`, and include the query string of the script URL in the entry when it has one. For the manual snippet, add `cloudflareinsights.com` to the single `connect-src` entry. Keep `'self'` in `connect-src` for both setups: the automatic setup sends the beacon to your own domain.
-- Do not put personal data in URLs or query strings. Web Analytics does not log query strings, but other logs and tools do.
-- Add no other analytics or tracking script, such as Google Analytics or a session recorder, before you add a consent banner (see Cookies).
+- Only analytics tool by default.
+- Proxied site: automatic setup (add site, select hostname). Not proxied (`workers.dev`): manual JS snippet before `</body>` in the base layout in `src/layouts/`.
+- Automatic setup: no `Cache-Control: public, no-transform` on pages (blocks injection) → drop `no-transform` or use the snippet.
+- Choose "Enable with JS Snippet installation", not "Enable, excluding EU visitor data" (unless EU data is unwanted).
+- `"spa": false` in `data-cf-beacon` only to stop tracking SPA route changes (default on).
+- CSP (`security.csp`): `https://static.cloudflareinsights.com/beacon.min.js` in `scriptDirective.resources` (include the script's query string if any). Manual snippet: add `cloudflareinsights.com` to the single `connect-src` entry. Keep `'self'` in `connect-src` for both. → [SECURITY](SECURITY.md) (Headers)
+- No personal data in URLs or query strings.
+- No other analytics or tracker (Google Analytics, session recorder) before a consent banner exists. → Cookies
 
 ## Cookies
 
-### [ePrivacy Directive, Article 5(3)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02002L0058-20091219)
+### [GDPR and ePrivacy](STACK.md#gdpr-and-eprivacy): [ePrivacy Directive Article 5(3)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02002L0058-20091219)
 
-- Ask for consent before you store information on, or read information from, the device of a user, unless it is strictly needed. The directive exempts storage that only carries out a transmission, and storage that is needed for a service the user explicitly requested.
-- Do not set a non-essential cookie, and do not load a third-party script, pixel, font, embed, or tracker, before the user gives consent. Load embeds such as maps and videos only after a click.
-- Load Cloudflare Turnstile (see [SECURITY.md](SECURITY.md) (Abuse)) only on pages that have a protected form, and not before the user opens such a page. It is the only third-party script that this rule allows without a consent banner. Cloudflare states in the [Turnstile Privacy Addendum](https://www.cloudflare.com/turnstile-privacy-policy/) that Turnstile signals are strictly necessary for bot detection and that Cloudflare acts as processor for the site operator. Name Turnstile in the privacy policy (see Privacy policy). Ask your data protection adviser to confirm this for your site: the EDPB guidelines below do not analyze the exemptions.
-- Make withdrawing consent as easy as giving it ([GDPR Article 7(3)](https://gdpr-info.eu/art-7-gdpr/)): put a link in the footer that reopens the consent choice.
-- List each cookie and `localStorage` key that the site sets, with its purpose and lifetime, in one place on the privacy policy page.
+- Consent before storing or reading anything on the device, unless strictly needed (transmission only, or a service the user explicitly requested).
+- No non-essential cookie, third-party script, pixel, font, embed, or tracker before consent. Maps and videos load only after a click.
+- [Turnstile](STACK.md#turnstile) (→ [SECURITY](SECURITY.md) (Abuse)) is the only third-party script allowed without a banner: load it only on pages with a protected form, not before the user opens one. Basis: [Turnstile Privacy Addendum](https://www.cloudflare.com/turnstile-privacy-policy/) (strictly necessary bot detection, Cloudflare is processor). Name Turnstile in the privacy policy. Have a data protection adviser confirm: the EDPB guidelines do not analyze the exemptions.
+- Withdrawing consent as easy as giving it ([GDPR Article 7(3)](https://gdpr-info.eu/art-7-gdpr/)): footer link reopening the consent choice.
+- List each cookie and `localStorage` key (purpose, lifetime) in one place on the privacy policy page.
 
 ### [EDPB Guidelines 2/2023 on Article 5(3)](https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-22023-technical-scope-art-53-eprivacy-directive_en)
 
-- Check Article 5(3) for each technique that reads or stores data on the device of a user, not only for cookies. Read the guidelines for the scope. They do not analyze the exemptions from consent (paragraph 56): check each exemption for your use case.
+- Check Article 5(3) for every device read/store technique, not only cookies. The guidelines do not analyze the exemptions (paragraph 56): check each for your case.
 
 ## Privacy policy
 
 ### [GDPR Article 13](https://gdpr-info.eu/art-13-gdpr/)
 
-- Add a privacy policy page at `/privacy` and link it in the footer of the base layout and on each sign-up form.
-- Follow [GDPR Article 13](https://gdpr-info.eu/art-13-gdpr/) for the policy content: the contact of the controller, the purposes, the recipients (such as Cloudflare, Stripe, and the email provider), the retention period, and the rights of the user, including the right to complain to a supervisory authority.
-- List each processor that receives personal data in the policy, by name: Cloudflare (hosting, D1, R2, logs, and Turnstile bot protection on pages with a protected form), and the others that the app uses, such as Stripe, the email provider, and Sentry (GDPR Article 13(1)(e)).
-- State the transfer of personal data to the United States for each processor that stores or processes data there, with its safeguard (GDPR Article 13(1)(f)). For Cloudflare, name the certification under the [EU-U.S. Data Privacy Framework](https://www.cloudflare.com/privacypolicy/) and the EU Standard Contractual Clauses in the [Cloudflare DPA](https://www.cloudflare.com/cloudflare-customer-dpa/), and link both. Put this in the privacy policy page. Do not add a separate page for it.
-- Check the safeguards of each processor again when you add one, and update the policy in the same pull request.
-- Name in the policy how a user requests access, export, and deletion, and give one contact email.
-- Update the policy in the same pull request that adds a new processor, a new cookie, or a new personal data field.
+- Page at `/privacy`, linked in the base layout footer and on each sign-up form.
+- Content per Article 13: controller contact, purposes, recipients, retention, user rights incl. complaint to a supervisory authority.
+- List each processor by name (Article 13(1)(e)): Cloudflare (hosting, D1, R2, logs, Turnstile on pages with a protected form), plus Stripe, the email provider, Sentry as used.
+- US transfer per processor with safeguard (Article 13(1)(f)). Cloudflare: [EU-U.S. Data Privacy Framework](https://www.cloudflare.com/privacypolicy/) certification and EU Standard Contractual Clauses in the [Cloudflare DPA](https://www.cloudflare.com/cloudflare-customer-dpa/); link both. In the policy page, no separate page.
+- State how a user requests access, export, deletion; one contact email.
+- New processor, cookie, or personal data field → update the policy (and re-check safeguards) in the same PR.
 
 ## Data minimization
 
 ### [GDPR Article 5](https://gdpr-info.eu/art-5-gdpr/)
 
-- Collect only the fields that a feature needs (Article 5(1)(c)). Do not add a form field, column, or event property "for later".
-- Keep personal data no longer than needed (Article 5(1)(e)). Set a retention period for each table that holds personal data, and delete rows after it with the cleanup job in [SAAS.md](SAAS.md) (Cleanup).
-- Do not copy personal data to logs, analytics events, error reports, test fixtures, or screenshots. Use ids instead.
-- Use fake data in tests and in dev databases. Do not import production data.
+- Only fields a feature needs (5(1)(c)); no field, column, or event property "for later".
+- Retention period per personal-data table (5(1)(e)); delete after it with the cleanup job. → [SAAS](SAAS.md) (Cleanup)
+- No personal data in logs, analytics events, error reports, fixtures, screenshots → IDs.
+- Fake data in tests and dev databases; no production import.
 
 ## User rights
 
-### [GDPR Articles 12, 15, 17, and 20](https://gdpr-info.eu/art-12-gdpr/)
+### [GDPR Articles 12, 15, 17, 20](https://gdpr-info.eu/art-12-gdpr/)
 
-- Give each signed-in user a way to see their data (Article 15), export it (Article 20), and delete their account (Article 17), in the account settings of the app.
-- Export in a structured, commonly used, machine-readable format: use JSON, or CSV for tabular data. Build the export from the app repository modules, and filter by `tenant_id` and `user_id` from the session (see [SAAS.md](SAAS.md)).
-- Include data from all places that hold it: the app databases, R2 objects under the `tenant_id/` prefix, and the EmDash user record. Add each new store of personal data to the export and the delete in the same pull request.
-- Answer each request without undue delay and within one month. Make the account settings flow automatic so that no manual work is needed.
-- Make the delete cascade to app data. Follow [SAAS.md](SAAS.md) (Cleanup): mark rows with `deleted_at`, then delete them for good after the grace period.
-- Do not keep personal data after the grace period ends, except data that a law requires you to keep, such as invoices. Keep only the fields that the law requires.
-- Check the identity of the person before you export or delete: require a signed-in session, and a fresh sign-in or an email confirmation for delete.
+- Account settings: view (15), export (20), delete account (17).
+- Export JSON (CSV for tabular) via the app repository modules, filtered by `tenant_id` and `user_id` from the session. → [SAAS](SAAS.md)
+- Cover every store: app databases, [R2](STACK.md#r2) objects under `tenant_id/`, the [EmDash](STACK.md#emdash) user record. New personal data store → add to export and delete in the same PR.
+- Answer within one month, no undue delay; automatic flow, no manual work.
+- Delete cascades to app data: `deleted_at`, then hard delete after the grace period. → [SAAS](SAAS.md) (Cleanup)
+- Keep nothing after the grace period except legally required data (invoices), only the required fields.
+- Verify identity: signed-in session; delete also needs a fresh sign-in or email confirmation.
 
-### [Better Auth delete user](https://better-auth.com/docs/concepts/users-accounts#delete-user)
+### [Better Auth](STACK.md#better-auth) delete user
 
-- Use the Better Auth `user.deleteUser` option when you run Better Auth directly. It is off by default: set `user.deleteUser.enabled` to `true`. It hard-deletes the user from the database. Set it only if emdash-better-auth exposes the Better Auth `user` options. Check [AUTH.md](AUTH.md) (Open issues) first. If it does not, delete the app data as in [SAAS.md](SAAS.md) (Cleanup).
-- Call `authClient.deleteUser()` from the client. Pass `password` when the user has one. Without a password, the session must be fresh (`session.freshAge`, one day by default). Do not set `freshAge` to `0` unless you confirm the delete by email.
-- Set `sendDeleteAccountVerification` to confirm the delete by email, and for users that sign in with OAuth and have no password. Send the user, `url`, and `token` it receives to your email template (see [EMAIL.md](EMAIL.md)).
-- Delete the app data of the user in `afterDelete`, or queue it there for the cleanup job. Throw an `APIError` in `beforeDelete` to stop a delete that must not happen, for example the last owner of an organization.
+- `user.deleteUser.enabled: true` (off by default; hard-deletes) only if [emdash-better-auth](STACK.md#emdash-better-auth) exposes Better Auth `user` options. → [AUTH](AUTH.md) (Open issues). Else delete app data per [SAAS](SAAS.md) (Cleanup).
+- Client `authClient.deleteUser()`; pass `password` if the user has one, else session must be fresh (`session.freshAge`, default 1 day). `freshAge` `0` only with email confirmation.
+- `sendDeleteAccountVerification` for email confirmation and OAuth users without a password; pass user, `url`, `token` to the email template. → [EMAIL](EMAIL.md)
+- `afterDelete`: delete app data or queue it for the cleanup job. `beforeDelete`: throw `APIError` to block (for example last owner of an organization).
 
 ## Data residency
 
-### [D1 data location](https://developers.cloudflare.com/d1/configuration/data-location/)
+### [D1](STACK.md#d1) data location
 
-- Create D1 databases and R2 buckets without a jurisdiction. Do not pass `--jurisdiction` to `wrangler d1 create` or `wrangler r2 bucket create`, and do not set `jurisdiction` in `r2_buckets`. Read [WHY.md](../WHY.md#why-no-d1-jurisdiction).
-- Set the location of the D1 primary with a location hint, as in [PERF.md](PERF.md) (Placement).
-- Do not claim in the policy that data stays in the EU or in one region. State the transfer to the United States, as in Privacy policy.
+- No jurisdiction: no `--jurisdiction` on `wrangler d1 create` / `wrangler r2 bucket create`, no `jurisdiction` in `r2_buckets`. → [WHY](../WHY.md#why-no-d1-jurisdiction)
+- D1 primary via location hint. → [PERF](PERF.md) (Placement)
+- Policy never claims data stays in the EU or one region; state the US transfer.
 
 ## Logs
 
-### [Workers Logs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/)
+### [Workers](STACK.md#workers) Logs
 
-- Set `"observability": { "logs": { "invocation_logs": false } }` in `wrangler.jsonc` when request URLs can hold personal data.
-- Follow the rules in [OBSERVABILITY.md](OBSERVABILITY.md) for sampling, the fields to log, and retention. Keep the retention in mind when you answer a delete request.
+- `"observability": { "logs": { "invocation_logs": false } }` when request URLs can hold personal data.
+- Sampling, fields, retention → [OBSERVABILITY](OBSERVABILITY.md). Account for retention when answering a delete request.

@@ -2,59 +2,57 @@
 
 ## Database
 
-### [D1](https://developers.cloudflare.com/d1/)
+### [D1](STACK.md#d1)
 
-- Do not use interactive transactions (`db.transaction()`) on D1. kysely-d1 does not support them, and on workerd the error can hang the Worker. Use the D1 `batch()` API for statements that must run together, or design each write to be safe alone.
-- Keep each compound SELECT (`UNION`, `UNION ALL`, `INTERSECT`, `EXCEPT`) at 5 terms or fewer. D1 rejects a sixth term with "too many terms in compound SELECT". Split larger queries.
-- Send independent reads of one request in one D1 `batch()` call when latency matters. Do not batch queries of different requests together.
-- Bind at most 100 parameters in one query. This limit hits `where in` lists and multi-row inserts (rows times columns). Split the values into chunks, and send the chunks in one `batch()` call.
-- Keep each SQL statement under 100,000 bytes (100 KB). The query limits apply to each statement inside a `batch()` call. The D1 docs give no limit for the number of statements in a batch.
+- No interactive transactions (`db.transaction()`): kysely-d1 lacks them, workerd can hang → `batch()`, or make each write safe alone.
+- Compound SELECT (`UNION`, `INTERSECT`, `EXCEPT`): ≤ 5 terms.
+- Independent reads of one request → one `batch()`. Never batch across requests.
+- ≤ 100 bound parameters per statement (`where in`, multi-row insert = rows × columns) → chunk, send chunks in one `batch()`.
+- ≤ 100 KB per statement, also inside `batch()`.
 
 ## Queries
 
-### [Kysely](https://kysely.dev)
+### [Kysely](STACK.md#kysely)
 
-- Connect Kysely to D1 with the [kysely-d1](https://github.com/aidenwallis/kysely-d1) dialect: `new Kysely<Database>({ dialect: new D1Dialect({ database: env.APP1_DB }) })`.
-- Write the `Database` interface (one type per table) in one file. Update it in the same commit as the migration that changes the schema.
-- Put the queries for each table in one repository module in `src/apps/<app>/db/`, for example `src/apps/app1/db/project.ts`. Follow the rules in [ARCH.md](ARCH.md) (Apps). Do not write queries in routes or components.
-- Put a `limit` on every list query. Follow the rules in [API.md](API.md) (Pagination).
-- Do not run a query for each row of a result (N+1). Load related rows with a join or with one `where in` query, in chunks of 100 values or fewer.
-- Use the query builder for all queries. Use the `sql` template tag only for SQL the builder cannot express. Do not build SQL from strings.
+- Dialect: kysely-d1 `D1Dialect({ database: env.APP1_DB })`.
+- `Database` interface (one type per table) in one file; update it in the migration's commit.
+- Repository pattern: one module per table in `src/apps/<app>/db/` (`src/apps/app1/db/project.ts`). No queries in routes or components. → [ARCH](ARCH.md) (Apps)
+- `limit` on every list query. → [API](API.md) (Pagination)
+- No N+1 → join, or `where in` in chunks of ≤ 100.
+- Query builder for all SQL; `sql` tag only where the builder cannot express it. No string-built SQL.
 
 ## Migrations
 
-### [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/)
+### D1 migrations
 
-- Write schema changes as SQL files and apply them with `wrangler d1 migrations apply`.
-- Do not use the Kysely `Migrator` for app databases. Keep one migration system: SQL files and `wrangler d1 migrations apply`.
-- Make migrations forward-only. Do not edit a migration after it ran in production. Add a new one.
+- SQL files + `wrangler d1 migrations apply`. No Kysely `Migrator` for app databases.
+- Forward-only. Never edit a migration that ran in production; add a new one.
 
 ## Seed data
 
-### [Local development](https://developers.cloudflare.com/d1/best-practices/local-development/)
+### D1 local development
 
-- Load seed data into the local database with `npx wrangler d1 execute <db> --local --file=src/apps/<app>/db/seed.sql`. Run it after `npx wrangler d1 migrations apply <db> --local`.
-- Use fake data only in seed files, as PRIVACY.md requires. Do not copy rows or exports from a remote database into a seed file. Never run a seed file with `--remote`.
+- `npx wrangler d1 migrations apply <db> --local`, then `npx wrangler d1 execute <db> --local --file=src/apps/<app>/db/seed.sql`.
+- Fake data only. Never copy remote rows into a seed. Never seed with `--remote`. → [PRIVACY](PRIVACY.md)
 
 ## Backups
 
-### [Export and import](https://developers.cloudflare.com/d1/best-practices/import-export-data/)
+### D1 export and import
 
-- Export the remote database before each risky change (a destructive migration or a bulk update): `npx wrangler d1 export <db> --remote --output=<file>.sql`. Time Travel keeps only 7 days (Workers Free) or 30 days (Workers Paid), so also export on a schedule.
-- Run the scheduled export from CI, outside peak hours: a running export blocks other requests to the database.
-- Do not keep an export in git. It holds personal data. Store it in private storage with restricted access, outside the repository, and write exports to the `backups/` folder, which `.gitignore` excludes. Delete old exports by the retention rules in [PRIVACY.md](PRIVACY.md).
-- Do not rely on `d1 export` for a database with virtual tables, such as FTS5 tables: D1 cannot export them. Drop the virtual tables and recreate them after the export, or use Time Travel.
+- Before a risky change (destructive migration, bulk update): `npx wrangler d1 export <db> --remote --output=<file>.sql`.
+- Also export on a schedule from CI, off-peak (export blocks the database). Time Travel keeps only 7 days (Free) or 30 days (Paid).
+- No exports in git: write to `backups/` (gitignored), store in private restricted storage, delete by [PRIVACY](PRIVACY.md) retention.
+- `d1 export` fails with virtual tables (FTS5) → drop and recreate them around the export, or use Time Travel.
 
 ## Reference
 
-### [EmDash source](https://github.com/emdash-cms/emdash)
+### [EmDash](STACK.md#emdash) source
 
-- Learn from EmDash before you write data code. It uses Kysely on D1 in production.
-- Read these files:
-  - D1 dialect, migration lock, and compound SELECT limit: [`cloudflare/src/db/d1-dialect.ts`](https://github.com/emdash-cms/emdash/blob/main/packages/cloudflare/src/db/d1-dialect.ts)
-  - Batching SELECTs into one D1 round trip: [`cloudflare/src/db/coalescing-d1.ts`](https://github.com/emdash-cms/emdash/blob/main/packages/cloudflare/src/db/coalescing-d1.ts)
-  - Transaction fallback for D1: [`core/src/database/transaction.ts`](https://github.com/emdash-cms/emdash/blob/main/packages/core/src/database/transaction.ts)
-  - Migrator with static imports: [`core/src/database/migrations/runner.ts`](https://github.com/emdash-cms/emdash/blob/main/packages/core/src/database/migrations/runner.ts)
-  - `Database` interface: [`core/src/database/types.ts`](https://github.com/emdash-cms/emdash/blob/main/packages/core/src/database/types.ts)
-  - Repository modules: [`core/src/database/repositories/`](https://github.com/emdash-cms/emdash/blob/main/packages/core/src/database/repositories)
-- Do not import from `emdash/internal/*` in app code. Copy the pattern instead: internal modules are not public API.
+- Read before writing data code; it runs Kysely on D1 in production:
+  - D1 dialect, migration lock, compound SELECT limit: [`packages/cloudflare/src/db/d1-dialect.ts`](https://github.com/emdash-cms/emdash/blob/main/packages/cloudflare/src/db/d1-dialect.ts)
+  - SELECT coalescing into one round trip: [`packages/cloudflare/src/db/coalescing-d1.ts`](https://github.com/emdash-cms/emdash/blob/main/packages/cloudflare/src/db/coalescing-d1.ts)
+  - Transaction fallback: [`packages/core/src/database/transaction.ts`](https://github.com/emdash-cms/emdash/blob/main/packages/core/src/database/transaction.ts)
+  - Migrator with static imports: [`packages/core/src/database/migrations/runner.ts`](https://github.com/emdash-cms/emdash/blob/main/packages/core/src/database/migrations/runner.ts)
+  - `Database` interface: [`packages/core/src/database/types.ts`](https://github.com/emdash-cms/emdash/blob/main/packages/core/src/database/types.ts)
+  - Repositories: [`packages/core/src/database/repositories/`](https://github.com/emdash-cms/emdash/blob/main/packages/core/src/database/repositories)
+- No imports from `emdash/internal/*`; copy the pattern.

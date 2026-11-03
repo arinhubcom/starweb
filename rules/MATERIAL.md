@@ -1,43 +1,29 @@
 # MATERIAL
 
-Material Design 3 (MD3) rules for layout, spacing, states, motion, color, and component sizes. The rules follow MD3 Expressive.
+[Material Design 3](STACK.md#material-design-3) (MD3) Expressive: layout, spacing, states, motion, color, component sizes. Fonts and radius stay from the [Fulldev UI](STACK.md#fulldev-ui) theme; colors per Color.
 
 ## Sources
 
-### [Material Design 3 Expressive](https://m3.material.io/blog/building-with-m3-expressive)
-
-- Use the MD3 Expressive value when it differs from baseline MD3, for example a 64px navigation bar instead of 80px.
-- Take MD3 Expressive specs from the generated Jetpack Compose tokens in [androidx `material3/tokens`](https://github.com/androidx/androidx/tree/androidx-main/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/tokens), for example `NavigationRailCollapsedTokens.kt`. They are the most complete source.
-- Check what MD3 Expressive changed in the "M3 Expressive styles" section of each component doc in [MDC-Android](https://github.com/material-components/material-components-android/tree/master/docs/components).
-- Take values for the web, such as `linear()` spring curves, from the experimental Expressive web components in [material-web `labs/gb`](https://github.com/material-components/material-web/tree/main/labs/gb).
-- Do not take MD3 Expressive values from the material-web [`tokens/versions/latest`](https://github.com/material-components/material-web/tree/main/tokens/versions/latest/sass) folder: it has baseline MD3 values. Use it only for values that MD3 Expressive did not change, such as the state layer opacities.
-- Do not use Flutter as a source: it does not implement MD3 Expressive ([flutter#168813](https://github.com/flutter/flutter/issues/168813)).
-- Read the usage guidance on [m3.material.io](https://m3.material.io) in a browser, for example with `agent-browser`. The site is a JavaScript app, so fetch tools return no content.
+- Expressive value wins over baseline (navigation bar 64px, not 80px).
+- Expressive specs: androidx Compose [`material3/tokens`](https://github.com/androidx/androidx/tree/androidx-main/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/tokens) (`NavigationRailCollapsedTokens.kt`); changes per component: "M3 Expressive styles" in [MDC-Android docs](https://github.com/material-components/material-components-android/tree/master/docs/components); web (`linear()` springs): material-web [`labs/gb`](https://github.com/material-components/material-web/tree/main/labs/gb).
+- Not `tokens/versions/latest` of material-web (baseline) except unchanged values (state layer opacities). Not Flutter ([flutter#168813](https://github.com/flutter/flutter/issues/168813)).
+- m3.material.io is a JS app: read in a browser (`agent-browser`), fetch returns nothing.
 
 ## Layout
 
-### [Material Design 3 layout](https://m3.material.io/foundations/layout/layout-overview)
-
-- Use the Material Design 3 (MD3) rules for layout, spacing, and component sizes. Keep the fonts and the radius from the Fulldev UI theme. Generate the colors as described in [Color](#color).
-- Read 1dp as 1 CSS pixel. One Tailwind spacing step (`--spacing: 0.25rem`) is 4px.
-- Add the MD3 breakpoints to the `@theme` block in `global.css`: `--breakpoint-medium: 37.5rem;` (600px), `--breakpoint-expanded: 52.5rem;` (840px), `--breakpoint-large: 75rem;` (1200px), `--breakpoint-xlarge: 100rem;` (1600px). Below 600px is compact, with no prefix.
-- Use `medium:`, `expanded:`, `large:`, and `xlarge:` for page layout. Do not remove the Tailwind default breakpoints (`sm:`, `md:`, and so on): Fulldev UI components use them.
-- Set the page margin to 16px on compact and 24px from medium up: `px-4 medium:px-6`.
-- Put 24px between panes: `gap-6`.
-- Use 1 pane on compact and medium, 2 panes on expanded and large, and up to 3 panes on xlarge. Never use more than 3 panes.
-- Use 2 panes on medium only for low-density content, such as settings, with 50% width each (`grid-cols-2`).
-- Make a fixed pane 360px wide on expanded (`w-90`) and 412px on large and xlarge (`large:w-103`). Let the other pane fill the rest.
-- Put the navigation in a bottom navigation bar on compact, and in a navigation rail at the leading edge from medium up. Show the expanded rail (with labels) only on large and xlarge.
-- Keep body text between 40 and 60 characters per line: `max-w-[60ch]`.
-- Align leading elements (thumbnails, avatars, icons) in lists and cards on one line.
+- 1dp = 1 CSS px. Tailwind step (`--spacing: 0.25rem`) = 4px.
+- `@theme` in `global.css`: `--breakpoint-medium: 37.5rem;` (600) `--breakpoint-expanded: 52.5rem;` (840) `--breakpoint-large: 75rem;` (1200) `--breakpoint-xlarge: 100rem;` (1600). < 600 compact, no prefix. Page layout uses `medium:` `expanded:` `large:` `xlarge:`; keep default `sm:` `md:` (Fulldev UI uses them).
+- Page margin `px-4 medium:px-6`. Pane gap `gap-6`.
+- Panes: 1 on compact/medium, 2 on expanded/large, ≤ 3 on xlarge. Medium 2 panes only for low-density content (settings), `grid-cols-2`.
+- Fixed pane: expanded `w-90` (360px), large/xlarge `large:w-103` (412px); the other fills.
+- Navigation: bottom bar on compact; rail at leading edge from medium; expanded rail (labels) only large/xlarge.
+- Body text 40-60 characters: `max-w-[60ch]`. Align leading elements (thumbnails, avatars, icons) on one line.
 
 ## Spacing
 
-### [Material Design 3 spacing](https://m3.material.io/m3/pages/spacing/overview)
+- MD3 tokens only (8px scale, `space100` = 8px):
 
-- Use only MD3 spacing tokens. They are on an 8px scale (`space100` = 8px). Map them to Tailwind steps:
-
-  | MD3 token | px | Tailwind step |
+  | MD3 token | px | Tailwind |
   |---|---|---|
   | space0, 25, 50, 75 | 0, 2, 4, 6 | `0`, `0.5`, `1`, `1.5` |
   | space100, 125, 150, 175 | 8, 10, 12, 14 | `2`, `2.5`, `3`, `3.5` |
@@ -45,37 +31,27 @@ Material Design 3 (MD3) rules for layout, spacing, states, motion, color, and co
   | space400, 450, 500 | 32, 36, 40 | `8`, `9`, `10` |
   | space600, 700, 800, 900 | 48, 56, 64, 72 | `12`, `14`, `16`, `18` |
 
-- Use multiples of 8px (even steps) by default. Use 2, 4, 6, 10, 12, and 14px only inside components, for example between an icon and its label.
-- Do not use other steps or arbitrary values such as `p-[13px]`. When you need a new value, add a token with the multiplier pattern (`space225` = 18px) as a `--spacing-*` theme variable.
-- Put padding and gaps on the parent: `p-*`, `gap-*` with `flex` or `grid`. Do not put margins on children (`mt-*`, `space-y-*`). Use margins only for space outside the parent's padding, or in the page layout.
-- Use logical sides for leading and trailing space (`ps-*`, `pe-*`, `ms-*`, `me-*`), so the layout works in right-to-left languages.
-- Use 8px or more between interactive targets.
-- Keep the same spacing when text scales up to 200%. Do not shrink padding when the font gets bigger.
+- Default multiples of 8px (even steps); 2, 4, 6, 10, 12, 14px only inside components (icon-label).
+- No other steps, no arbitrary values (`p-[13px]`). New value → `--spacing-*` token by multiplier pattern (`space225` = 18px).
+- Padding and gap on the parent (`p-*`, `gap-*` with flex/grid); no child margins (`mt-*`, `space-y-*`) except outside parent padding or page layout.
+- Logical sides (`ps-*`, `pe-*`, `ms-*`, `me-*`). ≥ 8px between interactive targets. Spacing unchanged at 200% text scale.
 
 ## Targets
 
-### [Material Design 3 targets and density](https://m3.material.io/foundations/layout/grids-spacing/density)
-
-- Make each touch target at least 48x48px (`min-h-12 min-w-12`), also when the icon or the visible control is smaller. Extend the hit area with padding or a transparent `::after` element.
-- Use density 0 (the MD3 default) for all components. Make denser variants opt-in only, through a user setting: each density step (-1, -2, -3) removes 4px of height or vertical padding.
-- Do not make dense components with targets smaller than 48x48px by default. Do not use density in menus, dialogs, and snackbars.
-- Keep the font size the same in all density steps.
+- Touch target ≥ 48x48px (`min-h-12 min-w-12`) even if the visible control is smaller; extend with padding or transparent `::after`.
+- Density 0 default. Denser variants opt-in via user setting only; each step (-1, -2, -3) removes 4px height or vertical padding. No dense targets < 48px by default; no density in menus, dialogs, snackbars. Font size constant across densities.
 
 ## States
 
-### [Material Design 3 interaction states](https://m3.material.io/foundations/interaction/states/overview)
-
-- Show hover, focus, and pressed states with a state layer: an overlay in the content color on top of the container. Do not change the container color. Take the color from the theme (`currentColor`) and only the opacity from MD3.
-- Use these state layer opacities: hover 8%, focus 10%, pressed 10%, and dragged 16%. Draw the layer with a `::before` element, for example `relative before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10`.
-- Add the state layer once, in the base class of the component variants (`cva()`). When you add it to an installed component, remove the component's own hover color (for example `hover:bg-primary/90`), so the two do not stack.
-- Show a disabled control at 38% opacity: `disabled:opacity-38`, or `data-disabled:opacity-38` for Base UI. Change the `disabled:opacity-50` that shadcn/ui components use. Do not show a state layer on a disabled control.
-- Make the focus indicator 3px thick with a 2px offset: `focus-visible:outline-3 focus-visible:outline-offset-2`. Take the outline color from the theme, for example `outline-ring`.
+- State layer: overlay in content color (`currentColor`) over the container; never change the container color. Opacities: hover 8%, focus 10%, pressed 10%, dragged 16%.
+- Via `::before`: `relative before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10`.
+- Add once in the `cva()` base class; on an installed component remove its own hover color (`hover:bg-primary/90`).
+- Disabled 38%: `disabled:opacity-38` (Base UI `data-disabled:opacity-38`); replace [shadcn/ui](STACK.md#shadcnui) `disabled:opacity-50`; no state layer.
+- Focus ring 3px, offset 2px: `focus-visible:outline-3 focus-visible:outline-offset-2 outline-ring` (theme color).
 
 ## Motion
 
-### [Material Design 3 motion](https://m3.material.io/styles/motion/overview/specs)
-
-- Add the MD3 easing curves to the `@theme` block in `global.css`:
+- `@theme` in `global.css`:
 
   ```css
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -84,24 +60,22 @@ Material Design 3 (MD3) rules for layout, spacing, states, motion, color, and co
   --ease-spring-fast-spatial: linear(0, 0.099, 0.317, 0.561, 0.775, 0.934, 1.034, 1.083, 1.095, 1.084, 1.063, 1.04, 1.02, 1.005, 0.996, 0.992, 0.991, 0.992, 0.994, 0.996, 1);
   ```
 
-- Use only MD3 durations with `duration-*`: 50, 100, 150, and 200ms (short), 250, 300, 350, and 400ms (medium), 450, 500, 550, and 600ms (long), and 700, 800, 900, and 1000ms (extra long). Do not use other values.
-- Animate an element that enters the screen with `ease-emphasized-decelerate`, and an element that leaves it with `ease-emphasized-accelerate`.
-- Animate a movement or a scale change (`transform`) in a small component, such as a switch handle, with the MD3 Expressive fast spatial spring: `ease-spring-fast-spatial duration-350`. Use longer durations from the list for full-screen transitions.
-- Animate opacity and color with `ease-standard`. Do not use the spring for them: it overshoots.
-- Follow the rules for reduced motion in [UI-UX.md](UI-UX.md#motion).
+- `duration-*` only: 50, 100, 150, 200 (short); 250, 300, 350, 400 (medium); 450, 500, 550, 600 (long); 700, 800, 900, 1000 (extra long) ms.
+- Enter `ease-emphasized-decelerate`; exit `ease-emphasized-accelerate`.
+- Small-component `transform` (switch handle): `ease-spring-fast-spatial duration-350`; full-screen transitions use longer durations.
+- Opacity and color: `ease-standard`, never the spring (overshoots).
+- Reduced motion → [UI-UX](UI-UX.md#motion).
 
 ## Color
 
-### [Material Design 3 color system](https://m3.material.io/styles/color/system/overview)
-
-- Generate the theme colors from one seed color with [material-color-utilities](https://github.com/material-foundation/material-color-utilities) (`@material/material-color-utilities`). Do not pick theme colors by hand.
-- Use `SchemeTonalSpot` with the 2025 spec (MD3 Expressive) and the standard contrast level: `new SchemeTonalSpot(Hct.fromInt(argbFromHex(seed)), isDark, 0, "2025")`. Build one scheme with `isDark` set to `false` for `:root` and one with `true` for `.dark`.
-- Use `SchemeFidelity` only when the exact brand color must appear in the UI: it puts the seed color in `primaryContainer`, but supports only the 2021 spec. Do not use `SchemeExpressive`: it moves the hues away from the seed color.
-- Generate the colors at build time in `scripts/theme.ts`, and run it with `npx tsx scripts/theme.ts`. Install both packages as dev dependencies: `npm i -D @material/material-color-utilities tsx`. Do not run the script with plain `node`: version 0.4.0 imports its own files without the `.js` extension, so Node cannot load it.
-- Read each role from the scheme and write it as hex: `hexFromArgb(scheme.surfaceContainerHigh)`.
-- Write the output to `src/styles/theme.css` and import it in `global.css`. Do not edit `theme.css` by hand: change the seed and run the script again.
-- Remove the color variables that `shadcn init` wrote to `:root` and `.dark` in `global.css`. Keep `--radius`, the shadows, the fonts, and the chart colors (`--chart-1` to `--chart-5`) from the Fulldev UI theme.
-- Map the MD3 roles to the shadcn/ui variables. The roles follow the MD3 component tokens, for example a menu container is `surface-container`:
+- Generate from one seed with [material-color-utilities](https://github.com/material-foundation/material-color-utilities) (`@material/material-color-utilities`); no hand-picked theme colors.
+- `new SchemeTonalSpot(Hct.fromInt(argbFromHex(seed)), isDark, 0, "2025")` (Expressive, standard contrast): `false` → `:root`, `true` → `.dark`.
+- `SchemeFidelity` only when the exact brand color must show (seed in `primaryContainer`; 2021 spec only). No `SchemeExpressive` (shifts hues).
+- Build time: `scripts/theme.ts`, run `npx tsx scripts/theme.ts`; `npm i -D @material/material-color-utilities tsx`. No plain `node` (0.4.0 imports without `.js`).
+- Roles as hex: `hexFromArgb(scheme.surfaceContainerHigh)`.
+- Output `src/styles/theme.css`, imported in `global.css`; never hand-edit, change the seed and rerun.
+- Remove color variables `shadcn init` wrote to `:root` and `.dark`; keep `--radius`, shadows, fonts, `--chart-1`..`--chart-5` from Fulldev UI.
+- Role map:
 
   | shadcn/ui variable | MD3 role |
   |---|---|
@@ -121,77 +95,67 @@ Material Design 3 (MD3) rules for layout, spacing, states, motion, color, and co
   | `--sidebar-accent`, `--sidebar-accent-foreground` | `secondaryContainer`, `onSecondaryContainer` |
   | `--sidebar-border`, `--sidebar-ring` | `outlineVariant`, `secondary` |
 
-- Add the MD3 roles that have no shadcn/ui variable as kebab-case variables, and expose them in `@theme inline` in `theme.css`: `primaryContainer`, `onPrimaryContainer`, `tertiary`, `onTertiary`, `tertiaryContainer`, `onTertiaryContainer`, `onError`, `errorContainer`, `onErrorContainer`, `surfaceContainerLowest` to `surfaceContainerHighest`, `inverseSurface`, `inverseOnSurface`, `inversePrimary`, `outline`, `outlineVariant`, and `scrim`. For example, write `--surface-container-high` and `--color-surface-container-high: var(--surface-container-high);`.
-- Use the extra roles where MD3 uses them, for example `bg-surface-container-high` for a dialog, `bg-primary-container text-on-primary-container` for a highlighted area, and `bg-destructive text-on-error` for a destructive button.
+- Roles without a shadcn/ui variable: kebab-case variables exposed in `@theme inline` in `theme.css` (`--surface-container-high` + `--color-surface-container-high: var(--surface-container-high);`): `primaryContainer`, `onPrimaryContainer`, `tertiary`, `onTertiary`, `tertiaryContainer`, `onTertiaryContainer`, `onError`, `errorContainer`, `onErrorContainer`, `surfaceContainerLowest`..`surfaceContainerHighest`, `inverseSurface`, `inverseOnSurface`, `inversePrimary`, `outline`, `outlineVariant`, `scrim`.
+- Use as MD3 does: dialog `bg-surface-container-high`; highlight `bg-primary-container text-on-primary-container`; destructive button `bg-destructive text-on-error`.
 
 ## Components
 
-### [Material Design 3 buttons](https://m3.material.io/components/buttons/specs)
+### Buttons
 
-- Set button sizes to the MD3 values. Change the `size` variants of Fulldev UI and Base UI buttons (see [DESIGN.md](DESIGN.md)) in `src/components/ui/button/button-variants.ts` and `src/components/ui/react/button.tsx` after install:
+- Change `size` variants of Fulldev UI and [Base UI](STACK.md#base-ui) buttons (→ [DESIGN](DESIGN.md)) in `src/components/ui/button/button-variants.ts` and `src/components/ui/react/button.tsx` after install:
 
-  | MD3 size | Height | Leading and trailing padding | Icon | Icon-label gap | Tailwind |
+  | Size | Height | Side padding | Icon | Gap | Tailwind |
   |---|---|---|---|---|---|
-  | XS | 32px | 16px | 20px | 8px | `h-8 px-4 gap-2 [&_svg]:size-5` |
-  | S (default) | 40px | 16px | 20px | 8px | `h-10 px-4 gap-2 [&_svg]:size-5` |
-  | M | 56px | 24px | 24px | 8px | `h-14 px-6 gap-2 [&_svg]:size-6` |
-  | L | 96px | 48px | 32px | 12px | `h-24 px-12 gap-3 [&_svg]:size-8` |
-  | XL | 136px | 64px | 40px | 16px | `h-34 px-16 gap-4 [&_svg]:size-10` |
+  | XS | 32 | 16 | 20 | 8 | `h-8 px-4 gap-2 [&_svg]:size-5` |
+  | S (default) | 40 | 16 | 20 | 8 | `h-10 px-4 gap-2 [&_svg]:size-5` |
+  | M | 56 | 24 | 24 | 8 | `h-14 px-6 gap-2 [&_svg]:size-6` |
+  | L | 96 | 48 | 32 | 12 | `h-24 px-12 gap-3 [&_svg]:size-8` |
+  | XL | 136 | 64 | 40 | 16 | `h-34 px-16 gap-4 [&_svg]:size-10` |
 
-- Give XS and S buttons and icon buttons a 48x48px target. See [Targets](#targets).
+- XS and S buttons and icon buttons: 48x48px target (Targets).
 
-### [Material Design 3 icon buttons](https://m3.material.io/components/icon-buttons/specs)
+### Icon buttons
 
-- Set icon button sizes to the MD3 values. Use the same size names as the buttons:
+| Size | Container | Icon | Tailwind |
+|---|---|---|---|
+| XS | 32 | 20 | `size-8 [&_svg]:size-5` |
+| S (default) | 40 | 24 | `size-10 [&_svg]:size-6` |
+| M | 56 | 24 | `size-14 [&_svg]:size-6` |
+| L | 96 | 32 | `size-24 [&_svg]:size-8` |
+| XL | 136 | 40 | `size-34 [&_svg]:size-10` |
 
-  | MD3 size | Container | Icon | Tailwind |
-  |---|---|---|---|
-  | XS | 32px | 20px | `size-8 [&_svg]:size-5` |
-  | S (default) | 40px | 24px | `size-10 [&_svg]:size-6` |
-  | M | 56px | 24px | `size-14 [&_svg]:size-6` |
-  | L | 96px | 32px | `size-24 [&_svg]:size-8` |
-  | XL | 136px | 40px | `size-34 [&_svg]:size-10` |
+### Text fields
 
-### [Material Design 3 text fields](https://m3.material.io/components/text-fields/specs)
+- `h-14 px-4`, icons `size-6`, icon-input gap `gap-4`. Supporting text 4px below, 16px sides: `pt-1 px-4`.
 
-- Make a text field 56px high with 16px leading and trailing padding: `h-14 px-4`. Use 24px icons (`size-6`) and a 16px gap between an icon and the input (`gap-4`).
-- Put the supporting text 4px below the field, with 16px side padding: `pt-1 px-4`.
+### Lists
 
-### [Material Design 3 lists](https://m3.material.io/components/lists/specs)
+- Item height 1 line `min-h-14` (56), 2 lines `min-h-18` (72), 3 lines `min-h-22` (88). `px-4 py-2.5 gap-3`.
+- Leading: icon `size-5` (20), avatar `size-10` (40), image `size-14` (56).
 
-- Make list items 56px high for one line, 72px for two lines, and 88px for three lines: `min-h-14`, `min-h-18`, `min-h-22`.
-- Use 16px side padding, 10px top and bottom padding, and a 12px gap between the leading element and the text: `px-4 py-2.5 gap-3`.
-- Use 20px leading icons (`size-5`), 40px avatars (`size-10`), and 56px images (`size-14`).
+### Menus
 
-### [Material Design 3 menus](https://m3.material.io/components/menus/specs)
+- Menu `min-w-28` (112), `py-2`. Item `min-h-12 px-4 py-2 gap-3`, icons `size-5`. Not 44px (Expressive segmented item, below the 48px target).
 
-- Make a menu at least 112px wide (`min-w-28`), with 8px top and bottom padding (`py-2`).
-- Make menu items at least 48px high (`min-h-12`), with 16px side padding, 8px top and bottom padding, and a 12px gap: `min-h-12 px-4 py-2 gap-3`. Use 20px icons (`size-5`). Do not use 44px: that is the height of an MD3 Expressive segmented menu item, which is below the 48px target (see [Targets](#targets)).
+### Chips
 
-### [Material Design 3 chips](https://m3.material.io/components/chips/specs)
+- `h-8 px-4`; leading icon `ps-2`; icon `size-4.5` (18); gap 8px (`gap-2`) icon-label and between chips.
+- 48px target: `relative after:absolute after:inset-x-0 after:-inset-y-2`; rows `gap-y-4`.
 
-- Make chips 32px high with 16px side padding: `h-8 px-4`. With a leading icon, use 8px leading padding (`ps-2`).
-- Use 18px icons (`size-4.5`) and an 8px gap between an icon and the label, and between chips in a row: `gap-2`.
-- Give each chip a 48px high target (see [Targets](#targets)): extend the 32px chip with a transparent `::after` element, for example `relative after:absolute after:inset-x-0 after:-inset-y-2`. Put 16px between rows of chips (`gap-y-4`), so the targets do not overlap.
+### Dialogs
 
-### [Material Design 3 dialogs](https://m3.material.io/components/dialogs/specs)
+- Width 280-560px, ≥ 24px from edges: `min-w-70 max-w-[min(560px,calc(100%-3rem))]`. `p-6`, icons `size-6`.
 
-- Make a dialog from 280px to 560px wide, and at least 24px from the screen edges: `min-w-70 max-w-[min(560px,calc(100%-3rem))]`.
-- Use 24px padding (`p-6`) and 24px icons (`size-6`).
+### Selection controls
 
-### [Material Design 3 selection controls](https://m3.material.io/components/checkbox/specs)
+- Checkbox `size-4.5` (18), radio `size-5` (20), switch track `w-13 h-8` (52x32). State layer `size-10` (40) with a 48x48px target.
 
-- Make a checkbox 18px (`size-4.5`), a radio button 20px (`size-5`), and a switch track 52x32px (`w-13 h-8`).
-- Put a 40px state layer (`size-10`) around each control, and give it a 48x48px target. See [Targets](#targets).
+### Navigation bar
 
-### [Material Design 3 navigation bar](https://m3.material.io/components/navigation-bar/specs)
+- Bottom bar `h-16` (64, Expressive). Active indicator `w-14 h-8` (56x32), icons `size-6`, icon-label gap `gap-1`.
 
-- Make the bottom navigation bar 64px high (`h-16`), as in MD3 Expressive.
-- Make the active indicator 56x32px (`w-14 h-8`), with 24px icons (`size-6`) and a 4px gap between the icon and the label (`gap-1`).
+### Navigation rail
 
-### [Material Design 3 navigation rail](https://m3.material.io/components/navigation-rail/specs)
-
-- Make the collapsed navigation rail 96px wide (`w-24`), as in MD3 Expressive. Make each item 64px high (`h-16`), with a 56x32px active indicator (`w-14 h-8`).
-- Put 44px above the first item (`pt-11`), and 40px between an optional header, such as a FAB, and the items (`mb-10`).
-- Make the expanded rail from 220px to 360px wide: `min-w-55 max-w-90`.
-- Do not use a navigation drawer. MD3 Expressive deprecates it. Use the expanded navigation rail instead.
+- Collapsed `w-24` (96, Expressive); item `h-16` (64) with indicator `w-14 h-8` (56x32). 44px above first item (`pt-11`); 40px between header (FAB) and items (`mb-10`).
+- Expanded `min-w-55 max-w-90` (220-360).
+- No navigation drawer (deprecated in Expressive) → expanded rail.

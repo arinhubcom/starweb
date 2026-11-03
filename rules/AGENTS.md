@@ -1,23 +1,36 @@
 # AGENTS
 
-These rules apply when you add or change a rule in this folder. Also follow the rules in [AGENTS.md](../AGENTS.md) at the project root.
+Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project root.
 
-## Writing rules
+`rules/` is written for an agent that knows the stack. Name the lib, tool, API, pattern, or spec. Do not explain what its docs explain. Put reasons and alternatives in [WHY.md](../WHY.md).
 
-- Put each rule in the file for its topic, under an `##` area and a `###` heading for the tool. Put the link to the official docs in the `###` heading.
-- Keep `STACK.md` short. For each tool, write only which tool to use and a Markdown link to the topic file, for example `Follow the rules in [DATA.md](DATA.md).` Put the details in the topic file.
-- Write one rule per bullet. Start with a verb, for example "Use", "Set", or "Do not".
-- Keep each rule short and specific. Name the exact API, file, or command.
-- When a rule forbids something, give the correct way in the same bullet.
-- Write rules only. Put the reasons and alternatives in [WHY.md](../WHY.md).
+## Format
+
+- One registry: [STACK.md](STACK.md). Each name gets one `###` entry: a one-line scope, the topic files, then the sources (`llms`, `context7`, `docs`, `github`, `mcp`, `skills`, `tools`), as bare URLs.
+- Topic files link each name to its registry entry once, at first use: `[Kysely](STACK.md#kysely)`. Do not repeat source URLs in topic files.
+- Use a deep link in a topic file only when the registry sources cannot find the page by name (a specific GitHub file, a legal text, a GitHub issue).
+- `##` per area, `###` per name. One rule per bullet, a fragment is fine: `No \`forwardRef\`; \`ref\` is a prop.`
+- Keep every project decision: chosen tool, forbidden tool, exact path, file name, command, binding, version pin, limit, number, order. Drop the reason unless the agent would otherwise "fix" the rule back.
+- Write the forbidden option and its replacement in one bullet: `No Drizzle/Prisma → Kysely.`
+- Cross-reference with `→ [FILE](FILE.md)`.
+
+## Verification
+
 - Verify each rule in the official docs or on GitHub before you add it.
-- Also test a rule locally when the docs do not fully answer it, or when it depends on what a tool does, such as its output, a config, or an error. Install the package in a temporary folder outside the project, run a short script or command, and check the result. Do not install test packages in the project.
-- When you cannot verify a rule in the docs or with a local test, do not add it. Say what you could not verify.
+- When the docs do not fully answer it, or it depends on tool output, a config, or an error: install the package in a temporary folder outside the project, run a short script, check the result. No test packages in the project.
+- A rule you cannot verify is not added. Say what you could not verify.
 
-## Template rules
+## Sources
 
-- Change the file in `template/files/` or `scripts/setup.mjs` that implements a rule in the same commit as the rule.
-- Do not edit a file in `template/files/` without the rule that describes it. Add or change the rule first.
-- Keep every version in `template/package.json` exact, with no `^` or `~`.
-- Run `bash scripts/test-template.sh <tmp-dir>` before you commit a change to `template/`, `scripts/`, or a rule that they implement. Use a new folder outside the repository for `<tmp-dir>`.
-- Run `bash scripts/test-update.sh <tmp-dir>` too, with another new folder, when the change touches `scripts/update.mjs`, `scripts/setup.mjs`, `scripts/lib.mjs`, `.starweb.json`, or the files that `update.mjs` merges.
+- Context7: `https://context7.com/<library-id>/llms.txt?tokens=10000`. Find the ID with `https://context7.com/api/v1/search?query=<name>`. Prefer a `verified` ID with the higher `benchmarkScore`.
+- `llms.txt`: try `<docs-origin>/llms.txt` and `/llms-full.txt`. Add only a URL that returns 200 with `text/plain` or `text/markdown`.
+- Skills: find with `https://skills.sh/api/search?q=<name>`. Prefer the vendor's own skill, then the most installed one. Link `https://skills.sh/<owner>/<repo>/<skill>`.
+- Check every URL before you add it. A URL that fails is not added.
+
+## Template
+
+- A rule and the file in `template/files/` or `scripts/setup.mjs` that implements it change in the same commit.
+- No edit to `template/files/` without the rule that describes it; change the rule first.
+- Exact versions in `template/package.json`, no `^` or `~`.
+- Before a commit that touches `template/`, `scripts/`, or a rule they implement: `bash scripts/test-template.sh <tmp-dir>` (new folder outside the repository).
+- Also `bash scripts/test-update.sh <tmp-dir>` (another new folder) when the change touches `scripts/update.mjs`, `scripts/setup.mjs`, `scripts/lib.mjs`, `.starweb.json`, or the files `update.mjs` merges. It edits lines 7, 10, and 13 of `rules/DEV.md`; keep that file at 13 or more lines.
