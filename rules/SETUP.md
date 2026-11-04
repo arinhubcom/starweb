@@ -1,6 +1,6 @@
 # SETUP
 
-Ordered procedure for a new Starweb project; steps 1-3 create it from the [template](https://github.com/arinhubcom/starweb/tree/main/template) and [setup.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/setup.mjs), the rest is manual.
+Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb project; steps 1-3 create it from the [template](https://github.com/arinhubcom/starweb/tree/main/template) and [setup.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/setup.mjs), the rest is manual.
 
 ## Project
 
@@ -11,7 +11,7 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 
 ### setup.mjs
 
-3. `node <starweb>/scripts/setup.mjs my-site --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, Update); `my-site` = new or empty folder. Writes `.starweb.json` (clone commit, name, site); commit it. The script: copies `template/` to the project root: starter files, configs, security, tests, CI, Dependabot ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), copies agent files and `rules/`, writes `package.json` without the pin-only tools, writes a new `EMDASH_ENCRYPTION_KEY` to `.env`, `npm install`, `npx wrangler types`, `npx tsx scripts/theme.ts`, `prettier`, `git init`.
+3. `node <starweb>/scripts/setup.mjs my-site --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, [UPDATE](UPDATE.md)); `my-site` = new or empty folder. Writes `.starweb.json` (clone commit, name, site); commit it. The script: copies `template/` to the project root: starter files, configs, security, tests, CI, Dependabot ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), copies agent files and `rules/`, writes `package.json` without the pin-only tools, writes a new `EMDASH_ENCRYPTION_KEY` to `.env`, `npm install`, `npx wrangler types`, `npx tsx scripts/theme.ts`, `prettier`, `git init`.
 
 ## Cloudflare
 
@@ -93,35 +93,3 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 31. First dev deploy: `npm run build`, `npx emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""` per app database, `wrangler deploy --env=""`. Then each push to `main` deploys dev. → [DEPLOY](DEPLOY.md) (Migrations, CI)
 32. First release: push tag `<worker>-YYYY-MM-DD-r1`, approve the `production` job, test the stage URL, run the promotion workflow (traffic in steps). → [DEPLOY](DEPLOY.md) (Releases, CI)
 33. Dev-bypass routes return `403` on prod. → [SECURITY](SECURITY.md) (Auth)
-
-## Update
-
-[update.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/update.mjs) uses `.starweb.json` and the kept Starweb clone.
-
-1. `git -C <starweb> pull`.
-2. `node <starweb>/scripts/update.mjs <project> --dry-run`; read the plan (changes nothing).
-3. `node <starweb>/scripts/update.mjs <project>`: merges agent files, `rules/`, template files; updates unchanged `package.json` versions and scripts; `npm install`.
-4. Resolve conflicts (markers `<<<<<<< project`, `||||||| base`, `>>>>>>> starweb`); set `commit` in `.starweb.json` to the commit the script prints.
-5. `update.mjs` does not change generated files; a project with a `.starweb.json` commit from before `template/` held the starter keeps its starter files. If they are missing, add the footer link to `/privacy` in `src/layouts/Base.astro`, add `public/.well-known/security.txt` to `.gitignore`, and run `npx tsx scripts/theme.ts`.
-6. `npm run check` and `npm run build` pass.
-7. Commit.
-
-## EmDash update
-
-`emdash`, `@emdash-cms/cloudflare`, and the starter files move only through Starweb. No bump by hand or by Dependabot (`ignore` in `dependabot.yml` also stops its security updates). No `upgrade-emdash` and no `upgrading-emdash` skill: it takes an npm tag, not a version, so it skips the pin and `min-release-age`. A security alert for these packages → these steps.
-
-### Starweb repository
-
-1. Pick the newest version older than 3 days that `create-emdash`, `emdash`, and `@emdash-cms/cloudflare` all have: `node scripts/update-starter.mjs --check` prints it. → [DEPS](DEPS.md) (npm min-release-age)
-2. `node scripts/update-starter.mjs <version>`, with `template/` and `starter/` committed. It runs `create-emdash`, merges the difference to `starter/` into `template/`, replaces `starter/`, and pins the three packages.
-3. Resolve the conflicts in `template/` (markers `<<<<<<< project`, `||||||| base`, `>>>>>>> starweb`). Handle each line under `Review by hand` and `Starter package.json changes to review`; the script changes no other `package.json` line.
-4. Read each version since the old pin in the [EmDash changelog](https://github.com/emdash-cms/emdash/blob/main/packages/core/CHANGELOG.md). Update `template/`, `rules/`, and `WHY.md` for each change that affects them. → [AGENTS](AGENTS.md) (Template)
-5. `bash scripts/test-template.sh <tmp-dir>` and `bash scripts/test-update.sh <tmp-dir>` pass.
-6. Commit `template/`, `starter/`, and the rule changes together.
-
-### Project
-
-1. Read each version since the project's pin in the [EmDash changelog](https://github.com/emdash-cms/emdash/blob/main/packages/core/CHANGELOG.md).
-2. The steps in Update. `update.mjs` moves the pins and merges the starter files.
-3. Apply the changelog entries that affect project code.
-4. New core migrations in the changelog → back up first; they run in the release pipeline. → [DEPLOY](DEPLOY.md) (EmDash core migrations)

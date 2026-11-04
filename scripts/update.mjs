@@ -198,8 +198,25 @@ function listPaths(plans, ...actions) {
   return plans.filter((p) => actions.includes(p.action)).map((p) => p.path);
 }
 
-function printSummary(plans, pkg, dryRun) {
+function changedRules(commit, head) {
+  return (gitOut(["diff", "--name-only", commit, head, "--", "rules"]) ?? "")
+    .split("\n")
+    .filter(Boolean);
+}
+
+function printReview(commit, head) {
+  if (commit === head) return;
+  const range = `${commit.slice(0, 7)}..${head.slice(0, 7)}`;
+  console.log(
+    `\nRead the Starweb changes, then apply them to the project code (rules/UPDATE.md):
+  git -C ${repoRoot} log --oneline ${range}
+  git -C ${repoRoot} diff ${range} -- rules/ template/ WHY.md`,
+  );
+}
+
+function printSummary(plans, pkg, dryRun, rules) {
   const groups = [
+    ["Rules changed", rules],
     ["Updated", listPaths(plans, "updated")],
     ["Added", listPaths(plans, "added")],
     ["Merged", listPaths(plans, "merged")],
@@ -237,7 +254,8 @@ function main() {
   );
   const plans = planFiles(dir, state, head);
   const pkg = planPackageJson(dir, state, head);
-  printSummary(plans, pkg, dryRun);
+  printSummary(plans, pkg, dryRun, changedRules(state.commit, head));
+  printReview(state.commit, head);
   if (dryRun) return;
   applyFiles(dir, plans);
   if (pkg.changes.length > 0) writeJson(pkg.projectPath, pkg.next);

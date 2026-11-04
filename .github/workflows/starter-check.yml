@@ -31,7 +31,7 @@ jobs:
           if [ "$status" -eq 0 ]; then exit 0; fi
           if [ "$status" -ne 3 ]; then exit "$status"; fi
           {
-            echo 'Follow the steps in `rules/SETUP.md` (EmDash update).'
+            echo 'Follow the steps in `rules/UPDATE.md` (EmDash update).'
             echo
             echo '```text'
             sed -n '/^Pinned EmDash version/,$p' "$RUNNER_TEMP/report.txt"

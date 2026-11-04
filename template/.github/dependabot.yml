@@ -9,7 +9,7 @@ updates:
       timezone: "Europe/Prague"
     cooldown:
       default-days: 3
-    # EmDash moves through Starweb: rules/SETUP.md (EmDash update).
+    # EmDash moves through Starweb: rules/UPDATE.md (EmDash update).
     ignore:
       - dependency-name: "emdash"
       - dependency-name: "@emdash-cms/cloudflare"

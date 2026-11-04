@@ -14,7 +14,17 @@ Set up a new Starweb project named my-site. Clone https://github.com/arinhubcom/
 
 Replace `my-site` with your project name.
 
-The steps are in [rules/SETUP.md](rules/SETUP.md). The [template/](template/) folder holds the `create-emdash` output with the Starweb changes in place, `package.json`, and the tested configs. The new project takes it over: the script [scripts/setup.mjs](scripts/setup.mjs) copies the folder to the project root and writes a new encryption key. The rules hold decisions, not install commands. Each EmDash update runs `create-emdash` again: [scripts/update-starter.mjs](scripts/update-starter.mjs) merges the new output into `template/`, and [starter/](starter/) keeps the last output as the merge base. See the steps in [rules/SETUP.md](rules/SETUP.md#emdash-update). To bring later Starweb changes into the project, run [scripts/update.mjs](scripts/update.mjs) (see the Update section in [rules/SETUP.md](rules/SETUP.md)). CI tests the template every week. Read [why](WHY.md#why-a-template-setupmjs-and-ci).
+The steps are in [rules/SETUP.md](rules/SETUP.md). The [template/](template/) folder holds the `create-emdash` output with the Starweb changes in place, `package.json`, and the tested configs. The new project takes it over: the script [scripts/setup.mjs](scripts/setup.mjs) copies the folder to the project root and writes a new encryption key. The rules hold decisions, not install commands. Each EmDash update runs `create-emdash` again: [scripts/update-starter.mjs](scripts/update-starter.mjs) merges the new output into `template/`, and [starter/](starter/) keeps the last output as the merge base. See the steps in [rules/UPDATE.md](rules/UPDATE.md#emdash-update). CI tests the template every week. Read [why](WHY.md#why-a-template-setupmjs-and-ci).
+
+## 🔄 Update a project
+
+When Starweb has new rules or a better template, give this prompt to your AI agent in the project:
+
+```text
+Update this project to the newest Starweb. Find the Starweb clone, for example ~/starweb, or clone https://github.com/arinhubcom/starweb again. Run git pull there. Read rules/UPDATE.md in the clone, not the older copy in the project, and do the steps in "Starweb update" in order. A merge does not change project code, so do the Apply steps too: change the code that breaks a new rule. If a step fails, stop and report the error.
+```
+
+The steps are in [rules/UPDATE.md](rules/UPDATE.md). The script [scripts/update.mjs](scripts/update.mjs) merges the new rules and template files with your changes, and lists the rules that changed.
 
 ## 🏗️ Architecture
 

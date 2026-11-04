@@ -31,7 +31,7 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 ### Dependabot groups
 
 - npm group `astro`: `patterns: ["astro", "@astrojs/*", "wrangler", "@emdash-cms/*"]`. Merge by hand after the Compatibility checks.
-- npm `ignore`: `emdash`, `@emdash-cms/cloudflare`. → [SETUP](SETUP.md) (EmDash update)
+- npm `ignore`: `emdash`, `@emdash-cms/cloudflare`. → [UPDATE](UPDATE.md) (EmDash update)
 - npm group `dev-dependencies`: `dependency-type: "development"`, `update-types: ["minor", "patch"]`.
 
 ### Dependabot automerge
@@ -52,7 +52,7 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 ### npm min-release-age
 
 - `.npmrc` in repository root (committed): `min-release-age=3`; equal to `cooldown.default-days`.
-- New `emdash` releases wait 3 days (no exclude list). → [SETUP](SETUP.md) (EmDash update)
+- New `emdash` releases wait 3 days (no exclude list). → [UPDATE](UPDATE.md) (EmDash update)
 
 ### npm audit
 
