@@ -846,6 +846,13 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 ## Quality
 
+### Why `astro check` stays on TypeScript 6
+
+- `astro check` does not support TypeScript 7, and Astro plans to deprecate it. It stops with an error, because TypeScript 7 no longer exports the API that `@astrojs/language-server` uses ([astro#17268](https://github.com/withastro/astro/issues/17268)). So a newer `@astrojs/check` is not the way forward.
+- The replacement is `tsc --noEmit --runExternalCode` with `@astrojs/ts-content-mapper`, which needs TypeScript 7.1 or later. On 2026-11-04, only a beta of that TypeScript version existed.
+- A test on 2026-11-04 with that beta and `@astrojs/ts-content-mapper` 0.2.0 found type errors in `.astro` files, and reported none in the template code. But it reported 769 errors in `node_modules/emdash/src`: the `emdash` package ships `.ts` source, so the strict flags of the project apply to it, and `skipLibCheck` covers only `.d.ts` files.
+- The speed gain is small: 6-13 s against 9-19 s for `astro check` in the same test. So the move waits for a stable TypeScript release and for a fix of those errors. `--runExternalCode` also runs code from `node_modules` during the type check.
+
 ### Why `exactOptionalPropertyTypes` stays on
 
 - The flag catches real mismatches with the EmDash types: `cursor` and `currentLocale` must be absent, not `undefined`. So fix the starter code and keep the flag.
@@ -917,6 +924,7 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - `.env` stays out of the template: `create-emdash` writes a random `EMDASH_ENCRYPTION_KEY` to it, and a shared key would decrypt the plugin secrets of other projects.
 - The template uses the newest Node.js LTS version (24 on 2026-10-15). The first CI run used Node.js 22.23.3, which ships npm 10.9, and `npm install` failed with `Cannot read properties of null (reading 'edgesOut')`. The same install failed locally with npm 10.9.4, also without `.npmrc`, and passed with npm 11.11.0. Node.js 24 ships npm 11, so `setup.mjs` and `update.mjs` stop early when npm is older than 11. Node.js 26 is newer but not LTS yet.
 - A version bump alone does not bring new features into the rules. So a pin change of the main tools needs a read of their release notes, the same as `astro`.
+- The template test runs the checks and `npm audit` at the same time, in two groups: the type-aware lint reads `.astro/types.d.ts`, which `astro check` writes, so lint starts after typecheck. In three rounds from the same clean state on 2026-11-04 (8 cores), they took 25-32 s, and 47-54 s in order. The test checks the text of the `check` script, because it runs the parts and not the script.
 - CI runs `scripts/test-template.sh` on each change to `template/`, `scripts/`, or `rules/`, and every Monday. The script runs `setup.mjs` on a new folder, and runs `npm run check`, `npm run build`, and `npm run preview` with checks of the responses. The weekly run finds a change in a registry package that no commit in this repository caused.
 - Dependabot ignores `create-emdash`, `emdash`, and `@emdash-cms/cloudflare` in the Starweb repository, and `emdash` and `@emdash-cms/cloudflare` in a project: a bump without the starter files would leave the project or `template/` on the old starter. The `ignore` option also stops security pull requests for these packages, so a security alert starts the steps in [UPDATE.md](rules/UPDATE.md#emdash-update). Dependabot still shows the alert.
 - `.github/workflows/starter-check.yml` runs every Monday, because no other signal exists: Dependabot ignores the EmDash packages, and `npm run check` cannot see a new commit in `emdash-cms/templates`. It updates one open issue, so a change that waits does not add a new issue each week.
