@@ -20,6 +20,31 @@ claude "Set up a new Starweb project named my-site. Clone https://github.com/ari
 
 The steps are in [rules/SETUP.md](rules/SETUP.md). The script [scripts/setup.mjs](scripts/setup.mjs) copies the tested files from [template/](template/) into the new project and pins the package versions. To bring later Starweb changes into the project, run [scripts/update.mjs](scripts/update.mjs) (see the Update section in [rules/SETUP.md](rules/SETUP.md)). CI tests the template every week. Read [why](WHY.md#why-a-template-setupmjs-and-ci).
 
+## 🏗️ Architecture
+
+The diagram shows the main parts of a Starweb project and the main advantage of each part.
+
+```mermaid
+flowchart TD
+    accTitle: Starweb architecture and its main advantages
+    accDescr: An AI agent uses the Starweb template to build and deploy one Cloudflare Worker. Requests from people go to the Cloudflare CDN. A cache hit returns without running the Worker. Other requests run the Worker, which holds Astro, EmDash CMS, and your apps. The Worker uses built-in data services through bindings. Astro and EmDash can also run on Node.js.
+
+    Agent["AI agent"] -->|"Reads the rules and runs setup"| Template["Starweb template<br/>Rules for agents, files tested by CI every week"]
+    Template -->|"Gradual deployments and instant rollback"| Worker
+
+    People["Visitors, app users, and editors"] --> CDN["Cloudflare CDN<br/>A cache hit does not run the Worker"]
+    CDN -->|"Cache miss or dynamic request"| Worker
+
+    subgraph Worker["One Cloudflare Worker: edge compute, no slow cold starts, free plan to start"]
+        Astro["Astro<br/>Zero JavaScript by default, islands only for interactive parts"]
+        EmDash["EmDash CMS<br/>Admin panel, live content, sandboxed plugins, and MCP server"]
+        Apps["Your apps and API routes<br/>Login, 2FA, organizations, and Stripe billing from emdash-better-auth"]
+    end
+
+    Worker -->|"Bindings"| Data["Built-in data services<br/>D1, R2, KV, Queues, Durable Objects, and Workers AI"]
+    Worker -.->|"Fallback"| Node["Node.js<br/>Astro and EmDash also run here"]
+```
+
 ## 🚀 Features
 
 - Rules and instructions in `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and `rules/`.
