@@ -25,24 +25,26 @@ The steps are in [rules/SETUP.md](rules/SETUP.md). The script [scripts/setup.mjs
 The diagram shows the main parts of a Starweb project and the main advantage of each part.
 
 ```mermaid
+%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%
 flowchart TD
     accTitle: Starweb architecture and its main advantages
     accDescr: An AI agent uses the Starweb template to build and deploy one Cloudflare Worker. Requests from people go to the Cloudflare CDN. A cache hit returns without running the Worker. Other requests run the Worker, which holds Astro, EmDash CMS, and your apps. The Worker uses built-in data services through bindings. Astro and EmDash can also run on Node.js.
 
-    Agent["AI agent"] -->|"Reads the rules and runs setup"| Template["Starweb template<br/>Rules for agents, files tested by CI every week"]
-    Template -->|"Gradual deployments and instant rollback"| Worker
+    Agent["AI agent"] -->|"Reads the rules<br/>and runs setup"| Template["Starweb template<br/>Rules for agents<br/>CI tests the files every week"]
+    Template -->|"Gradual deployments<br/>and instant rollback"| Worker
 
-    People["Visitors, app users, and editors"] --> CDN["Cloudflare CDN<br/>A cache hit does not run the Worker"]
-    CDN -->|"Cache miss or dynamic request"| Worker
+    People["Visitors, app users,<br/>and editors"] --> CDN["Cloudflare CDN<br/>A cache hit does not<br/>run the Worker"]
+    CDN -->|"Cache miss or<br/>dynamic request"| Worker
 
-    subgraph Worker["One Cloudflare Worker: edge compute, no slow cold starts, free plan to start"]
-        Astro["Astro<br/>Zero JavaScript by default, islands only for interactive parts"]
-        EmDash["EmDash CMS<br/>Admin panel, live content, sandboxed plugins, and MCP server"]
-        Apps["Your apps and API routes<br/>Login, 2FA, organizations, and Stripe billing from emdash-better-auth"]
+    subgraph Worker["One Cloudflare Worker"]
+        Runtime["Workers runtime<br/>No slow cold starts<br/>Free plan to start"]
+        Astro["Astro<br/>Zero JavaScript by default<br/>Islands for interactive parts"]
+        EmDash["EmDash CMS<br/>Admin panel, live content,<br/>sandboxed plugins,<br/>and MCP server"]
+        Apps["Your apps and API routes<br/>Login, 2FA, organizations,<br/>and Stripe billing"]
     end
 
-    Worker -->|"Bindings"| Data["Built-in data services<br/>D1, R2, KV, Queues, Durable Objects, and Workers AI"]
-    Worker -.->|"Fallback"| Node["Node.js<br/>Astro and EmDash also run here"]
+    Worker -->|"Bindings"| Data["Built-in data services<br/>D1, R2, KV, Queues,<br/>Durable Objects,<br/>and Workers AI"]
+    Worker -.->|"Fallback"| Node["Node.js<br/>Astro and EmDash<br/>also run here"]
 ```
 
 ## 🚀 Features
