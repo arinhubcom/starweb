@@ -1,0 +1,9 @@
+# rules/DEPS.md (Install, pnpm minimumReleaseAge, pnpm audit).
+allowBuilds:
+  esbuild: true
+  workerd: true
+catalog:
+  zod: 4.6.7
+minimumReleaseAge: 4320
+overrides:
+  zod: "catalog:"

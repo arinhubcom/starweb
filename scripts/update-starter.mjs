@@ -23,7 +23,9 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import {
+  NPM_LOCK,
   TEMPLATE_DIR,
+  TEMPLATE_LOCK,
   TEMPLATE_PACKAGE,
   fail,
   gitOut,
@@ -53,12 +55,13 @@ const FORMAT_PACKAGES = [
 ];
 const FORMAT_FILES = [".prettierrc", ".prettierignore"];
 // Starter output that does not belong in the repository: secrets and lockfiles,
-// generated types, pnpm settings (shadcn init would use pnpm), and a symbolic
-// link that the template already has.
+// generated types, pnpm settings (the template has its own), and a symbolic link
+// that the template already has.
 const NOT_KEPT = [
   ".claude",
   ".env",
-  "package-lock.json",
+  NPM_LOCK,
+  TEMPLATE_LOCK,
   "pnpm-workspace.yaml",
   "worker-configuration.d.ts",
 ];
@@ -122,10 +125,8 @@ function installFormatter(workDir) {
   );
   const pins = { ...dependencies, ...devDependencies };
   writeJson(join(workDir, "package.json"), { private: true });
-  run(workDir, "npm", [
-    "install",
-    "--no-audit",
-    "--no-fund",
+  run(workDir, "pnpm", [
+    "add",
     "--ignore-scripts",
     ...FORMAT_PACKAGES.map((name) => `${name}@${pins[name]}`),
   ]);
@@ -137,11 +138,10 @@ function createStarter(workDir, version) {
   const parent = join(workDir, `v${version}`);
   const project = join(parent, "app");
   mkdirSync(parent);
-  run(parent, "npm", [
+  run(parent, "pnpm", [
     "create",
     `emdash@${version}`,
     "app",
-    "--",
     "--template",
     TEMPLATE_NAME,
     "--yes",
@@ -230,12 +230,11 @@ function updatePackageJson(version, oldPackage, newPackage) {
     ...root,
     devDependencies: { ...root.devDependencies, [CREATE_PACKAGE]: version },
   });
-  run(templateDir, "npm", [
+  run(templateDir, "pnpm", [
     "install",
-    "--package-lock-only",
+    "--lockfile-only",
+    "--no-frozen-lockfile",
     "--ignore-scripts",
-    "--no-audit",
-    "--no-fund",
   ]);
   return ["scripts", "dependencies", "devDependencies"].flatMap((section) =>
     diffMap(section, oldPackage[section], newPackage[section]),
@@ -260,7 +259,7 @@ function printReport(report, packageChanges) {
 
 // Stable versions that are old enough to pin, for one package.
 function allowedVersions(name) {
-  const times = JSON.parse(run(repoRoot, "npm", ["view", name, "time", "--json"]));
+  const times = JSON.parse(run(repoRoot, "pnpm", ["view", name, "time", "--json"]));
   const newestDate = Date.now() - MIN_RELEASE_AGE_MS;
   return Object.entries(times)
     .filter(

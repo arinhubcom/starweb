@@ -1,6 +1,6 @@
 # STACK
 
-Registry of every name in `rules/`. Each entry: scope, topic files, sources. Load sources in this order: `llms` > `context7` > `docs` > `github`. Install `skills` with `npx skills add <owner>/<repo> --skill <name>`.
+Registry of every name in `rules/`. Each entry: scope, topic files, sources. Load sources in this order: `llms` > `context7` > `docs` > `github`. Install `skills` with `pnpm dlx skills add <owner>/<repo> --skill <name>`.
 
 Context7 URLs take `?tokens=<n>`; raise it for a deep lookup.
 
@@ -8,7 +8,7 @@ Context7 URLs take `?tokens=<n>`; raise it for a deep lookup.
 
 ### Node.js
 
-Active LTS with npm 11, for tooling and CI. → [DEPS](DEPS.md), [SETUP](SETUP.md)
+Active LTS, for tooling and CI. → [DEPS](DEPS.md), [SETUP](SETUP.md)
 
 - llms: https://nodejs.org/llms.txt
 - docs: https://nodejs.org/en/about/previous-releases
@@ -623,13 +623,13 @@ Version updates, groups, cooldown, automerge. → [DEPS](DEPS.md)
 - github: https://github.com/dependabot/dependabot-core
 - skills: https://skills.sh/github/awesome-copilot/dependabot
 
-### npm
+### pnpm
 
-`npm ci`, `package-lock.json`, `min-release-age`, `audit`. → [DEPS](DEPS.md), [QUALITY](QUALITY.md)
+`pnpm install --frozen-lockfile`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `allowBuilds`, `minimumReleaseAge`, `audit`, `pnpm/action-setup`. → [DEPS](DEPS.md), [QUALITY](QUALITY.md)
 
-- docs: https://docs.npmjs.com/
-- context7: https://context7.com/npm/cli/llms.txt?tokens=10000
-- github: https://github.com/npm/cli
+- docs: https://pnpm.io/
+- context7: https://context7.com/pnpm/pnpm/llms.txt?tokens=10000
+- github: https://github.com/pnpm/pnpm · https://github.com/pnpm/action-setup
 
 ### skills CLI
 

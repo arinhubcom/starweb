@@ -523,7 +523,7 @@ If the seed is invalid, the first request fails and the error is logged. Restart
 ## Exporting Seeds
 
 ```bash
-npx emdash export-seed                      # Schema only
-npx emdash export-seed --with-content       # Schema + all content
-npx emdash export-seed --with-content=posts,pages  # Specific collections
+pnpm exec emdash export-seed                      # Schema only
+pnpm exec emdash export-seed --with-content       # Schema + all content
+pnpm exec emdash export-seed --with-content=posts,pages  # Specific collections
 ```

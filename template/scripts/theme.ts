@@ -1,5 +1,5 @@
 // Generate src/styles/theme.css from one seed color. Run with:
-// npx tsx scripts/theme.ts
+// pnpm exec tsx scripts/theme.ts
 // See the Color section in rules/MATERIAL.md. Change SEED, not the output.
 import { writeFileSync } from "node:fs";
 import {

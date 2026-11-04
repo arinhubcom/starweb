@@ -10,11 +10,11 @@
 - Global readers: simple, consistent text; no slang, jargon, clichés, figurative language, culture-specific references.
 - No announcements of future features or changes.
 - "You"; no "we" in instructions. Active voice. Present tense; "will" only for a later action (next backup). American spelling and punctuation.
-- Condition before instruction: "To install the package, run `npm i`."
+- Condition before instruction: "To install the package, run `pnpm add`."
 - Sentence case for titles and headings.
 - Numbered lists for ordered steps, bulleted for others, description lists for pairs.
 - Serial (Oxford) comma.
-- Code font: code, file names, commands, API names (`astro.config`, `npm i`, `injectRoute()`). UI elements bold: Click **Save**.
+- Code font: code, file names, commands, API names (`astro.config`, `pnpm add`, `injectRoute()`). UI elements bold: Click **Save**.
 - Unambiguous dates: 2026-10-14 or October 14, 2026; not 10/14/26.
 - Link text readable alone; no "click here", "this document", "this article".
 - Alt text on every image; vector or high-resolution images (SVG). Accessible to people with disabilities.

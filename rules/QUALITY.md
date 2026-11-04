@@ -16,7 +16,7 @@
 
 ### [Astro](STACK.md#astro) check
 
-- `npm run typecheck` before commit: no errors or warnings.
+- `pnpm run typecheck` before commit: no errors or warnings.
 - `typecheck` = `astro check --minimumFailingSeverity warning`.
 
 ## Lint
@@ -35,7 +35,7 @@
 - `import/no-unassigned-import`: `allow: ["**/*.css"]`.
 - Tests (`test/**`, `**/*.test.ts`, `**/*.test.tsx`): `e18e/prefer-static-regex` off.
 - JavaScript (`**/*.js`, `**/*.mjs`, `**/*.cjs`): `typescript/no-unsafe-argument`, `-assignment`, `-call`, `-member-access`, `-return` off.
-- Type-aware rules need `.astro/types.d.ts`: run `npm run typecheck` once before `npm run lint` in a new clone (else false `no-unsafe-*` errors on `astro:*` imports). `check` already runs them in this order.
+- Type-aware rules need `.astro/types.d.ts`: run `pnpm run typecheck` once before `pnpm run lint` in a new clone (else false `no-unsafe-*` errors on `astro:*` imports). `check` already runs them in this order.
 
 ### React Doctor rules
 
@@ -78,10 +78,10 @@
 
 ## Scripts
 
-### [npm](STACK.md#npm) scripts
+### [pnpm](STACK.md#pnpm) scripts
 
 - Template `package.json`: `dev`, `build`, `preview`, `typecheck`, `lint` (`oxlint --type-aware --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
-- `check` = `npm run format:check && npm run typecheck && npm run lint && npm run knip && npm run test`.
+- `check` = `pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run test`.
 - Not in `test` or `check`: `build`, `size` (needs `dist/`; → [PERF](PERF.md#client-javascript)), API checks, dependency checks, screenshot and e2e tests (CI only).
 
 ## Order
@@ -89,11 +89,11 @@
 ### [GitHub Actions](STACK.md#github-actions)
 
 - Order, fastest first, stop at first failure: `format:check`, `typecheck`, `lint`, `knip`, `test`.
-- `npm run check` locally before commit; same scripts in the PR workflow.
+- `pnpm run check` locally before commit; same scripts in the PR workflow.
 - PR workflow after `check`, in order, stop at first failure:
-  1. `npm run build` (e2e and screenshot tests need its output).
-  2. `npm run size`. → [PERF](PERF.md#client-javascript)
+  1. `pnpm run build` (e2e and screenshot tests need its output).
+  2. `pnpm run size`. → [PERF](PERF.md#client-javascript)
   3. API: regenerate `openapi.json` + `git diff --exit-code`, `redocly lint`, `oasdiff breaking`. → [API](API.md)
-  4. Dependencies: `npm audit --omit=dev --audit-level=high`, `npm audit signatures`. → [DEPS](DEPS.md)
+  4. Dependencies: `pnpm audit --prod --audit-level high`, `pnpm audit signatures`. → [DEPS](DEPS.md)
   5. e2e, then screenshot tests. → [TESTING](TESTING.md#ci)
-- `npm run typecheck` before each release. → [DEPLOY](DEPLOY.md)
+- `pnpm run typecheck` before each release. → [DEPLOY](DEPLOY.md)

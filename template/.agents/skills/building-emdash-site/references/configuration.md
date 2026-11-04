@@ -194,13 +194,13 @@ The dev server regenerates this file automatically when schema changes. You can 
 
 ```bash
 # From local dev server (writes emdash-env.d.ts at project root)
-npx emdash types
+pnpm exec emdash types
 
 # From remote instance
-npx emdash types --url https://my-site.pages.dev
+pnpm exec emdash types --url https://my-site.pages.dev
 
 # Custom output path
-npx emdash types --output src/types/cms.ts
+pnpm exec emdash types --output src/types/cms.ts
 ```
 
 The CLI also writes `.emdash/schema.json` with the raw schema for tooling.
@@ -228,7 +228,7 @@ For Cloudflare, replace `@astrojs/node` with `@astrojs/cloudflare` and add `@emd
 
 ```bash
 pnpm dev                    # Start the Astro dev server
-npx emdash types            # Refresh types from the running site
+pnpm exec emdash types            # Refresh types from the running site
 ```
 
 The runtime runs pending migrations on the first request and applies the bundled seed when the database is empty and setup has not been completed. The Astro integration generates `emdash-env.d.ts` when the server starts. The admin UI is at `http://localhost:4321/_emdash/admin`. On first run, you'll go through setup to create an admin account.

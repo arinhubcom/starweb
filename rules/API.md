@@ -24,7 +24,7 @@
 - Contract = [Zod](STACK.md#zod) schemas in `src/apps/app1/api/schemas.ts`, also used to validate requests. No hand-written OpenAPI.
 - `.meta({ description, example })`. `id` in `.meta()` only on reused schemas (moves to `components` as `$ref`; duplicate `id` throws).
 - Parameters: `requestParams: { path, query, header, cookie }`, one `z.object()` per location.
-- `createDocument()` in Node script `scripts/openapi.ts` → `src/apps/app1/api/openapi.json`. Run `npx tsx scripts/openapi.ts`. Never import `createDocument()` in Worker code.
+- `createDocument()` in Node script `scripts/openapi.ts` → `src/apps/app1/api/openapi.json`. Run `pnpm exec tsx scripts/openapi.ts`. Never import `createDocument()` in Worker code.
 - Operations (`paths`, `requestParams`, `requestBody`, `responses`) in `scripts/openapi.ts`, importing from `schemas.ts`. None in `schemas.ts`.
 - Commit the generated file. CI regenerates and fails on `git diff --exit-code`.
 
@@ -43,7 +43,7 @@
 
 ### [openapi-fetch](STACK.md#openapi-fetch)
 
-- Types: `npx openapi-typescript src/apps/app1/api/openapi.json -o src/apps/app1/api/openapi.d.ts`.
+- Types: `pnpm exec openapi-typescript src/apps/app1/api/openapi.json -o src/apps/app1/api/openapi.d.ts`.
 - Islands: `createClient<paths>({ baseUrl })` in the [TanStack](STACK.md#tanstack) Query `queryFn`. No hand-typed `fetch`.
 - MCP and agent tools built from the same Zod schemas. No second schema.
 

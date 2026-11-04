@@ -27,12 +27,12 @@
 - `tsconfig.json` `compilerOptions` keep `"baseUrl": "."`, `"paths": { "@/*": ["./src/*"] }`; `shadcn add` needs them.
 - `template/` holds the output of `shadcn init` with `https://ui.full.dev/r/styles/base-vega/base.json`: `components.json` (`@fulldev` registry), theme tokens in `src/styles/global.css`, `cn()` in `src/lib/utils.ts`, packages `shadcn`, `cn`, `tw-animate-css`. No second `shadcn init`.
 - `tailwind-variants`; no `class-variance-authority` (`no-restricted-imports` in `.oxlintrc.json` fails on it).
-- After each `shadcn add` (Fulldev or shadcn/ui): convert every `cva()` in the added files to `tv()`. `cva("<base>", { variants, defaultVariants })` → `tv({ base: "<base>", variants, defaultVariants })`; `import { tv, type VariantProps } from "tailwind-variants"`. Call sites stay. Registry items import `class-variance-authority` without listing it; `npx astro check` reports each file left. → [DESIGN](DESIGN.md)
+- After each `shadcn add` (Fulldev or shadcn/ui): convert every `cva()` in the added files to `tv()`. `cva("<base>", { variants, defaultVariants })` → `tv({ base: "<base>", variants, defaultVariants })`; `import { tv, type VariantProps } from "tailwind-variants"`. Call sites stay. Registry items import `class-variance-authority` without listing it; `pnpm exec astro check` reports each file left. → [DESIGN](DESIGN.md)
 - `class="@container"` on `<body>` in the base layout (container query variants such as `@2xl:`).
-- Add components with `npx shadcn add @fulldev/button` (uses the project's `shadcn`). No `@latest`, no hand copy.
+- Add components with `pnpm exec shadcn add @fulldev/button` (uses the project's `shadcn`). No `@latest`, no hand copy.
 - Location: `src/components/ui/<name>/` (`button.astro`, `button-variants.ts`, `index.ts`); `import { Button } from "@/components/ui/button"`. Your code after install; edit there.
 - Theme via the CSS variables from init; no hardcoded colors.
-- Skills: `npx skills add shadcn/ui`, `npx skills add fulldotdev/ui --skill fulldev-ui`.
+- Skills: `pnpm dlx skills add shadcn/ui`, `pnpm dlx skills add fulldotdev/ui --skill fulldev-ui`.
 - React islands (shadcn/ui, Base UI) only for interactive parts with no Fulldev component.
 
 ## React components
@@ -65,9 +65,9 @@
 - For React islands (dialog, dropdown menu, popover, tabs, select); Base UI wrappers in the Fulldev theme. Static UI → Fulldev `.astro`.
 - Use the shadcn/ui component when it exists; no hand-written Base UI wrapper.
 - Keep `"style": "base-vega"` in `components.json` (fixed after init). No `radix-*` style (imports `radix-ui`).
-- Add with `--path`: `npx shadcn add dialog --path src/components/ui/react` (default path is for `.astro`). Registry dependencies land in the same folder with imports rewritten to `@/components/ui/react/...`.
+- Add with `--path`: `pnpm exec shadcn add dialog --path src/components/ui/react` (default path is for `.astro`). Registry dependencies land in the same folder with imports rewritten to `@/components/ui/react/...`.
 - Before the first React component: add `@base-ui/react`, `lucide-react` (init and `base-vega` do not add them).
-- After each `shadcn add`: `npx astro check`; add the reported missing packages.
+- After each `shadcn add`: `pnpm exec astro check`; add the reported missing packages.
 - After each `shadcn add` check `package.json`; if `radix-ui` or `@radix-ui/*` was added, remove it and add the component again from `base-vega`.
 - Edit in `src/components/ui/react/`.
 

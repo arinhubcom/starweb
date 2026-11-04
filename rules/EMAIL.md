@@ -13,4 +13,4 @@
 ### [emailcn](STACK.md#emailcn)
 
 - Start templates from emailcn components and blocks, React Email variant.
-- `npx shadcn@latest add @emailcn/react-email/block-onboarding-default`; no hand copy. Your code after install; edit to the brand.
+- `pnpm dlx shadcn@latest add @emailcn/react-email/block-onboarding-default`; no hand copy. Your code after install; edit to the brand.

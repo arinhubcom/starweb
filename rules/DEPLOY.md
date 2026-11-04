@@ -68,13 +68,13 @@
 
 ### [EmDash](STACK.md#emdash) core migrations
 
-- `emdash migrate` in CI against the remote D1 database of the environment, after `npm run build` (writes `.emdash/migrations.json`; keep it in `.gitignore`).
-- `npx emdash migrate --account-id "$CLOUDFLARE_ACCOUNT_ID" --d1 "$D1_DATABASE_ID" --expected-target-fingerprint "$EMDASH_TARGET_FINGERPRINT"`, `CLOUDFLARE_API_TOKEN` with D1 Edit. Non-interactive apply fails without the fingerprint.
-- After deploy: `npx emdash migrate --check` (non-zero on pending or unknown migrations).
-- Local: `npx emdash migrate --wrangler-config wrangler.jsonc --wrangler-env production` with `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`; check the printed target. CI uses the explicit `--account-id`/`--d1` form.
-- Fingerprint once per database: `npx emdash migrate --status --account-id <id> --d1 <database>` locally, check account and database, store as variable `EMDASH_TARGET_FINGERPRINT` of the GitHub environment (dev or `production`). Change only after reviewing a changed target.
+- `emdash migrate` in CI against the remote D1 database of the environment, after `pnpm run build` (writes `.emdash/migrations.json`; keep it in `.gitignore`).
+- `pnpm exec emdash migrate --account-id "$CLOUDFLARE_ACCOUNT_ID" --d1 "$D1_DATABASE_ID" --expected-target-fingerprint "$EMDASH_TARGET_FINGERPRINT"`, `CLOUDFLARE_API_TOKEN` with D1 Edit. Non-interactive apply fails without the fingerprint.
+- After deploy: `pnpm exec emdash migrate --check` (non-zero on pending or unknown migrations).
+- Local: `pnpm exec emdash migrate --wrangler-config wrangler.jsonc --wrangler-env production` with `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`; check the printed target. CI uses the explicit `--account-id`/`--d1` form.
+- Fingerprint once per database: `pnpm exec emdash migrate --status --account-id <id> --d1 <database>` locally, check account and database, store as variable `EMDASH_TARGET_FINGERPRINT` of the GitHub environment (dev or `production`). Change only after reviewing a changed target.
 - One `emdash migrate` per database at a time (second run waits 10 s for the lock, then fails). Never cancel a running one (lock stays held).
-- Stuck lock: `npx emdash migrate --status`, confirm no job runs, `npx emdash migrate --take-over-lock <id>`.
+- Stuck lock: `pnpm exec emdash migrate --status`, confirm no job runs, `pnpm exec emdash migrate --take-over-lock <id>`.
 
 ### D1 Time Travel
 
@@ -107,13 +107,13 @@
 - Token from the **Edit Cloudflare Workers** template; **Account Resources** = the one account, **Zone Resources** = the one zone of the routes. Add D1 Edit (migrations, `emdash migrate`); Queues Edit only with Queues. Nothing else.
 - Two tokens: repository secret (PR previews, dev deploy); secret of GitHub environment `production` (stage, promotion).
 - PR preview: `pull_request` (default types), `wrangler versions upload --env="" --preview-alias pr-${{ github.event.pull_request.number }}`. No `pull_request_target`; forks get no preview.
-- Before the upload: `npm run build`, `npx emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""`. Never edit a migration a preview applied → new migration.
+- Before the upload: `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""`. Never edit a migration a preview applied → new migration.
 - One sticky PR comment with the preview URL (`marocchino/sticky-pull-request-comment`). Build the alias URL yourself: `deployment-url` is the versioned URL ([wrangler-action#384](https://github.com/cloudflare/wrangler-action/issues/384)).
 - Token job: `contents: read` only. Comment job: `pull-requests: write`. No job has both.
 - `concurrency` per PR, `cancel-in-progress: false`: `group: cf-preview-${{ github.event.pull_request.number }}`.
-- Dev deploy: `push` with `branches: [main]`, checkout `${{ github.sha }}`; `npm run build`, `npx emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""`, `wrangler deploy --env=""`. Not `pull_request` `closed`.
+- Dev deploy: `push` with `branches: [main]`, checkout `${{ github.sha }}`; `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""`, `wrangler deploy --env=""`. Not `pull_request` `closed`.
 - Dev deploy `concurrency` with `cancel-in-progress: false`.
-- Stage: `push` with `tags: ["<worker>-[0-9]*"]`, `environment: production`; `npm run build`, `npx emdash migrate`, `wrangler d1 migrations apply <db> --remote --env production`, `wrangler versions upload --env production --tag ${{ github.ref_name }} --preview-alias stage`.
+- Stage: `push` with `tags: ["<worker>-[0-9]*"]`, `environment: production`; `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env production`, `wrangler versions upload --env production --tag ${{ github.ref_name }} --preview-alias stage`.
 - Environment `production`: deploy only from tag pattern `<worker>-[0-9]*` and branch `main` (`GITHUB_REF`: `refs/tags/<tag>` for stage, `refs/heads/main` for promotion), required reviewers.
 - Promotion: `workflow_dispatch`, environment `production`; find the version by tag, `wrangler versions deploy <version-id>@10% <old-version-id>@90% --env production -y`, then Releases steps.
 
@@ -123,7 +123,7 @@
 - Wrangler ≥ 4.135.0.
 - Bind each D1 in the `previews` block to a dev database, same binding name. Never a prod database.
 - Dev migrations applied before creating a Preview.
-- Secrets: `npx wrangler preview base-config secret put <NAME>`.
+- Secrets: `pnpm exec wrangler preview base-config secret put <NAME>`.
 - Protect Preview URLs with Cloudflare Access.
 
 ## Separate Workers
@@ -155,5 +155,5 @@ Moving an app to its own Worker. → [ARCH](ARCH.md) (Apps) first.
 
 ## Checks
 
-- `npm run check` (includes `npm run typecheck`) before each release. → [QUALITY](QUALITY.md)
+- `pnpm run check` (includes `pnpm run typecheck`) before each release. → [QUALITY](QUALITY.md)
 - Test locally with `astro build` and `astro preview`. → [DEV](DEV.md)

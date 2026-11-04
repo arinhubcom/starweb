@@ -15,18 +15,18 @@
 - Per island: `.size-limit.mjs` lists each `src/components/islands/*.tsx` and `src/apps/*/islands/*.tsx` (no `*.stories.tsx`, `*.test.tsx`); measures its own chunk, brotli. Default `10 kB`; raise one island in `LIMIT_OVERRIDES` (name without extension → limit). An empty list skips the check.
 - Per page: `page-js-limits.json`, `{ "<path>": <max brotli bytes> }`. Counts everything the page loads: scripts, `modulepreload`, island `component-url`, `renderer-url`, `before-hydration-url`, inline scripts, and their static imports, from any origin. Lazy `import()` does not count.
 - Each new public route gets an entry. Page with no script: limit `0`; `Base.astro` adds the inline theme script, so its pages need more.
-- `npm run size` after `npm run build` (needs `dist/`); in the PR workflow and in `scripts/test-template.sh`. Not in `check`.
+- `pnpm run size` after `pnpm run build` (needs `dist/`); in the PR workflow and in `scripts/test-template.sh`. Not in `check`.
 - Admin (`/_emdash/**`) is out of scope: no entry, and no limit on all of `dist/client/_astro/`.
 - The script starts `astro preview` on a free port and fetches each path; a redirect to another path, a non-200 status, or a script that fails to load fails the check.
 - Parsing: [parse5](STACK.md#parse5) for HTML, [es-module-lexer](STACK.md#es-module-lexer) (`/js` build) for imports; no regexes. Code in `scripts/check-js-size.ts`, `scripts/lib/page-js.ts`.
 
 ### Limit values
 
-- New limit: the `npm run size` measurement plus 10 %, rounded up to a whole kB. → [WHY](../WHY.md#why-limits-have-10--headroom)
+- New limit: the `pnpm run size` measurement plus 10 %, rounded up to a whole kB. → [WHY](../WHY.md#why-limits-have-10--headroom)
 - Before you raise a limit: walk the order in [ARCH](ARCH.md) (Astro), try a lower hydration directive, then lazy `import()`.
 - Raise a limit only in its own commit; the message gives the old value, the new value, and the reason.
 - Lower a limit, in the same commit as the change that shrinks the page or island, when the new limit rule gives a value at least 10 % below the current limit.
-- Code review checks these rules; `npm run size` fails only over a limit, not far under one.
+- Code review checks these rules; `pnpm run size` fails only over a limit, not far under one.
 
 ## Backend
 
@@ -40,7 +40,7 @@
 
 ### Workers placement
 
-- D1 with a location hint near most users: `npx wrangler d1 create <name> --location=weur` (`wnam`, `enam`, `weur`, `eeur`, `apac`, `oc`); `database_id` in `wrangler.jsonc`.
+- D1 with a location hint near most users: `pnpm exec wrangler d1 create <name> --location=weur` (`wnam`, `enam`, `weur`, `eeur`, `apac`, `oc`); `database_id` in `wrangler.jsonc`.
 - Targeted Placement in `wrangler.jsonc`: `"placement": { "mode": "targeted", "region": "aws:eu-central-1" }` (cloud region nearest the hint) → [EmDash on Cloudflare](https://docs.emdashcms.com/deployment/cloudflare/#place-the-worker-near-d1).
 - No D1 read replication with it: remove the starter's `session: "auto"` and `coalesce: true` in `d1({ binding: "DB", session: "auto", coalesce: true })` (EmDash `session` stays `"disabled"`).
 

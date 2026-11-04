@@ -18,7 +18,7 @@ import {
 import { dirname, join, resolve } from "node:path";
 import {
   REPO_DOCS,
-  assertNpm,
+  assertPnpm,
   STATE_FILE,
   TEMPLATE_DIR,
   TEMPLATE_LOCK,
@@ -116,12 +116,7 @@ function writePackageFiles(dir, { name, freshLock }) {
   const template = readJson(join(templateDir, TEMPLATE_PACKAGE));
   writeJson(join(dir, TEMPLATE_PACKAGE), { ...template, name });
   if (freshLock) return;
-  const lock = readJson(join(templateDir, TEMPLATE_LOCK));
-  writeJson(join(dir, TEMPLATE_LOCK), {
-    ...lock,
-    name,
-    packages: { ...lock.packages, "": { ...lock.packages[""], name } },
-  });
+  cpSync(join(templateDir, TEMPLATE_LOCK), join(dir, TEMPLATE_LOCK));
 }
 
 // Each project gets its own key, in the format of create-emdash. The file is
@@ -142,10 +137,13 @@ function run(dir, command, args) {
 }
 
 function installAndFormat(dir, freshLock) {
-  run(dir, "npm", [freshLock ? "install" : "ci", "--no-audit", "--no-fund"]);
-  run(dir, "npx", ["wrangler", "types"]);
-  run(dir, "npx", ["tsx", "scripts/theme.ts"]);
-  run(dir, "npx", ["prettier", ".", "--write", "--log-level", "warn"]);
+  run(dir, "pnpm", [
+    "install",
+    freshLock ? "--no-frozen-lockfile" : "--frozen-lockfile",
+  ]);
+  run(dir, "pnpm", ["exec", "wrangler", "types"]);
+  run(dir, "pnpm", ["exec", "tsx", "scripts/theme.ts"]);
+  run(dir, "pnpm", ["exec", "prettier", ".", "--write", "--log-level", "warn"]);
   run(dir, "git", ["init", "--quiet"]);
 }
 
@@ -160,18 +158,18 @@ function writeState(dir, values, commit) {
 function printNextSteps() {
   console.log(`
 Setup done. Next steps (see rules/SETUP.md):
-  1. Run "npm run check" and "npm run build". Both must pass.
+  1. Run "pnpm run check" and "pnpm run build". Both must pass.
   2. Set SITE, CONTROLLER, and the contact addresses in src/lib/site.ts, and replace each [Add marker in src/pages/privacy.astro.
-  3. Create the D1 database with a location hint, set its database_id, and log in with "npx wrangler login".
+  3. Create the D1 database with a location hint, set its database_id, and log in with "pnpm exec wrangler login".
   4. Add the optional parts that SETUP.md lists: i18n, auth, apps, Sentry, Storybook, Playwright, and the deploy workflows.
-  5. Start "npm run dev", open /_emdash/admin/, and complete the setup wizard.
+  5. Start "pnpm run dev", open /_emdash/admin/, and complete the setup wizard.
   6. Commit the project.`);
 }
 
 function main() {
   const options = parseArgs(process.argv.slice(2));
   assertEmptyTarget(options.dir);
-  assertNpm();
+  assertPnpm();
   const commit = starwebHead();
   const steps = [
     ["Copy the template", () => copyTemplate(options.dir, options)],

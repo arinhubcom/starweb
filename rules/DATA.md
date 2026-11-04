@@ -32,14 +32,14 @@
 
 ### D1 local development
 
-- `npx wrangler d1 migrations apply <db> --local`, then `npx wrangler d1 execute <db> --local --file=src/apps/<app>/db/seed.sql`.
+- `pnpm exec wrangler d1 migrations apply <db> --local`, then `pnpm exec wrangler d1 execute <db> --local --file=src/apps/<app>/db/seed.sql`.
 - Fake data only. Never copy remote rows into a seed. Never seed with `--remote`. → [PRIVACY](PRIVACY.md)
 
 ## Backups
 
 ### D1 export and import
 
-- Before a risky change (destructive migration, bulk update): `npx wrangler d1 export <db> --remote --output=<file>.sql`.
+- Before a risky change (destructive migration, bulk update): `pnpm exec wrangler d1 export <db> --remote --output=<file>.sql`.
 - Also export on a schedule from CI, off-peak (export blocks the database). Time Travel keeps only 7 days (Free) or 30 days (Paid).
 - No exports in git: write to `backups/` (gitignored), store in private restricted storage, delete by [PRIVACY](PRIVACY.md) retention.
 - `d1 export` fails with virtual tables (FTS5) → drop and recreate them around the export, or use Time Travel.

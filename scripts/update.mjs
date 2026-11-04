@@ -4,15 +4,16 @@
 // HEAD), and ours (the project file).
 // Usage: node <starweb>/scripts/update.mjs <project-dir> [--dry-run]
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
+  NPM_LOCK,
   REPO_DOCS,
   STATE_FILE,
   TEMPLATE_DIR,
   TEMPLATE_LOCK,
   TEMPLATE_PACKAGE,
-  assertNpm,
+  assertPnpm,
   fail,
   gitOut,
   planFile,
@@ -27,7 +28,12 @@ import {
   writeJson,
 } from "./lib.mjs";
 
-const DEP_SECTIONS = ["dependencies", "devDependencies", "overrides"];
+// A label per section: an override and a dependency can have the same name.
+const DEP_SECTIONS = [
+  ["dependencies", "package"],
+  ["devDependencies", "package"],
+  ["overrides", "override"],
+];
 
 function parseArgs(argv) {
   const options = { dir: undefined, dryRun: false };
@@ -86,7 +92,8 @@ function ownedPaths(commit) {
   const entries = names.flatMap((source) => {
     if (!source.startsWith(`${TEMPLATE_DIR}/`)) return [[source, source]];
     const target = source.startsWith(prefix) ? source.slice(prefix.length) : "";
-    return target === "" || [TEMPLATE_PACKAGE, TEMPLATE_LOCK].includes(target)
+    return target === "" ||
+      [TEMPLATE_PACKAGE, TEMPLATE_LOCK, NPM_LOCK].includes(target)
       ? []
       : [[target, source]];
   });
@@ -160,10 +167,7 @@ function planPackageJson(dir, state, head) {
     showAt(state.commit, "template/package.json") ?? "{}",
   );
   const theirs = JSON.parse(showAt(head, "template/package.json") ?? "{}");
-  const sections = [
-    ["scripts", "script"],
-    ...DEP_SECTIONS.map((s) => [s, "package"]),
-  ];
+  const sections = [["scripts", "script"], ...DEP_SECTIONS];
   const result = { next: { ...project }, changes: [], kept: [], gone: [] };
   for (const [section, label] of sections) {
     const plan = planMap(
@@ -179,8 +183,8 @@ function planPackageJson(dir, state, head) {
     for (const key of ["changes", "kept", "gone"])
       result[key].push(...plan[key]);
   }
-  const depsChanged = result.changes.some((line) =>
-    line.startsWith("package "),
+  const depsChanged = result.changes.some(
+    (line) => line.startsWith("package ") || line.startsWith("override "),
   );
   return { ...result, projectPath, depsChanged };
 }
@@ -235,17 +239,35 @@ function printSummary(plans, pkg, dryRun, rules) {
   }
 }
 
-function installIfNeeded(dir, pkg) {
-  if (!pkg.depsChanged) return;
-  step("Run npm install");
-  const result = spawnSync("npm", ["install"], { cwd: dir, stdio: "inherit" });
-  if (result.status !== 0) throw new Error("npm install failed.");
+function runPnpm(dir, args) {
+  const result = spawnSync("pnpm", args, { cwd: dir, stdio: "inherit" });
+  if (result.status !== 0) throw new Error(`pnpm ${args[0]} failed.`);
+}
+
+const usesNpm = (dir) => existsSync(join(dir, NPM_LOCK));
+
+// A project from before the move to pnpm keeps its resolved versions. The npm
+// lockfile goes only after pnpm has read it. Call this after applyFiles, so that
+// pnpm-workspace.yaml is in the project.
+function moveFromNpm(dir) {
+  step("Move the project from npm to pnpm");
+  if (!existsSync(join(dir, TEMPLATE_LOCK))) runPnpm(dir, ["import"]);
+  rmSync(join(dir, NPM_LOCK));
+  console.log(
+    `Removed ${NPM_LOCK}. Follow the steps for the move in rules/UPDATE.md.`,
+  );
+}
+
+function install(dir) {
+  step("Run pnpm install");
+  // CI turns on the frozen lockfile by default, and this install changes it.
+  runPnpm(dir, ["install", "--no-frozen-lockfile"]);
 }
 
 function main() {
   const { dir, dryRun } = parseArgs(process.argv.slice(2));
   const state = readState(dir);
-  if (!dryRun) assertNpm();
+  if (!dryRun) assertPnpm();
   assertCommit(state.commit);
   const head = starwebHead();
   step(
@@ -255,10 +277,15 @@ function main() {
   const pkg = planPackageJson(dir, state, head);
   printSummary(plans, pkg, dryRun, changedRules(state.commit, head));
   printReview(state.commit, head);
-  if (dryRun) return;
+  const moving = usesNpm(dir);
+  if (dryRun) {
+    if (moving) console.log("\nThe update moves the project from npm to pnpm.");
+    return;
+  }
   applyFiles(dir, plans);
   if (pkg.changes.length > 0) writeJson(pkg.projectPath, pkg.next);
-  installIfNeeded(dir, pkg);
+  if (moving) moveFromNpm(dir);
+  if (moving || pkg.depsChanged) install(dir);
   if (plans.some((p) => p.action === "conflict")) {
     console.error(
       `\nConflicts: resolve the markers (project, base, starweb), then set "commit" in ${STATE_FILE} to ${head}.`,

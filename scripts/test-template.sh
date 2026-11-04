@@ -4,7 +4,7 @@
 # the build, then test the built Worker.
 # Usage: bash scripts/test-template.sh <workdir> [--quick] [--fresh]
 # --quick stops after the checks, to iterate. It does not replace the full run.
-# --fresh skips the template lockfile and runs the npm run check script in order.
+# --fresh skips the template lockfile and runs the pnpm run check script in order.
 set -euo pipefail
 
 USAGE="Usage: bash scripts/test-template.sh <workdir> [--quick] [--fresh]"
@@ -99,7 +99,7 @@ start_preview() {
   local port="$1" output
   # --background runs the server in its own process group and returns, the
   # same way with and without an AI agent in the environment.
-  output="$(cd "$APP_DIR" && npm run preview -- --port "$port" --background 2>&1)"
+  output="$(cd "$APP_DIR" && pnpm run preview --port "$port" --background 2>&1)"
   printf '%s\n' "$output"
   PREVIEW_PID="$(printf '%s\n' "$output" | grep -oE 'pid [0-9]+' | head -n 1 | grep -oE '[0-9]+' || true)"
   [ -n "$PREVIEW_PID" ] || fail "no PID in the preview output"
@@ -164,7 +164,20 @@ grep -q '"name": "tpl-test"' "$APP_DIR/package.json" || fail "package.json has t
 if grep -q '"create-emdash"' "$APP_DIR/package.json"; then
   fail "package.json has create-emdash, which only the Starweb repository uses"
 fi
-grep -q '"name": "tpl-test"' "$APP_DIR/package-lock.json" || fail "package-lock.json has the wrong name"
+[ -f "$APP_DIR/pnpm-lock.yaml" ] || fail "the project has no pnpm-lock.yaml"
+[ ! -e "$APP_DIR/package-lock.json" ] || fail "the project has package-lock.json"
+# A pinned pnpm version gives a lockfile with two YAML documents, and the
+# dependency graph of GitHub cannot read it: rules/DEPS.md (Install).
+if grep -q '"packageManager"\|"devEngines"' "$APP_DIR/package.json"; then
+  fail "package.json pins pnpm"
+fi
+if grep -q '^---$' "$APP_DIR/pnpm-lock.yaml"; then
+  fail "pnpm-lock.yaml has more than one YAML document"
+fi
+grep -qE '^  zod: [0-9]+\.[0-9]+\.[0-9]+$' "$APP_DIR/pnpm-workspace.yaml" || fail "the zod catalog entry has no exact version"
+# One copy of a package has two lines: packages and snapshots.
+[ "$(grep -cE '^  zod@' "$APP_DIR/pnpm-lock.yaml")" = "2" ] || fail "the project has more than one copy of zod"
+grep -q '^minimumReleaseAge: 4320$' "$APP_DIR/pnpm-workspace.yaml" || fail "pnpm-workspace.yaml has no 3 day release age"
 if node "$REPO_ROOT/scripts/setup.mjs" "$APP_DIR" --name tpl-test >/dev/null 2>&1; then
   fail "setup.mjs ran on a folder that is not empty"
 fi
@@ -204,7 +217,7 @@ grep -q -- '--surface-container-high: #' "$APP_DIR/src/styles/theme.css" || fail
 grep -q -- '--color-surface-container-high: var(--surface-container-high);' "$APP_DIR/src/styles/theme.css" || fail "theme.css does not expose the MD3 roles"
 grep -q '^\.dark {' "$APP_DIR/src/styles/theme.css" || fail "theme.css has no dark scheme"
 cp "$APP_DIR/src/styles/theme.css" "$WORKDIR/theme.before.css"
-(cd "$APP_DIR" && npx tsx scripts/theme.ts)
+(cd "$APP_DIR" && pnpm exec tsx scripts/theme.ts)
 cmp "$WORKDIR/theme.before.css" "$APP_DIR/src/styles/theme.css" || fail "scripts/theme.ts output differs from the formatted file"
 grep -q '"binding": "SESSION"' "$APP_DIR/wrangler.jsonc" || fail "wrangler.jsonc has no SESSION binding"
 echo "ok: theme and session binding"
@@ -233,7 +246,7 @@ export function Probe({ items }: { items: string[] }) {
   );
 }
 EOF
-OXLINT_OUTPUT="$(cd "$APP_DIR" && npx oxlint --type-aware --format=unix src/oxlint-probe.tsx || true)"
+OXLINT_OUTPUT="$(cd "$APP_DIR" && pnpm exec oxlint --type-aware --format=unix src/oxlint-probe.tsx || true)"
 rm "$PROBE"
 for rule in "eslint(no-debugger)" "jsx-a11y(alt-text)" "e18e(prefer-array-at)" "react-doctor(effect-needs-cleanup)" "typescript(no-floating-promises)" "eslint(no-restricted-imports)"; do
   printf '%s\n' "$OXLINT_OUTPUT" | grep -qF "$rule" || fail "oxlint did not report $rule: $OXLINT_OUTPUT"
@@ -243,15 +256,15 @@ if printf '%s\n' "$OXLINT_OUTPUT" | grep -qF "react(react-in-jsx-scope)"; then
 fi
 echo "ok: oxlint runs the eslint, jsx-a11y, e18e, react-doctor, and type-aware rules"
 
-step "Run the checks and npm audit at the same time"
-# The test runs the parts of npm run check, so check the script text.
-grep -qF '"check": "npm run format:check && npm run typecheck && npm run lint && npm run knip && npm run test"' "$APP_DIR/package.json" || fail "the check script changed: update this step"
+step "Run the checks and pnpm audit at the same time"
+# The test runs the parts of pnpm run check, so check the script text.
+grep -qF '"check": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run test"' "$APP_DIR/package.json" || fail "the check script changed: update this step"
 # astro check writes .astro/types.d.ts, and the type-aware lint reads it, so lint
 # starts after typecheck.
-FIRST=("npm run format:check" "npm run typecheck" "npm run knip")
-[ "$QUICK" -eq 1 ] || FIRST+=("npm audit --omit=dev --audit-level=high" "npm audit signatures")
+FIRST=("pnpm run format:check" "pnpm run typecheck" "pnpm run knip")
+[ "$QUICK" -eq 1 ] || FIRST+=("pnpm audit --prod --audit-level high" "pnpm audit signatures")
 run_parallel "${FIRST[@]}"
-run_parallel "npm run lint" "npm run test"
+run_parallel "pnpm run lint" "pnpm run test"
 if [ "$QUICK" -eq 1 ]; then
   echo
   echo "PASS: the template passes the checks ($STEP steps, --quick)"
@@ -259,21 +272,21 @@ if [ "$QUICK" -eq 1 ]; then
 fi
 
 if [ "$FRESH" -eq 1 ]; then
-  step "Run npm run check"
-  (cd "$APP_DIR" && npm run check)
+  step "Run pnpm run check"
+  (cd "$APP_DIR" && pnpm run check)
 fi
 
-step "Run npm run build"
-(cd "$APP_DIR" && npm run build)
+step "Run pnpm run build"
+(cd "$APP_DIR" && pnpm run build)
 
-step "Run npm run size"
-(cd "$APP_DIR" && npm run size)
+step "Run pnpm run size"
+(cd "$APP_DIR" && pnpm run size)
 
 step "Check the button in the built CSS"
 grep -lqE 'opacity:(8%|\.08)' "$APP_DIR"/dist/client/_astro/*.css || fail "the built CSS has no hover state layer"
 echo "ok: the built CSS has the state layer"
 
-step "Start npm run preview"
+step "Start pnpm run preview"
 PORT="$(free_port)"
 [ "$PORT" != "0" ] || fail "no free port between 4501 and 4599"
 start_preview "$PORT"

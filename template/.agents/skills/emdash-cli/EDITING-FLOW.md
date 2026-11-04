@@ -53,7 +53,7 @@ These survive round-trips intact. You can see and move them, but editing the JSO
 Skip markdown conversion entirely to work with raw PT JSON:
 
 ```bash
-npx emdash content get posts 01ABC123 --raw
+pnpm exec emdash content get posts 01ABC123 --raw
 ```
 
 Use raw mode when:
@@ -72,10 +72,10 @@ When creating or updating content, each field is checked:
 
 ```bash
 # Markdown string — converted to PT automatically
-npx emdash content create posts --data '{"title": "Hello", "body": "# Welcome\n\nThis is **bold**."}'
+pnpm exec emdash content create posts --data '{"title": "Hello", "body": "# Welcome\n\nThis is **bold**."}'
 
 # Raw PT array — passed through as-is
-npx emdash content create posts --data '{"title": "Hello", "body": [{"_type": "block", "children": [{"_type": "span", "text": "Welcome"}]}]}'
+pnpm exec emdash content create posts --data '{"title": "Hello", "body": [{"_type": "block", "children": [{"_type": "span", "text": "Welcome"}]}]}'
 ```
 
 ## Auto-Publishing
@@ -125,11 +125,11 @@ The CLI **requires** `--rev` on updates. The typical workflow:
 
 ```bash
 # 1. Read the item — note the _rev in the output
-npx emdash content get posts 01ABC123
+pnpm exec emdash content get posts 01ABC123
 # Output includes: _rev: MToyMDI2LTAyLTE0...
 
 # 2. Update with the _rev you received — auto-publishes by default
-npx emdash content update posts 01ABC123 \
+pnpm exec emdash content update posts 01ABC123 \
   --rev MToyMDI2LTAyLTE0... \
   --data '{"title": "New Title"}'
 # Output shows updated item with new _rev

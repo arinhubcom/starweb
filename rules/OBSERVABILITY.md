@@ -22,7 +22,7 @@
 
 ### Real-time logs
 
-- Live view after a release: `npx wrangler tail <worker>-production --format json`; filter `--status error`, `--search <text>`, `--version-id <id>`; query with `jq`.
+- Live view after a release: `pnpm exec wrangler tail <worker>-production --format json`; filter `--status error`, `--search <text>`, `--version-id <id>`; query with `jq`.
 - No `wrangler tail` for storage (stores nothing, drops messages under load).
 
 ## [Effect](STACK.md#effect)

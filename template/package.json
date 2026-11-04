@@ -17,7 +17,7 @@
     "format:check": "prettier . --check",
     "knip": "knip",
     "test": "vitest run --coverage",
-    "check": "npm run format:check && npm run typecheck && npm run lint && npm run knip && npm run test",
+    "check": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run test",
     "size": "tsx scripts/check-js-size.ts"
   },
   "dependencies": {
@@ -33,7 +33,7 @@
     "react-dom": "19.3.1",
     "tailwind-variants": "4.0.1",
     "tailwindcss": "4.3.3",
-    "zod": "4.6.7",
+    "zod": "catalog:",
     "zod-compiler": "2.0.7"
   },
   "devDependencies": {
@@ -43,6 +43,7 @@
     "@e18e/eslint-plugin": "0.8.1",
     "@material/material-color-utilities": "0.4.0",
     "@size-limit/file": "14.3.0",
+    "@types/node": "26.6.6",
     "@vitest/coverage-istanbul": "5.0.5",
     "es-module-lexer": "3.0.4",
     "knip": "6.44.1",
@@ -60,8 +61,5 @@
     "typescript": "6.0.3",
     "vitest": "5.0.5",
     "wrangler": "4.156.0"
-  },
-  "overrides": {
-    "zod": "$zod"
   }
 }

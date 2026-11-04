@@ -130,7 +130,7 @@ Content and UI strings use two tools: [PolyStella](https://github.com/cloudflare
 
 - It is the most used styling system, so agents write it well and many examples exist.
 - Utility classes keep styles in the markup of `.astro` components and React islands. One system for both, with no extra build step for `.astro` files.
-- Astro supports it officially: `npx astro add tailwind` sets up the `@tailwindcss/vite` plugin.
+- Astro supports it officially: `pnpm exec astro add tailwind` sets up the `@tailwindcss/vite` plugin.
 - Design tokens are CSS theme variables (`@theme`), so `.astro` files, islands, and plain CSS read the same values.
 - emdash-better-auth already needs Tailwind for its auth pages, so the project has one styling system, not two.
 - It fits the ecosystem: Base UI docs show Tailwind examples, and the Better Auth UI shadcn/ui variant and Fulldev UI use Tailwind v4.
@@ -577,7 +577,7 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 ### Why `astro preview` and not `wrangler dev`
 
 - `astro build` and `astro preview` run the built Worker in workerd. The Astro Cloudflare docs say that this closely mirrors production behavior.
-- The docs do not say that `wrangler dev` fails. The rule is a project choice: one command, `npm run preview`, so each check runs the same way.
+- The docs do not say that `wrangler dev` fails. The rule is a project choice: one command, `pnpm run preview`, so each check runs the same way.
 
 ## Testing
 
@@ -628,7 +628,7 @@ Tested on 2026-11-04 in a temporary project with Astro 7.4.4, `@astrojs/cloudfla
 - `storybook build` fails without `@storybook/react` (`failed to resolve import "@storybook/react/entry-preview"`). The install docs now list it.
 - A React story needs `parameters: { renderer: 'react' }`, as the docs now show. `renderer: '@storybook/react'` fails with `Renderer '@storybook/react' not found. Available renderers: react`.
 - `renderStory()` renders only Astro components. A React story fails with `Story meta.component must be an Astro component factory`.
-- In browser mode, a clean install passes without `@vitest/*` packages in `package.json`. npm still hoists the 3.2.4 copy of `@vitest/expect` that Storybook depends on, and it does not break Vitest 5.0.5. On Vitest 4.1.11, npm hoisted 3.2.4 copies of four `@vitest/*` packages, and the tests failed with missing exports (`createDOMElementFilter`, `ChaiStyleAssertions`).
+- These tests ran with npm, before the move to pnpm. In browser mode, a clean install passes without `@vitest/*` packages in `package.json`. npm still hoists the 3.2.4 copy of `@vitest/expect` that Storybook depends on, and it does not break Vitest 5.0.5. On Vitest 4.1.11, npm hoisted 3.2.4 copies of four `@vitest/*` packages, and the tests failed with missing exports (`createDOMElementFilter`, `ChaiStyleAssertions`).
 - `@storybook/addon-vitest` ran the Card smoke test and the Counter `play` function in Chromium, and an ARIA snapshot test passed next to them. A wrong expected value made the `play` function and the ARIA snapshot fail, so the tests really run.
 - `it.effect()` from `@effect/vitest` 4.1.1 passes in Node.js and in workerd with `@cloudflare/vitest-plugin` 1.4.11. A wrong expected value makes it fail.
 - Upstream issues from the first test on 2026-10-14, all fixed: [#191](https://github.com/storybook-astro/storybook-astro/issues/191) (docs, in 1.14.0), [#192](https://github.com/storybook-astro/storybook-astro/issues/192) (`@astrojs/react` 7, in 1.13.0), and [#193](https://github.com/storybook-astro/storybook-astro/issues/193) (Vitest 5, in 1.13.0).
@@ -708,11 +708,23 @@ trendaro-fe (qset v4) has four test tiers for each widget: unit tests, DOM snaps
 
 ## Dependencies
 
-### Why Zod has an npm override
+### Why pnpm
 
-- `emdash`, `@emdash-cms/auth`, and `@emdash-cms/plugin-types` 1.4.0 pin `zod` 4.5.4. It has a high severity advisory ([GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5)), fixed in 4.6.6, so `npm audit --omit=dev --audit-level=high` fails on every new project.
-- `npm audit fix --force` offers `emdash` 0.36.0, a downgrade across a major version. An audit exception would keep the vulnerable copy in the Worker. The override removes it.
-- `$zod` follows the version in `dependencies`. A fixed version in `overrides` fails with `EOVERRIDE` as soon as Dependabot updates the direct dependency.
+- Disk space. On 2026-11-04, the template with an empty store on btrfs took 1.2 GB per project with npm, so 2.3 GB for two projects. With pnpm, the store took 997 MB, and each project added 13-18 MB of its own, so 1.1 GB for two. A next project adds about the same 13-18 MB, not 1.2 GB. npm also keeps a cache in `~/.npm`, which the numbers leave out.
+- pnpm hard-links files from one [content-addressable store](https://pnpm.io/motivation). npm unpacks a copy into each project. Hard links need one file system: on another one, [pnpm copies the packages](https://pnpm.io/settings/store), and the saving is gone.
+- The strict `node_modules` found one package that only npm hoisting provided: `@types/node`, which `tsconfig.json` names. Oxlint failed with `Cannot find type definition file for 'node'`. It is now a direct dependency, pinned at the version that npm resolved.
+- `pnpm import` keeps the resolved versions from `package-lock.json`, so the move and `update.mjs` do not change the versions of a project.
+- pnpm 12 has what the npm setup used: `minimumReleaseAge` (default 1 day, here 3), [`pnpm audit signatures`](https://pnpm.io/cli/audit), and frozen lockfiles in CI. It also fails an install on an [unreviewed build script](https://pnpm.io/settings/build); npm ran them all.
+- No `packageManager` pin, because of the [GitHub docs](https://docs.github.com/en/code-security/dependabot/ecosystems-supported-by-dependabot/supported-ecosystems-and-repositories): "When pnpm writes `pnpm-lock.yaml` as two YAML documents, the dependency graph does not detect the dependencies in that file. This is the default format for pnpm 12 projects that pin a pnpm version." Alerts and security updates then stop. On 2026-11-04, pnpm 12.16.1 wrote two documents with the pin and one without it. The same pnpm docs that cover the pin name no way to keep one document with it, so `pnpm/action-setup` pins the version in CI, and `scripts/test-template.sh` fails on a pin.
+- `create-emdash` adapts its output to the package manager that runs it. Under `pnpm create`, `README.md` and `EMDASH.md` show pnpm commands, and `package.json` gets a `packageManager` pin. `starter/` holds that output, so `--check` sees no false difference. The template does not take the pin, because `updatePackageJson` only moves the EmDash versions.
+- No Corepack: the [pnpm CI docs](https://pnpm.io/continuous-integration) say "Do not use Corepack".
+- Dependabot [supports pnpm 12](https://github.blog/changelog/2026-10-20-dependabot-now-supports-npm-12-pnpm-11-and-12-and-bun-1-4) since 2026-10-20. Not verified: the Dependabot docs do not name pnpm in the `cooldown` table, and do not mention the `catalog:` protocol. No real Dependabot run has tested this setup yet.
+
+### Why Zod has a pnpm override
+
+- `emdash`, `@emdash-cms/auth`, and `@emdash-cms/plugin-types` 1.4.0 pin `zod` 4.5.4. It has a high severity advisory ([GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5)), fixed in 4.6.6, so `pnpm audit --prod --audit-level high` fails on every new project without the override.
+- With npm, `npm audit fix --force` offered `emdash` 0.36.0, a downgrade across a major version. An audit exception would keep the vulnerable copy in the Worker. The override removes it.
+- The catalog holds one version for the direct dependency and the override. On 2026-11-04 with pnpm 12.16.1, `$zod` still worked but printed that the syntax is deprecated and to use a catalog. The selector `zod@<4.6.6` left two copies, 4.6.6 and 4.6.7.
 
 ### Why Dependabot and not Renovate
 
@@ -732,7 +744,7 @@ What Dependabot does not have, and what the rules do instead:
   - `0.x`: SemVer says that in major version zero "Anything MAY change at any time", so a minor update can break.
   - Major: SemVer uses a major version for backward-incompatible changes.
   - `astro` group: these packages must stay within each other's peer ranges and pass the Compatibility checks in [DEPS.md](rules/DEPS.md), so a person merges them.
-- **No lockfile maintenance.** Renovate `lockFileMaintenance` deletes the lockfile and runs npm again. Dependabot `versioning-strategy: lockfile-only` only skips updates that need a change in `package.json`. The rules use a monthly `npm update` PR instead.
+- **No lockfile maintenance.** Renovate `lockFileMaintenance` deletes the lockfile and runs npm again. Dependabot `versioning-strategy: lockfile-only` only skips updates that need a change in `package.json`. The rules use a monthly `pnpm update` PR instead.
 - **No Dependency Dashboard.** The open Dependabot PRs show the pending updates, but not the updates that `cooldown` holds back. Per the [Renovate bot comparison](https://docs.renovatebot.com/bot-comparison/), Dependabot has no similar feature.
 - **No preset monorepo groups.** Renovate `config:recommended` includes `group:monorepos`. With Dependabot, you write each group, for example the `astro` group.
 - **One schedule per ecosystem.** Renovate can set a schedule for one package. Dependabot sets `schedule` per entry in `updates`.
@@ -889,7 +901,7 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 ### Why React Doctor rules are listed by name
 
 - The plugin has no preset for Oxlint, and most of its 907 rules target other stacks (three.js, React Native, Next.js, and more).
-- `.oxlintrc.json` is static on purpose: a plugin update cannot add failures to `npm run check` by itself.
+- `.oxlintrc.json` is static on purpose: a plugin update cannot add failures to `pnpm run check` by itself.
 - No `react-perf` plugin: it flags each inline function, object, and array prop, which matters only for memoized children. `react-doctor/no-inline-prop-on-memo-component` covers that case.
 
 ### What the React Doctor license allows
@@ -919,23 +931,23 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 - A list of 60 manual steps gave a different result each time: an agent could skip a step, change a version, or copy a config with a mistake. Files in `template/` are the same each time and carry the config that a test project proved.
 - `template/` has the layout of a project: `package.json` and the configs sit at its root, and a new project takes over the folder. So the rules hold decisions and no install commands, which could drift from the pinned versions.
-- `template/package.json` pins every version, and `template/package-lock.json` pins the transitive ones. So a project gets the set that was tested together, and not the newest packages of the day. `setup.mjs` runs `npm ci`, which also fails when the two files do not match. The weekly CI run uses `--fresh`, which resolves again without the lockfile, to find a change in a transitive dependency that no commit caused.
+- `template/package.json` pins every version, and `template/pnpm-lock.yaml` pins the transitive ones. So a project gets the set that was tested together, and not the newest packages of the day. `setup.mjs` runs `pnpm install --frozen-lockfile`, which also fails when the two files do not match. The weekly CI run uses `--fresh`, which resolves again without the lockfile, to find a change in a transitive dependency that no commit caused.
 - `create-emdash` is pinned in the root `package.json`, because only `scripts/update-starter.mjs` runs it. With it out of the template, `template/package.json` differs from a project only in the name, so the lockfile fits.
-- `template/` holds Fulldev UI because a page with no island needs it. `shadcn` stays in the project: `global.css` imports `shadcn/tailwind.css`, and `npx shadcn add` then runs at the tested version. A test on 2026-11-04 showed that the old `shadcn init` step failed `prettier --check`, wrote `^` versions, and needed Knip exceptions.
+- `template/` holds Fulldev UI because a page with no island needs it. `shadcn` stays in the project: `global.css` imports `shadcn/tailwind.css`, and `pnpm exec shadcn add` then runs at the tested version. A test on 2026-11-04 showed that the old `shadcn init` step failed `prettier --check`, wrote `^` versions, and needed Knip exceptions.
 - The home page uses the button, so `cn`, `tailwind-variants`, and `src/lib/utils.ts` are used code and need no Knip exception. Only components that a project adds and does not use yet need `ignoreIssues`.
-- `no-restricted-imports` in `.oxlintrc.json` makes a registry item with `class-variance-authority` fail `npm run lint`, so the conversion to `tv()` cannot be forgotten.
+- `no-restricted-imports` in `.oxlintrc.json` makes a registry item with `class-variance-authority` fail `pnpm run lint`, so the conversion to `tv()` cannot be forgotten.
 - `scripts/setup.mjs` does the mechanical part: it copies `template/`, writes a new encryption key, and installs. The manual steps in [SETUP.md](rules/SETUP.md) keep only the work that needs a decision or an account: Cloudflare, optional features, and deploy.
 - `template/` holds the `create-emdash` output with the Starweb changes in place, so a project does not depend on the registry and a reader sees the real files. An EmDash update runs `create-emdash` again: `scripts/update-starter.mjs` formats the output with the template's Prettier config and merges the difference to `starter/` into `template/`. A starter change in a file that Starweb changed appears as a conflict, not as a silent overwrite.
 - `starter/` is the merge base, because `create-emdash` cannot give the old output again: it downloads its template from the main branch of `emdash-cms/templates`, with no version, so `create-emdash` 1.3.1 and 1.4.0 give the same files. For the same reason, the pinned `create-emdash` version does not pin the starter files: only the commit that replaced `starter/` does. `diff -r starter template` shows all Starweb changes to the starter.
 - `.env` stays out of the template: `create-emdash` writes a random `EMDASH_ENCRYPTION_KEY` to it, and a shared key would decrypt the plugin secrets of other projects.
-- The template uses the newest Node.js LTS version (24 on 2026-10-15). The first CI run used Node.js 22.23.3, which ships npm 10.9, and `npm install` failed with `Cannot read properties of null (reading 'edgesOut')`. The same install failed locally with npm 10.9.4, also without `.npmrc`, and passed with npm 11.11.0. Node.js 24 ships npm 11, so `setup.mjs` and `update.mjs` stop early when npm is older than 11. Node.js 26 is newer but not LTS yet.
+- The template uses the newest Node.js LTS version (24 on 2026-10-15). The first CI run used Node.js 22.23.3, which ships npm 10.9, and `npm install` failed with `Cannot read properties of null (reading 'edgesOut')`. The same install failed locally with npm 10.9.4, also without `.npmrc`, and passed with npm 11.11.0. Node.js 26 is newer but not LTS yet. The project now uses pnpm, and `setup.mjs` and `update.mjs` stop early when pnpm is older than 12.
 - A version bump alone does not bring new features into the rules. So a pin change of the main tools needs a read of their release notes, the same as `astro`.
-- The template test runs the checks and `npm audit` at the same time, in two groups: the type-aware lint reads `.astro/types.d.ts`, which `astro check` writes, so lint starts after typecheck. In three rounds from the same clean state on 2026-11-04 (8 cores), they took 25-32 s, and 47-54 s in order. The test checks the text of the `check` script, because it runs the parts and not the script. On the same day, `npm ci` took 31 s where `npm install` without a lockfile took 87 s. The weekly `--fresh` run also runs `npm run check` in order.
+- The template test runs the checks and `pnpm audit` at the same time, in two groups: the type-aware lint reads `.astro/types.d.ts`, which `astro check` writes, so lint starts after typecheck. In three rounds from the same clean state on 2026-11-04 (8 cores), they took 25-32 s, and 47-54 s in order. The test checks the text of the `check` script, because it runs the parts and not the script. Those rounds ran with npm. On the same day, `npm ci` took 31 s where `npm install` without a lockfile took 87 s. The weekly `--fresh` run also runs `pnpm run check` in order.
 - Rule and doc changes do not run the template test: they run `check-why.mjs`, and the weekly run still covers them.
-- CI runs `scripts/test-template.sh` on each change to `template/`, `starter/`, or `scripts/`, and every Monday. The script runs `setup.mjs` on a new folder, and runs `npm run check`, `npm run build`, and `npm run preview` with checks of the responses. The weekly run finds a change in a registry package that no commit in this repository caused.
+- CI runs `scripts/test-template.sh` on each change to `template/`, `starter/`, or `scripts/`, and every Monday. The script runs `setup.mjs` on a new folder, and runs `pnpm run check`, `pnpm run build`, and `pnpm run preview` with checks of the responses. The weekly run finds a change in a registry package that no commit in this repository caused.
 - Dependabot ignores `create-emdash`, `emdash`, and `@emdash-cms/cloudflare` in the Starweb repository, and `emdash` and `@emdash-cms/cloudflare` in a project: a bump without the starter files would leave the project or `template/` on the old starter. The `ignore` option also stops security pull requests for these packages, so a security alert starts the steps in [UPDATE.md](rules/UPDATE.md#emdash-update). Dependabot still shows the alert.
-- `.github/workflows/starter-check.yml` runs every Monday, because no other signal exists: Dependabot ignores the EmDash packages, and `npm run check` cannot see a new commit in `emdash-cms/templates`. It updates one open issue, so a change that waits does not add a new issue each week.
-- `upgrade-emdash` is the official updater, but it takes an npm tag such as `latest` and rejects a version. In a Starweb project, it would skip the tested pin and `min-release-age`.
+- `.github/workflows/starter-check.yml` runs every Monday, because no other signal exists: Dependabot ignores the EmDash packages, and `pnpm run check` cannot see a new commit in `emdash-cms/templates`. It updates one open issue, so a change that waits does not add a new issue each week.
+- `upgrade-emdash` is the official updater, but it takes an npm tag such as `latest` and rejects a version. In a Starweb project, it would skip the tested pin and `minimumReleaseAge`.
 - Dependabot groups the whole template in one group, `stack`, in the Starweb repository. One PR updates the set, and one CI run tests the set together. Separate PRs would test each package alone, and a pair that must match (for example `astro` and `@astrojs/cloudflare`) could fail in both.
 - The project `dependabot.yml` in `template/` uses the groups from [DEPS.md](rules/DEPS.md), because a project has its own review flow.
 

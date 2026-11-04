@@ -6,12 +6,12 @@
 
 - CMS. Start from the EmDash Cloudflare template (D1 + R2); no hand-port of the Node.js setup.
 - `react()` before `emdash()` in `integrations` (admin UI hangs on "Loading EmDash..." otherwise). Public pages need no React.
-- Content types in the admin UI (`/_emdash/admin`, stored in the database); `npx emdash types` after a schema change. No hand-written content types.
+- Content types in the admin UI (`/_emdash/admin`, stored in the database); `pnpm exec emdash types` after a schema change. No hand-written content types.
 - `getEmDashCollection()`, `getEmDashEntry()` from `emdash`; always handle `error`.
 - Pass `cacheHint` to route caching: `if (Astro.cache?.enabled) Astro.cache.set(cacheHint)`.
 - Rich text = Portable Text (JSON), never HTML.
 - Plugins: `definePlugin()`, minimal capabilities (`content:read`).
-- Skills: `npx skills add emdash-cms/skills`.
+- Skills: `pnpm dlx skills add emdash-cms/skills`.
 
 ## Rendering
 
@@ -68,7 +68,7 @@ Own plugins work on Free, as native plugins or in the site process.
 
 - `"triggers": { "crons": ["* * * * *"] }` in `wrangler.jsonc`.
 - `src/worker.ts`: `export default { ...handler, scheduled: createScheduledHandler() }`; import `handler`, `createScheduledHandler`, `PluginBridge` from `@emdash-cms/cloudflare/worker`; export `PluginBridge`.
-- `npx emdash doctor` checks trigger and handler; read only its scheduler line on [D1](STACK.md#d1) (its database check looks for a local SQLite file: `database: not found at ./data.db`). `wrangler tail` shows `[scheduled] Published 1 scheduled item(s)`.
+- `pnpm exec emdash doctor` checks trigger and handler; read only its scheduler line on [D1](STACK.md#d1) (its database check looks for a local SQLite file: `database: not found at ./data.db`). `wrangler tail` shows `[scheduled] Published 1 scheduled item(s)`.
 - Preview deployments do not run Cron Triggers → scheduled entries do not publish there.
 
 ## Menus and taxonomies
@@ -89,7 +89,7 @@ Own plugins work on Free, as native plugins or in the site process.
 ### Core database migrations
 
 - Production: `migrations: { runtime: "manual" }` in `emdash()` (no migrate on first request); `EMDASH_MIGRATIONS_MODE` overrides per environment. Release order → [DEPLOY](DEPLOY.md) (Migrations).
-- `npx emdash migrate` from the release pipeline, after build, before the new version gets traffic. Remote D1 flags, target fingerprint, post-deploy check, migration lock → [DEPLOY](DEPLOY.md) (EmDash core migrations).
+- `pnpm exec emdash migrate` from the release pipeline, after build, before the new version gets traffic. Remote D1 flags, target fingerprint, post-deploy check, migration lock → [DEPLOY](DEPLOY.md) (EmDash core migrations).
 
 ## WordPress import
 

@@ -1,5 +1,6 @@
 version: 2
 updates:
+  # Dependabot uses the value "npm" for pnpm too.
   - package-ecosystem: "npm"
     directory: "/template"
     schedule:

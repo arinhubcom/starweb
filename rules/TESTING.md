@@ -43,7 +43,7 @@
 ### [Storybook Astro](STACK.md#storybook-astro)
 
 - `@storybook-astro/framework` in `.storybook/main.ts`; not the `storybook-astro` package.
-- Dev packages `storybook`, `@storybook/builder-vite`, `@storybook/react`, `@storybook-astro/framework`; not `npm create storybook`.
+- Dev packages `storybook`, `@storybook/builder-vite`, `@storybook/react`, `@storybook-astro/framework`; not `pnpm create storybook`.
 - `@storybook-astro/framework` 1.13 or newer for `@astrojs/react` 7 and Vitest 5; no TypeScript 7 (peer `typescript ^5.0.0 || ^6.0.0`, docgen is skipped).
 - React islands: `react({ include: ['**/react/**'] })` from `@storybook-astro/framework/integrations` (`src/components/ui/react/*.tsx`).
 - Meta of each React story: `parameters: { renderer: 'react' }`, not `'@storybook/react'`.
@@ -84,15 +84,15 @@
 - Baselines: default PNG, no `type: 'webp'` → [WHY](../WHY.md#why-png-baselines-in-git); in git, no Git LFS.
 - Viewport in `playwright.config.ts`; `mask` dynamic content.
 - Allow font provider requests in story screenshot tests (Storybook Astro loads fonts from provider URLs).
-- Create and update baselines only in CI: manual workflow running `npx vitest run -u` (ARIA `.snap`) and `npx playwright test --update-snapshots` (screenshots, `.aria.yml`). No local baseline commits → [WHY](../WHY.md#why-baselines-come-only-from-ci).
+- Create and update baselines only in CI: manual workflow running `pnpm exec vitest run -u` (ARIA `.snap`) and `pnpm exec playwright test --update-snapshots` (screenshots, `.aria.yml`). No local baseline commits → [WHY](../WHY.md#why-baselines-come-only-from-ci).
 - On failure upload `test-results/` diff images as a CI artifact.
 
 ## End-to-end tests
 
 ### Playwright
 
-- Against `astro preview` → [DEV](DEV.md). `npx playwright install chromium`.
-- `webServer`: `command: 'npm run preview -- --port <port>'`, same port in `url`, `reuseExistingServer: !process.env.CI`.
+- Against `astro preview` → [DEV](DEV.md). `pnpm exec playwright install chromium`.
+- `webServer`: `command: 'pnpm run preview --port <port>'`, same port in `url`, `reuseExistingServer: !process.env.CI`.
 - Manual, script, or agent start with `--background`, stop by PID → [DEV](DEV.md) (Local dev).
 - `astro build` first. Keep `.wrangler/deploy/config.json` (`astro preview` fails `No build output found` without it).
 - Test each critical flow: signup, login, payment.

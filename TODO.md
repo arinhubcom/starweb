@@ -37,8 +37,8 @@ Gaps in the rules and the steps:
 Steps that no test has run:
 
 - [ ] Run a real deploy on Cloudflare (steps 31 and 32). Confirm that the deploy creates the `SESSION` KV namespace from the binding without an ID, and that `env.production` works with it.
-- [ ] Run `npm run dev` and the admin setup wizard (step 20), and `npx emdash doctor` (step 22) on a generated project.
-- [ ] Run the optional steps 8-18 on a generated project, and confirm that `npm run check` and `npm run build` still pass.
+- [ ] Run `pnpm run dev` and the admin setup wizard (step 20), and `pnpm exec emdash doctor` (step 22) on a generated project.
+- [ ] Run the optional steps 8-18 on a generated project, and confirm that `pnpm run check` and `pnpm run build` still pass.
 
 Possible template additions:
 

@@ -163,6 +163,71 @@ node "$STARWEB/scripts/update.mjs" "$APP"
 assert_contains "$APP/EMDASH.md" "second starter change"
 assert_equal "$(state_commit)" "$NEW_COMMIT" ".starweb.json commit after a starter change"
 
+step "Update a project that still uses npm: it moves to pnpm"
+# The last commit with an npm lockfile: the versions must survive the move.
+LAST_NPM_COMMIT=8a77a65
+clone_git show "$LAST_NPM_COMMIT:template/package-lock.json" >"$APP/package-lock.json"
+rm "$APP/pnpm-lock.yaml"
+sed -i '2s/$/ (npm move)/' "$STARWEB/rules/DEV.md"
+commit_in_clone "test: change a rule before the move to pnpm"
+NEW_COMMIT="$(clone_git rev-parse HEAD)"
+MOVE_DRY_OUTPUT="$(node "$STARWEB/scripts/update.mjs" "$APP" --dry-run)"
+printf '%s\n' "$MOVE_DRY_OUTPUT" | grep -q 'moves the project from npm to pnpm' || fail "the plan does not report the move"
+[ -f "$APP/package-lock.json" ] || fail "--dry-run removed package-lock.json"
+# The plan from the last npm commit names the old override, not a zod package.
+cp "$APP/.starweb.json" "$WORKDIR/state.before.json"
+cp "$APP/package.json" "$WORKDIR/package.before.json"
+node -e '
+  const fs = require("node:fs");
+  const [stateFile, packageFile, commit] = process.argv.slice(1);
+  const state = JSON.parse(fs.readFileSync(stateFile, "utf8"));
+  fs.writeFileSync(stateFile, JSON.stringify({ ...state, commit }, null, 2) + "\n");
+  const pkg = JSON.parse(fs.readFileSync(packageFile, "utf8"));
+  const old = { ...pkg, overrides: { zod: "$zod" } };
+  fs.writeFileSync(packageFile, JSON.stringify(old, null, 2) + "\n");
+' "$APP/.starweb.json" "$APP/package.json" "$(clone_git rev-parse "$LAST_NPM_COMMIT")"
+OVERRIDE_OUTPUT="$(node "$STARWEB/scripts/update.mjs" "$APP" --dry-run)"
+cp "$WORKDIR/state.before.json" "$APP/.starweb.json"
+cp "$WORKDIR/package.before.json" "$APP/package.json"
+printf '%s\n' "$OVERRIDE_OUTPUT" | grep -q '^  override zod' || fail "the plan does not name the old zod override"
+if printf '%s\n' "$OVERRIDE_OUTPUT" | grep -q '^  package zod$'; then
+  fail "the plan calls the old zod override a package"
+fi
+[ ! -e "$APP/pnpm-lock.yaml" ] || fail "--dry-run wrote pnpm-lock.yaml"
+node "$STARWEB/scripts/update.mjs" "$APP"
+[ ! -e "$APP/package-lock.json" ] || fail "update.mjs kept package-lock.json"
+[ -f "$APP/pnpm-lock.yaml" ] || fail "update.mjs wrote no pnpm-lock.yaml"
+assert_contains "$APP/pnpm-lock.yaml" "astro@$(node -p 'require(process.argv[1]).dependencies.astro' "$STARWEB/template/package.json")"
+assert_equal "$(state_commit)" "$NEW_COMMIT" ".starweb.json commit after the move"
+
+step "Keep the npm lockfile when pnpm import fails"
+printf 'not json\n' >"$APP/package-lock.json"
+rm "$APP/pnpm-lock.yaml"
+sed -i '3s/$/ (bad lock)/' "$STARWEB/rules/DEV.md"
+commit_in_clone "test: change a rule before a failed move"
+set +e
+node "$STARWEB/scripts/update.mjs" "$APP"
+BAD_LOCK_STATUS=$?
+set -e
+[ "$BAD_LOCK_STATUS" -ne 0 ] || fail "update.mjs passed with a broken package-lock.json"
+assert_contains "$APP/package-lock.json" "not json"
+rm "$APP/package-lock.json"
+(cd "$APP" && pnpm install --no-frozen-lockfile --silent)
+node "$STARWEB/scripts/update.mjs" "$APP"
+NEW_COMMIT="$(clone_git rev-parse HEAD)"
+assert_equal "$(state_commit)" "$NEW_COMMIT" ".starweb.json commit after the failed move"
+
+step "Keep pnpm-lock.yaml when a project has both lockfiles"
+cp "$APP/pnpm-lock.yaml" "$WORKDIR/pnpm-lock.before.yaml"
+printf '{}\n' >"$APP/package-lock.json"
+sed -i '4s/$/ (both locks)/' "$STARWEB/rules/DEV.md"
+commit_in_clone "test: change a rule with both lockfiles"
+NEW_COMMIT="$(clone_git rev-parse HEAD)"
+node "$STARWEB/scripts/update.mjs" "$APP"
+[ ! -e "$APP/package-lock.json" ] || fail "update.mjs kept package-lock.json next to pnpm-lock.yaml"
+cmp "$WORKDIR/pnpm-lock.before.yaml" "$APP/pnpm-lock.yaml" || fail "update.mjs changed pnpm-lock.yaml"
+echo "ok: pnpm-lock.yaml stays when a project has both lockfiles"
+
 step "Change the same line in Starweb and in the project: a conflict"
 sed -i '10s/$/ UPSTREAM-A/' "$STARWEB/rules/DEV.md"
 commit_in_clone "test: change a rule line"
@@ -212,12 +277,15 @@ assert_not_contains "$STARWEB/template/src/layouts/Base.astro" "only in the old 
 assert_contains "$STARWEB/template/src/layouts/Base.astro" "themeScript"
 assert_not_contains "$STARWEB/starter/src/layouts/Base.astro" "themeScript"
 [ -f "$STARWEB/starter/seed/seed.json" ] || fail "starter/ has no new seed file"
-for path in .env AGENTS.md pnpm-workspace.yaml worker-configuration.d.ts; do
+for path in .env AGENTS.md package-lock.json worker-configuration.d.ts; do
   [ ! -e "$STARWEB/template/$path" ] || fail "update-starter.mjs wrote template/$path"
   [ ! -e "$STARWEB/starter/$path" ] || fail "update-starter.mjs wrote starter/$path"
 done
-[ ! -e "$STARWEB/starter/package-lock.json" ] || fail "update-starter.mjs wrote starter/package-lock.json"
-[ -f "$STARWEB/template/package-lock.json" ] || fail "update-starter.mjs removed template/package-lock.json"
+[ ! -e "$STARWEB/starter/pnpm-lock.yaml" ] || fail "update-starter.mjs wrote starter/pnpm-lock.yaml"
+[ ! -e "$STARWEB/starter/pnpm-workspace.yaml" ] || fail "update-starter.mjs wrote starter/pnpm-workspace.yaml"
+[ -f "$STARWEB/template/pnpm-lock.yaml" ] || fail "update-starter.mjs removed template/pnpm-lock.yaml"
+assert_contains "$STARWEB/template/pnpm-workspace.yaml" "minimumReleaseAge: 4320"
+assert_not_contains "$STARWEB/template/package.json" "packageManager"
 printf '%s\n' "$STARTER_OUTPUT" | grep -q '^Conflicts: 0$' || fail "update-starter.mjs reports conflicts"
 if node "$STARWEB/scripts/update-starter.mjs" "$PINNED" >/dev/null 2>&1; then
   fail "update-starter.mjs ran with uncommitted changes"

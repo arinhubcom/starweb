@@ -24,7 +24,9 @@ export const REPO_DOCS = [
 // package.json and lockfile on their own, and copy all other files.
 export const TEMPLATE_DIR = "template";
 export const TEMPLATE_PACKAGE = "package.json";
-export const TEMPLATE_LOCK = "package-lock.json";
+export const TEMPLATE_LOCK = "pnpm-lock.yaml";
+// The lockfile of a project or commit from before the move to pnpm.
+export const NPM_LOCK = "package-lock.json";
 const EMDASH_RULE =
   "- Follow the rules in [EMDASH.md](EMDASH.md) for the EmDash template.";
 
@@ -92,14 +94,14 @@ export function starwebHead() {
   return sha.trim();
 }
 
-// Stop when npm is older than 11: npm 10 fails `npm install` for this stack
-// with "Cannot read properties of null (reading 'edgesOut')".
-export function assertNpm() {
-  const result = spawnSync("npm", ["--version"], { encoding: "utf8" });
+// Stop when pnpm is older than 12, the oldest major that the template test ran
+// with. pnpm-workspace.yaml and the lockfile have only been tested with it.
+export function assertPnpm() {
+  const result = spawnSync("pnpm", ["--version"], { encoding: "utf8" });
   const version = result.status === 0 ? result.stdout.trim() : "none";
-  if (Number.parseInt(version, 10) >= 11) return;
+  if (Number.parseInt(version, 10) >= 12) return;
   fail(
-    `npm 11 or later is required (found ${version}). Use the Node.js LTS version in template/.nvmrc, which ships npm 11.`,
+    `pnpm 12 or later is required (found ${version}). See https://pnpm.io/installation.`,
   );
 }
 
