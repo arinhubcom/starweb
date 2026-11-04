@@ -25,6 +25,31 @@ First split, to verify (owner only, not checked for quality):
 - Not from the library owner: `wshobson/agents` (TypeScript), `pproenca/dot-skills` (Zod), `mindrally/skills` (Kysely), `astrolicious/agent-skills` (Astro), `vercel-labs/agent-skills` (React, web design), `tanstack-skills/tanstack-skills` (TanStack Query), `lombiq/tailwind-agent-skills` (Tailwind CSS), `hamen/material-3-skill` (Material 3), `addyosmani/*` (web quality, security), `coreyhaines31/marketingskills` (SEO), `antfu/skills` (Vitest), `currents-dev/playwright-best-practices-skill`, `brianlovin/agent-config` (Knip), `getsentry/skills` (security review).
 - Unknown owner: `armitage-labs/creem-skills` (check if Armitage Labs runs Creem).
 
+## Finish the template
+
+The rule in [rules/AGENTS.md](rules/AGENTS.md) (Template) requires an implementation or a [rules/SETUP.md](rules/SETUP.md) step for each rule. `scripts/test-template.sh` covers the setup, the checks, the build, and the preview. It does not cover the items below.
+
+Gaps in the rules and the steps:
+
+- [ ] Add a step to [rules/SETUP.md](rules/SETUP.md) for the repository settings in [rules/DEPS.md](rules/DEPS.md): Dependabot alerts, security updates, and **Allow auto-merge**. No step covers them yet.
+- [ ] Check every rule in `rules/` against the new Template rule. One review found the gaps that are now fixed, but it did not check each rule line by line.
+
+Steps that no test has run:
+
+- [ ] Run a real deploy on Cloudflare (steps 31 and 32). Confirm that the deploy creates the `SESSION` KV namespace from the binding without an ID, and that `env.production` works with it.
+- [ ] Run `npm run dev` and the admin setup wizard (step 20), and `npx emdash doctor` (step 22) on a generated project.
+- [ ] Run the optional steps 8-18 on a generated project, and confirm that `npm run check` and `npm run build` still pass. A manual test of step 9 (`shadcn init`) showed that it keeps the `theme.css` import and adds color variables that override `theme.css`.
+- [ ] Decide whether `scripts/test-template.sh` runs step 9 and step 10, so that CI catches a `shadcn init` change.
+
+Possible template additions:
+
+- [ ] Decide whether the template ships the workflows that step 30 lists (Dependabot automerge, PR preview, dev deploy, stage upload, promotion, and D1 export), in place of a manual step.
+- [ ] Decide whether `scripts/update.mjs` also handles the starter patches and the `.gitignore` lines. Now the Update section in [rules/SETUP.md](rules/SETUP.md) lists them as manual work for existing projects.
+
+Dependency updates:
+
+- [ ] Move to TypeScript 7 when `typescript-eslint` allows it. `typescript-eslint` 8.72.1 needs `typescript` `<6.1.0`, so the template stays on 6.0.3, and the Dependabot pull request for 7.0.2 fails in CI.
+
 ## Follow the issues opened in other repositories
 
 Check these upstream issues and discussions. When one closes or changes, update the rule or decision that links to it, and then remove it from this list.
