@@ -4,14 +4,7 @@
 // HEAD), and ours (the project file).
 // Usage: node <starweb>/scripts/update.mjs <project-dir> [--dry-run]
 import { spawnSync } from "node:child_process";
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   PIN_ONLY_TOOLS,
@@ -22,6 +15,7 @@ import {
   assertNpm,
   fail,
   gitOut,
+  planFile,
   readJson,
   readText,
   repoRoot,
@@ -33,7 +27,6 @@ import {
   writeJson,
 } from "./lib.mjs";
 
-const MAX_CONFLICTS = 127;
 const DEP_SECTIONS = ["dependencies", "devDependencies", "overrides"];
 
 function parseArgs(argv) {
@@ -70,25 +63,23 @@ function assertCommit(commit) {
 }
 
 const LEGACY_TEMPLATE_PREFIX = `${TEMPLATE_DIR}/files/`;
+const SYMLINK_MODE = "120000 ";
+// The template holds this file since it holds the create-emdash output.
+const STARTER_MARKER = "EMDASH.md";
 
 const showAt = (commit, path) => gitOut(["show", `${commit}:${path}`]);
 
-// Map each project path to its Starweb-owned path at a commit. A project can
-// point to a commit from before the template files moved out of template/files.
+// Map each project path to its Starweb-owned path at a commit, without symbolic
+// links. A project can point to a commit from before the template files moved
+// out of template/files.
 function ownedPaths(commit) {
   const names = (
-    gitOut([
-      "ls-tree",
-      "-r",
-      "--name-only",
-      commit,
-      "--",
-      ...REPO_DOCS,
-      TEMPLATE_DIR,
-    ]) ?? ""
+    gitOut(["ls-tree", "-r", "-z", commit, "--", ...REPO_DOCS, TEMPLATE_DIR]) ??
+    ""
   )
-    .split("\n")
-    .filter(Boolean);
+    .split("\0")
+    .filter((line) => line !== "" && !line.startsWith(SYMLINK_MODE))
+    .map((line) => line.slice(line.indexOf("\t") + 1));
   const prefix = names.some((name) => name.startsWith(LEGACY_TEMPLATE_PREFIX))
     ? LEGACY_TEMPLATE_PREFIX
     : `${TEMPLATE_DIR}/`;
@@ -111,55 +102,12 @@ function starwebText(commit, source, target, values) {
   return target === "AGENTS.md" ? withEmdashRule(text) : text;
 }
 
-function mergeThreeWay(ours, base, theirs) {
-  const dir = mkdtempSync(join(tmpdir(), "starweb-merge-"));
-  try {
-    const paths = [ours, base, theirs].map((text, i) => {
-      const path = join(dir, ["ours", "base", "theirs"][i]);
-      writeFileSync(path, text);
-      return path;
-    });
-    const result = spawnSync(
-      "git",
-      [
-        "merge-file",
-        "-p",
-        "--diff3",
-        "-L",
-        "project",
-        "-L",
-        "base",
-        "-L",
-        "starweb",
-        ...paths,
-      ],
-      { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
-    );
-    if (result.status === null || result.status > MAX_CONFLICTS) {
-      throw new Error(`git merge-file failed: ${result.stderr}`);
-    }
-    return { text: result.stdout, conflict: result.status > 0 };
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
-}
-
-// Decide what to do with one file. Return { action, text? }.
-function planFile({ base, theirs, ours }) {
-  if (theirs === base) return { action: "skip" };
-  if (theirs === null) return { action: ours === null ? "skip" : "deleted" };
-  if (ours === null)
-    return { action: base === null ? "added" : "kept", text: theirs };
-  if (ours === theirs) return { action: "skip" };
-  if (ours === base) return { action: "updated", text: theirs };
-  const merged = mergeThreeWay(ours, base ?? "", theirs);
-  return { action: merged.conflict ? "conflict" : "merged", text: merged.text };
-}
-
 function planFiles(dir, state, head) {
   const baseSources = ownedPaths(state.commit);
   const headSources = ownedPaths(head);
   const targets = new Set([...baseSources.keys(), ...headSources.keys()]);
+  // A project from a commit without the starter files owns its copies of them.
+  const baseHasStarter = baseSources.has(STARTER_MARKER);
   return [...targets]
     .toSorted((a, b) => a.localeCompare(b))
     .map((target) => {
@@ -172,6 +120,9 @@ function planFiles(dir, state, head) {
         state,
       );
       const theirs = starwebText(head, headSources.get(target), target, state);
+      if (!baseHasStarter && base === null && ours !== null) {
+        return { path: target, action: "skip" };
+      }
       return { path: target, ...planFile({ base, theirs, ours }) };
     });
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Test the Starweb template end to end: create the pinned starter, run
+# Test the Starweb template end to end: create a project from template/ with
 # setup.mjs, check that update.mjs has nothing to change, run the checks and
 # the build, then test the built Worker.
 # Usage: bash scripts/test-template.sh <workdir>
@@ -98,17 +98,27 @@ wait_for_ok() {
   done
 }
 
-step "Read the pinned create-emdash version"
-VERSION="$(node -p 'require(process.argv[1]).devDependencies["create-emdash"]' "$REPO_ROOT/template/package.json")"
-[ -n "$VERSION" ] || fail "template/package.json has no create-emdash"
-echo "create-emdash $VERSION, work directory $WORKDIR"
-
-step "Create the starter project"
-rm -rf "$APP_DIR"
-(cd "$WORKDIR" && npm create "emdash@$VERSION" app -- --template cloudflare:starter --install --yes)
-
 step "Run setup.mjs"
+rm -rf "$APP_DIR"
 node "$REPO_ROOT/scripts/setup.mjs" "$APP_DIR" --name tpl-test --site https://example.com
+
+step "Check the starter files and the encryption key"
+[ -f "$APP_DIR/EMDASH.md" ] || fail "the project has no EMDASH.md"
+[ -f "$APP_DIR/seed/seed.json" ] || fail "the project has no seed file"
+[ -L "$APP_DIR/.claude/skills" ] || fail ".claude/skills is not a symbolic link"
+[ -f "$APP_DIR/.claude/skills/emdash-cli/SKILL.md" ] || fail ".claude/skills does not resolve"
+[ ! -e "$APP_DIR/template" ] || fail "the project has a template folder"
+[ ! -e "$APP_DIR/files" ] || fail "the project has a files folder"
+[ ! -e "$REPO_ROOT/template/.env" ] || fail "template/ has an .env file"
+grep -qE '^EMDASH_ENCRYPTION_KEY=emdash_enc_v1_[A-Za-z0-9_-]{43}$' "$APP_DIR/.env" || fail ".env has no encryption key"
+grep -q '"name": "tpl-test"' "$APP_DIR/package.json" || fail "package.json has the wrong name"
+if grep -q '"create-emdash"' "$APP_DIR/package.json"; then
+  fail "package.json has the pin-only tool create-emdash"
+fi
+if node "$REPO_ROOT/scripts/setup.mjs" "$APP_DIR" --name tpl-test >/dev/null 2>&1; then
+  fail "setup.mjs ran on a folder that is not empty"
+fi
+echo "ok: starter files, encryption key, and empty folder check"
 
 step "Run update.mjs --dry-run: nothing to change"
 UPDATE_OUTPUT="$(node "$REPO_ROOT/scripts/update.mjs" "$APP_DIR" --dry-run)"

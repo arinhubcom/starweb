@@ -9,12 +9,12 @@ It is built on [Astro](https://astro.build) and
 To set up a new project, give this prompt to your AI agent (Claude Code, Codex, Gemini CLI, or another agent):
 
 ```text
-Set up a new Starweb project named my-site. Clone https://github.com/arinhubcom/starweb into a folder outside the project, for example ~/starweb, and keep it: setup.mjs reads it, and update.mjs needs it later. Do not use a temporary folder. Read AGENTS.md and rules/SETUP.md there. Run create-emdash at the version pinned in template/package.json, then run scripts/setup.mjs on the new project, then do the remaining steps in rules/SETUP.md in order. After each step, check the result. If a step fails, stop and report the error.
+Set up a new Starweb project named my-site. Clone https://github.com/arinhubcom/starweb into a folder outside the project, for example ~/starweb, and keep it: setup.mjs reads it, and update.mjs needs it later. Do not use a temporary folder. Read AGENTS.md and rules/SETUP.md there. Run scripts/setup.mjs on the new project folder, then do the remaining steps in rules/SETUP.md in order. After each step, check the result. If a step fails, stop and report the error.
 ```
 
 Replace `my-site` with your project name.
 
-The steps are in [rules/SETUP.md](rules/SETUP.md). The [template/](template/) folder holds `package.json` and the tested configs, and the new project takes it over: the script [scripts/setup.mjs](scripts/setup.mjs) merges `package.json` and copies all other files to the project root. The rules hold decisions, not install commands. To bring later Starweb changes into the project, run [scripts/update.mjs](scripts/update.mjs) (see the Update section in [rules/SETUP.md](rules/SETUP.md)). CI tests the template every week. Read [why](WHY.md#why-a-template-setupmjs-and-ci).
+The steps are in [rules/SETUP.md](rules/SETUP.md). The [template/](template/) folder holds the `create-emdash` output with the Starweb changes in place, `package.json`, and the tested configs. The new project takes it over: the script [scripts/setup.mjs](scripts/setup.mjs) copies the folder to the project root and writes a new encryption key. The rules hold decisions, not install commands. Each EmDash update runs `create-emdash` again: [scripts/update-starter.mjs](scripts/update-starter.mjs) merges the new output into `template/`, and [starter/](starter/) keeps the last output as the merge base. To bring later Starweb changes into the project, run [scripts/update.mjs](scripts/update.mjs) (see the Update section in [rules/SETUP.md](rules/SETUP.md)). CI tests the template every week. Read [why](WHY.md#why-a-template-setupmjs-and-ci).
 
 ## 🏗️ Architecture
 

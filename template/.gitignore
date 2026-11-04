@@ -1,0 +1,22 @@
+node_modules
+dist
+.astro
+.emdash/migrations.json
+uploads
+data.db
+data.db-*
+.wrangler
+
+# Environment / Wrangler secrets
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+
+# Starweb
+test-results/
+coverage/
+backups/
+public/_headers
+public/.well-known/security.txt

@@ -1,13 +1,16 @@
 #!/usr/bin/env node
-// Set up a create-emdash Cloudflare starter project as a Starweb project.
+// Create a Starweb project from the template/ folder.
 // Usage: node <starweb>/scripts/setup.mjs <project-dir> --name <name> [--site <url>]
 import { spawnSync } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import {
   cpSync,
   existsSync,
+  lstatSync,
   mkdirSync,
-  renameSync,
-  rmSync,
+  readdirSync,
+  readlinkSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -19,28 +22,19 @@ import {
   TEMPLATE_DIR,
   TEMPLATE_PACKAGE,
   fail,
-  listFiles,
+  gitOut,
   readJson,
   readText,
   repoRoot,
-  sortKeys,
   starwebHead,
   step,
   substitute,
   withEmdashRule,
   writeJson,
 } from "./lib.mjs";
-import { starterPatches } from "./setup-patches.mjs";
 
 const templateDir = join(repoRoot, TEMPLATE_DIR);
 const DEFAULT_SITE = "https://example.com";
-const GITIGNORE_LINES = [
-  "test-results/",
-  "coverage/",
-  "backups/",
-  "public/_headers",
-  "public/.well-known/security.txt",
-];
 
 function parseArgs(argv) {
   const options = { dir: undefined, name: undefined, site: DEFAULT_SITE };
@@ -66,51 +60,40 @@ function parseArgs(argv) {
   return { ...options, dir: resolve(options.dir) };
 }
 
-function assertStarter(dir) {
-  const packagePath = join(dir, "package.json");
-  if (!existsSync(packagePath)) fail(`${dir} has no package.json.`);
-  if (existsSync(join(dir, "EMDASH.md"))) {
-    fail(
-      "EMDASH.md exists: this project was already set up. Use a fresh starter.",
-    );
-  }
-  const pkg = readJson(packagePath);
-  const deps = { ...pkg.dependencies, ...pkg.devDependencies };
-  if (!deps.emdash || !deps["@emdash-cms/cloudflare"]) {
-    fail(
-      "This is not the create-emdash Cloudflare starter (emdash or @emdash-cms/cloudflare is missing).",
-    );
+function assertEmptyTarget(dir) {
+  if (existsSync(dir) && readdirSync(dir).length > 0) {
+    fail(`${dir} is not empty. Use a new folder.`);
   }
 }
 
-function replaceExact(dir, file, from, to) {
-  const path = join(dir, file);
-  const text = readText(path);
-  if (!text.includes(from)) {
-    throw new Error(
-      `Starter changed: ${file} no longer contains ${JSON.stringify(from)}. Update scripts/setup.mjs.`,
-    );
-  }
-  writeFileSync(
-    path,
-    text.replace(from, () => to),
+// List the template files that git tracks or would track, so that ignored
+// files such as node_modules or .env never reach a project.
+function templateFiles() {
+  const names = gitOut(
+    ["ls-files", "-co", "--exclude-standard", "-z", "--", "."],
+    templateDir,
   );
+  if (names === null) fail(`Cannot list the files of ${templateDir}.`);
+  return names
+    .split("\0")
+    .filter((name) => name !== "" && name !== TEMPLATE_PACKAGE)
+    .filter((name) => existsSync(join(templateDir, name)));
 }
 
-function applyStarterPatches(dir) {
-  for (const { file, edits } of starterPatches) {
-    if (!existsSync(join(dir, file))) {
-      throw new Error(
-        `Starter changed: ${file} no longer exists. Update scripts/setup.mjs.`,
-      );
+function copyTemplate(dir, values) {
+  for (const relative of templateFiles()) {
+    const source = join(templateDir, relative);
+    const target = join(dir, relative);
+    mkdirSync(dirname(target), { recursive: true });
+    if (lstatSync(source).isSymbolicLink()) {
+      symlinkSync(readlinkSync(source), target);
+    } else {
+      writeFileSync(target, substitute(readText(source), values));
     }
-    for (const [from, to] of edits) replaceExact(dir, file, from, to);
   }
 }
 
-function prepareAgentFiles(dir) {
-  renameSync(join(dir, "AGENTS.md"), join(dir, "EMDASH.md"));
-  rmSync(join(dir, "pnpm-workspace.yaml"), { force: true });
+function copyRepoDocs(dir) {
   for (const entry of REPO_DOCS) {
     cpSync(join(repoRoot, entry), join(dir, entry), { recursive: true });
   }
@@ -118,58 +101,27 @@ function prepareAgentFiles(dir) {
   writeFileSync(agentsPath, withEmdashRule(readText(agentsPath)));
 }
 
-function copyOverlay(dir, values) {
-  const relatives = listFiles(templateDir).filter(
-    (relative) => relative !== TEMPLATE_PACKAGE,
-  );
-  for (const relative of relatives) {
-    const target = join(dir, relative);
-    mkdirSync(dirname(target), { recursive: true });
-    const text = readText(join(templateDir, relative));
-    writeFileSync(target, substitute(text, values));
-  }
-}
-
-function mergePackageJson(dir, name) {
-  const projectPath = join(dir, "package.json");
-  const project = readJson(projectPath);
+function writePackageJson(dir, name) {
   const template = readJson(join(templateDir, TEMPLATE_PACKAGE));
-  const { deploy: _deploy, ...starterScripts } = project.scripts ?? {};
-  const templateDevDeps = Object.fromEntries(
+  const devDependencies = Object.fromEntries(
     Object.entries(template.devDependencies).filter(
       ([tool]) => !PIN_ONLY_TOOLS.includes(tool),
     ),
   );
-  writeJson(projectPath, {
-    ...project,
+  writeJson(join(dir, TEMPLATE_PACKAGE), {
+    ...template,
     name,
-    scripts: { ...starterScripts, ...template.scripts },
-    dependencies: sortKeys({
-      ...project.dependencies,
-      ...template.dependencies,
-    }),
-    devDependencies: sortKeys({
-      ...project.devDependencies,
-      ...templateDevDeps,
-    }),
-    overrides: sortKeys({
-      ...project.overrides,
-      ...template.overrides,
-    }),
+    devDependencies,
   });
 }
 
-function updateGitignore(dir) {
-  const path = join(dir, ".gitignore");
-  const current = existsSync(path) ? readText(path) : "";
-  const known = new Set(current.split("\n"));
-  const missing = GITIGNORE_LINES.filter((line) => !known.has(line));
-  if (missing.length === 0) return;
-  const separator = current === "" || current.endsWith("\n") ? "" : "\n";
-  writeFileSync(
-    path,
-    `${current}${separator}\n# Starweb\n${missing.join("\n")}\n`,
-  );
+// Each project gets its own key, in the format of create-emdash. The file is
+// not in the template: a shared key would decrypt the secrets of other projects.
+function writeEncryptionKey(dir) {
+  const key = `emdash_enc_v1_${randomBytes(32).toString("base64url")}`;
+  writeFileSync(join(dir, ".env"), `EMDASH_ENCRYPTION_KEY=${key}\n`, {
+    mode: 0o600,
+  });
 }
 
 function run(dir, command, args) {
@@ -181,15 +133,11 @@ function run(dir, command, args) {
 }
 
 function installAndFormat(dir) {
-  // The starter lockfile can pin versions that are younger than the
-  // min-release-age of the new .npmrc, so install from a clean state.
-  rmSync(join(dir, "node_modules"), { recursive: true, force: true });
-  rmSync(join(dir, "package-lock.json"), { force: true });
   run(dir, "npm", ["install"]);
   run(dir, "npx", ["wrangler", "types"]);
   run(dir, "npx", ["tsx", "scripts/theme.ts"]);
   run(dir, "npx", ["prettier", ".", "--write", "--log-level", "warn"]);
-  if (!existsSync(join(dir, ".git"))) run(dir, "git", ["init", "--quiet"]);
+  run(dir, "git", ["init", "--quiet"]);
 }
 
 function writeState(dir, values, commit) {
@@ -213,19 +161,15 @@ Setup done. Next steps (see rules/SETUP.md):
 
 function main() {
   const options = parseArgs(process.argv.slice(2));
-  assertStarter(options.dir);
+  assertEmptyTarget(options.dir);
   assertNpm();
   const commit = starwebHead();
   const steps = [
-    [
-      "Rename AGENTS.md and copy the Starweb rules",
-      () => prepareAgentFiles(options.dir),
-    ],
-    ["Copy the template files", () => copyOverlay(options.dir, options)],
-    ["Patch the starter files", () => applyStarterPatches(options.dir)],
+    ["Copy the template", () => copyTemplate(options.dir, options)],
+    ["Copy the Starweb rules", () => copyRepoDocs(options.dir)],
     ["Write .starweb.json", () => writeState(options.dir, options, commit)],
-    ["Merge package.json", () => mergePackageJson(options.dir, options.name)],
-    ["Update .gitignore", () => updateGitignore(options.dir)],
+    ["Write package.json", () => writePackageJson(options.dir, options.name)],
+    ["Write the encryption key", () => writeEncryptionKey(options.dir)],
     [
       "Install, generate types, and format",
       () => installAndFormat(options.dir),

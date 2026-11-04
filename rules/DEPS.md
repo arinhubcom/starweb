@@ -10,8 +10,7 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 - Package that every project needs: exact version in `template/package.json`. Project package: let npm write the version; never edit it by hand.
 - CI: `npm ci`, not `npm install`.
 - No `--legacy-peer-deps`; fix the conflict. `emdash-better-auth` needs React ≥ 19.2.6: template pins 19.3.1.
-- Delete `pnpm-workspace.yaml` from the starter (else `shadcn init` uses pnpm, writes `pnpm-lock.yaml`). `setup.mjs` does it.
-- `setup.mjs` deletes the starter `package-lock.json` and `node_modules` and installs again with `min-release-age` (starter lock may pin versions younger than 3 days).
+- No `pnpm-workspace.yaml` (else `shadcn init` uses pnpm, writes `pnpm-lock.yaml`).
 - Node.js: newest LTS; major in `.nvmrc` (`24`); move up once the next major reaches LTS on the [Node.js release schedule](https://github.com/nodejs/release#release-schedule). No non-LTS. Astro ≥ 7.4.2 needs Node.js ≥ 22.23.4.
 - npm ≥ 11; npm 10 fails with `Cannot read properties of null (reading 'edgesOut')`. Node.js 24 ships npm 11.
 - CI Node.js: `actions/setup-node` with `node-version-file` or `node-version` from the same value as local, `cache: npm`.

@@ -38,7 +38,10 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project
 
 ## Template
 
-- `template/` holds `package.json` and the configs. A new project takes over the folder: `scripts/setup.mjs` merges `package.json` and copies all other files to the project root. No `files/` subfolder.
+- `template/` holds the `create-emdash` output (`cloudflare:starter`) with the Starweb changes in place, `package.json`, and the configs, formatted with Prettier. A new project takes over the folder: `scripts/setup.mjs` copies it to the project root. No `files/` subfolder, no `create-emdash` run in a project.
+- Not in `template/`: `.env` (`setup.mjs` writes a new key per project), lockfile, `pnpm-workspace.yaml`, `worker-configuration.d.ts`.
+- `starter/` holds the last `create-emdash` output, shaped like `template/` (renamed, formatted, without the files above): the merge base. No hand edits.
+- EmDash update: `node scripts/update-starter.mjs <version>` runs `create-emdash` again, merges the difference to `starter/` into `template/`, replaces `starter/`, and pins `create-emdash`, `emdash`, `@emdash-cms/cloudflare`. Resolve the conflicts, review the listed `package.json` changes, then test. No version bump of these packages by hand or by Dependabot.
 - No install commands in `rules/` (`npm i`, `npm rm`, `npx astro add`). A package every project needs goes in `template/package.json`, its config in `template/`. A rule for an optional feature names the packages only.
 - A rule and the file in `template/` or `scripts/setup.mjs` that implements it change in the same commit.
 - No edit to `template/` without the rule that describes it; change the rule first.
@@ -48,4 +51,4 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project
 - Before a commit that touches `template/`, `scripts/`, or a rule they implement: `bash scripts/test-template.sh <tmp-dir>` (new folder outside the repository).
 - Before each template test, check every package in `template/package.json` for a newer version (`npm view <package> time`); pin the newest that is older than 3 days and within peer ranges and the [DEPS](DEPS.md) ignore list, then test with it.
 - New `astro` minor or major: read its post in the [Astro blog feed](https://astro.build/rss.xml) (`Astro X.Y` for each minor it passes, plus the monthly "What's new in Astro" posts since the old pin). Update the rules, `WHY.md`, and `template/` for each new feature, deprecation, or fixed workaround in the same commit as the version bump.
-- Also `bash scripts/test-update.sh <tmp-dir>` (another new folder) when the change touches `scripts/update.mjs`, `scripts/setup.mjs`, `scripts/lib.mjs`, `.starweb.json`, or the files `update.mjs` merges. It edits lines 7, 10, and 13 of `rules/DEV.md`; keep that file at 13 or more lines.
+- Also `bash scripts/test-update.sh <tmp-dir>` (another new folder) when the change touches `scripts/update.mjs`, `scripts/update-starter.mjs`, `scripts/setup.mjs`, `scripts/lib.mjs`, `.starweb.json`, or the files `update.mjs` merges. It edits lines 7, 10, and 13 of `rules/DEV.md`; keep that file at 13 or more lines.
