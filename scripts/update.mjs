@@ -7,10 +7,10 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
-  PIN_ONLY_TOOLS,
   REPO_DOCS,
   STATE_FILE,
   TEMPLATE_DIR,
+  TEMPLATE_LOCK,
   TEMPLATE_PACKAGE,
   assertNpm,
   fail,
@@ -86,7 +86,7 @@ function ownedPaths(commit) {
   const entries = names.flatMap((source) => {
     if (!source.startsWith(`${TEMPLATE_DIR}/`)) return [[source, source]];
     const target = source.startsWith(prefix) ? source.slice(prefix.length) : "";
-    return target === "" || target === TEMPLATE_PACKAGE
+    return target === "" || [TEMPLATE_PACKAGE, TEMPLATE_LOCK].includes(target)
       ? []
       : [[target, source]];
   });
@@ -128,13 +128,13 @@ function planFiles(dir, state, head) {
 }
 
 // Plan the changes of one package.json map (scripts or a dependency section).
-function planMap(label, base, theirs, project, skip = []) {
+function planMap(label, base, theirs, project) {
   const next = { ...project };
   const changes = [];
   const kept = [];
   const gone = [];
   for (const [key, version] of Object.entries(theirs)) {
-    if (skip.includes(key) || base[key] === version) continue;
+    if (base[key] === version) continue;
     if (project[key] === version) continue;
     if (project[key] === base[key]) {
       next[key] = version;
@@ -148,7 +148,7 @@ function planMap(label, base, theirs, project, skip = []) {
     }
   }
   for (const key of Object.keys(base)) {
-    if (!skip.includes(key) && !(key in theirs)) gone.push(`${label} ${key}`);
+    if (key in project && !(key in theirs)) gone.push(`${label} ${key}`);
   }
   return { next, changes, kept, gone };
 }
@@ -171,7 +171,6 @@ function planPackageJson(dir, state, head) {
       base[section] ?? {},
       theirs[section] ?? {},
       project[section] ?? {},
-      PIN_ONLY_TOOLS,
     );
     if (section in project || Object.keys(plan.next).length > 0) {
       result.next[section] =

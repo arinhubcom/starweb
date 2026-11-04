@@ -45,7 +45,7 @@
 
 - State layer: overlay in content color (`currentColor`) over the container; never change the container color. Opacities: hover 8%, focus 10%, pressed 10%, dragged 16%.
 - Via `::before`: `relative before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10`.
-- Add once in the `tv()` `base`; on an installed component remove its own hover color (`hover:bg-primary/90`).
+- Add once in the `tv()` `base` of every component (→ [COMPONENTS](COMPONENTS.md)); on an installed component remove its own hover color (`hover:bg-primary/90`).
 - Disabled 38%: `disabled:opacity-38` (Base UI `data-disabled:opacity-38`); replace [shadcn/ui](STACK.md#shadcnui) `disabled:opacity-50`; no state layer.
 - Focus ring 3px, offset 2px: `focus-visible:outline-3 focus-visible:outline-offset-2 outline-ring` (theme color).
 
@@ -74,7 +74,7 @@
 - Build time: `scripts/theme.ts` (in the template, with the `SEED` constant), run `npx tsx scripts/theme.ts`; the template pins `@material/material-color-utilities` and `tsx`. No plain `node` (0.4.0 imports without `.js`).
 - Roles as hex: `hexFromArgb(scheme.surfaceContainerHigh)`.
 - Output `src/styles/theme.css`, imported in `global.css`; never hand-edit, change the seed and rerun.
-- Remove color variables `shadcn init` wrote to `:root` and `.dark`; keep `--radius`, shadows, fonts, `--chart-1`..`--chart-5` from Fulldev UI.
+- `global.css` has no color variables in `:root` and `.dark`, only `--radius`, shadows, fonts, `--chart-1`..`--chart-5` from Fulldev UI. A registry item adds some → remove them.
 - Role map:
 
   | shadcn/ui variable | MD3 role |
@@ -102,7 +102,7 @@
 
 ### Buttons
 
-- Change `size` variants of Fulldev UI and [Base UI](STACK.md#base-ui) buttons (→ [DESIGN](DESIGN.md)) in `src/components/ui/button/button-variants.ts` and `src/components/ui/react/button.tsx` after install:
+- `size` variants of Fulldev UI and [Base UI](STACK.md#base-ui) buttons (→ [DESIGN](DESIGN.md)): `xs`, `default` and `sm`, `md`, `lg`, `xl` in `src/components/ui/button/button-variants.ts` (in the template); same values in `src/components/ui/react/button.tsx` after install:
 
   | Size | Height | Side padding | Icon | Gap | Tailwind |
   |---|---|---|---|---|---|

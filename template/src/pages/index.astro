@@ -1,6 +1,7 @@
 ---
 import { getEmDashCollection, getSiteSettings } from "emdash";
 import { Image } from "emdash/ui";
+import { Button } from "@/components/ui/button";
 import Base from "../layouts/Base.astro";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
 
@@ -49,4 +50,8 @@ if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
       ))}
     </ul>
   )}
+
+  <Button as="a" href="/posts">
+    All posts
+  </Button>
 </Base>

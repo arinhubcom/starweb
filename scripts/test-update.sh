@@ -176,7 +176,7 @@ assert_contains "$APP/rules/DEV.md" ">>>>>>> starweb"
 assert_equal "$(state_commit)" "$NEW_COMMIT" ".starweb.json commit after a conflict"
 
 step "Run update-starter.mjs: merge a starter change into template/"
-PINNED="$(node -p 'require(process.argv[1]).devDependencies["create-emdash"]' "$STARWEB/template/package.json")"
+PINNED="$(node -p 'require(process.argv[1]).devDependencies["create-emdash"]' "$STARWEB/package.json")"
 # Fake an older snapshot. In 404.astro the template equals the snapshot, and in
 # Base.astro the template has its own changes. The new output has no such line.
 for file in src/pages/404.astro src/layouts/Base.astro; do
@@ -199,20 +199,23 @@ node -e '
   const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
   pkg.devDependencies["create-emdash"] = "0.0.1";
   fs.writeFileSync(file, JSON.stringify(pkg, null, 2) + "\n");
-' "$STARWEB/template/package.json"
+' "$STARWEB/package.json"
 commit_in_clone "test: fake an older create-emdash pin"
 STARTER_OUTPUT="$(node "$STARWEB/scripts/update-starter.mjs" "$PINNED")"
 printf '%s\n' "$STARTER_OUTPUT"
-assert_contains "$STARWEB/template/package.json" "\"create-emdash\": \"$PINNED\""
+assert_contains "$STARWEB/package.json" "\"create-emdash\": \"$PINNED\""
+assert_not_contains "$STARWEB/template/package.json" "create-emdash"
 assert_not_contains "$STARWEB/template/src/pages/404.astro" "only in the old starter"
 assert_not_contains "$STARWEB/template/src/layouts/Base.astro" "only in the old starter"
 assert_contains "$STARWEB/template/src/layouts/Base.astro" "themeScript"
 assert_not_contains "$STARWEB/starter/src/layouts/Base.astro" "themeScript"
 [ -f "$STARWEB/starter/seed/seed.json" ] || fail "starter/ has no new seed file"
-for path in .env AGENTS.md pnpm-workspace.yaml package-lock.json worker-configuration.d.ts; do
+for path in .env AGENTS.md pnpm-workspace.yaml worker-configuration.d.ts; do
   [ ! -e "$STARWEB/template/$path" ] || fail "update-starter.mjs wrote template/$path"
   [ ! -e "$STARWEB/starter/$path" ] || fail "update-starter.mjs wrote starter/$path"
 done
+[ ! -e "$STARWEB/starter/package-lock.json" ] || fail "update-starter.mjs wrote starter/package-lock.json"
+[ -f "$STARWEB/template/package-lock.json" ] || fail "update-starter.mjs removed template/package-lock.json"
 printf '%s\n' "$STARTER_OUTPUT" | grep -q '^Conflicts: 0$' || fail "update-starter.mjs reports conflicts"
 if node "$STARWEB/scripts/update-starter.mjs" "$PINNED" >/dev/null 2>&1; then
   fail "update-starter.mjs ran with uncommitted changes"

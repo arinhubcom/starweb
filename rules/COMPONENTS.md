@@ -19,13 +19,14 @@
 - Component that can appear more than once with script → custom element (`customElements.define`, `connectedCallback`).
 - No `client:*` on an `.astro` component (Astro throws).
 - File names kebab-case as the shadcn CLI writes (`button.astro`); imports PascalCase (`Button`).
+- Every component (Fulldev UI, [shadcn/ui](STACK.md#shadcnui), [Base UI](STACK.md#base-ui), and your own): styles in [Tailwind Variants](STACK.md#tailwind-variants) `tv()` that follow [MATERIAL](MATERIAL.md): sizes, targets, state layer, focus ring, disabled opacity, motion, and color roles. Apply it right after `shadcn add`, in the same commit. Reference: `src/components/ui/button/button-variants.ts`.
 
 ### [Fulldev UI](STACK.md#fulldev-ui)
 
 - Source of `.astro` components and page blocks (sections, hero, features, pricing, FAQ); no client JS.
-- Before init add the alias to `tsconfig.json` `compilerOptions`: `"baseUrl": "."`, `"paths": { "@/*": ["./src/*"] }`; else `shadcn init` stops at "Validating import alias".
-- Init once: `npx shadcn@<version> init https://ui.full.dev/r/styles/base-vega/base.json`; `<version>` = `shadcn` in `devDependencies` of `template/package.json`. Writes `components.json` (`@fulldev` registry), theme tokens in `src/styles/global.css`, `cn()` in `src/lib/utils.ts`; installs `shadcn`, `cn`, `class-variance-authority`, `tw-animate-css`.
-- Right after init: add `tailwind-variants`, remove `class-variance-authority`.
+- `tsconfig.json` `compilerOptions` keep `"baseUrl": "."`, `"paths": { "@/*": ["./src/*"] }`; `shadcn add` needs them.
+- `template/` holds the output of `shadcn init` with `https://ui.full.dev/r/styles/base-vega/base.json`: `components.json` (`@fulldev` registry), theme tokens in `src/styles/global.css`, `cn()` in `src/lib/utils.ts`, packages `shadcn`, `cn`, `tw-animate-css`. No second `shadcn init`.
+- `tailwind-variants`; no `class-variance-authority` (`no-restricted-imports` in `.oxlintrc.json` fails on it).
 - After each `shadcn add` (Fulldev or shadcn/ui): convert every `cva()` in the added files to `tv()`. `cva("<base>", { variants, defaultVariants })` → `tv({ base: "<base>", variants, defaultVariants })`; `import { tv, type VariantProps } from "tailwind-variants"`. Call sites stay. Registry items import `class-variance-authority` without listing it; `npx astro check` reports each file left. → [DESIGN](DESIGN.md)
 - `class="@container"` on `<body>` in the base layout (container query variants such as `@2xl:`).
 - Add components with `npx shadcn add @fulldev/button` (uses the project's `shadcn`). No `@latest`, no hand copy.

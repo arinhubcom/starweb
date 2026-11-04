@@ -7,18 +7,14 @@ on:
       - "template/**"
       - "starter/**"
       - "scripts/**"
-      - "rules/**"
-      - "WHY.md"
-      - "README.md"
+      - "package.json"
       - ".github/workflows/template.yml"
   pull_request:
     paths:
       - "template/**"
       - "starter/**"
       - "scripts/**"
-      - "rules/**"
-      - "WHY.md"
-      - "README.md"
+      - "package.json"
       - ".github/workflows/template.yml"
   schedule:
     - cron: "0 3 * * 1"
@@ -28,16 +24,6 @@ permissions:
   contents: read
 
 jobs:
-  why:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: template/.nvmrc
-      - run: node --test scripts/check-why.test.mjs
-      - run: node scripts/check-why.mjs
   template:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -48,5 +34,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: template/.nvmrc
-      - run: bash scripts/test-template.sh "$RUNNER_TEMP"
+          cache: npm
+          cache-dependency-path: template/package-lock.json
+      - run: bash scripts/test-template.sh "$RUNNER_TEMP" ${{ github.event_name == 'schedule' && '--fresh' || '' }}
       - run: bash scripts/test-update.sh "$RUNNER_TEMP/update"

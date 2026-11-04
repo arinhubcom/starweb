@@ -11,7 +11,6 @@ updates:
       default-days: 3
     # scripts/update-starter.mjs moves these with the starter files.
     ignore:
-      - dependency-name: "create-emdash"
       - dependency-name: "emdash"
       - dependency-name: "@emdash-cms/cloudflare"
     groups:

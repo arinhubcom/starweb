@@ -11,7 +11,7 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 
 ### setup.mjs
 
-3. `node <starweb>/scripts/setup.mjs my-site --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, Update); `my-site` = new or empty folder. Writes `.starweb.json` (clone commit, name, site); commit it. The script: copies `template/` to the project root: starter files, configs, security, tests, CI, Dependabot ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), copies agent files and `rules/`, writes `package.json` without the pin-only tools, writes a new `EMDASH_ENCRYPTION_KEY` to `.env`, `npm install`, `npx wrangler types`, `npx tsx scripts/theme.ts`, `prettier`, `git init`.
+3. `node <starweb>/scripts/setup.mjs my-site --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, Update); `my-site` = new or empty folder. Writes `.starweb.json` (clone commit, name, site); commit it. The script: copies `template/` to the project root: starter files, configs, security, tests, CI, Dependabot ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), copies agent files and `rules/`, writes `package.json` and `package-lock.json` with the project name, writes a new `EMDASH_ENCRYPTION_KEY` to `.env`, `npm ci`, `npx wrangler types`, `npx tsx scripts/theme.ts`, `prettier`, `git init`.
 
 ## Cloudflare
 
@@ -32,8 +32,8 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 
 ### [Fulldev UI](STACK.md#fulldev-ui)
 
-9. `npx shadcn@<version> init https://ui.full.dev/r/styles/base-vega/base.json`; `<version>` = `shadcn` in `devDependencies` of `template/package.json` (init adds `shadcn`). Add `@base-ui/react`, `lucide-react`, `tailwind-variants`; remove `class-variance-authority`. Add the [Knip](STACK.md#knip) exceptions for Fulldev. → [COMPONENTS](COMPONENTS.md), [QUALITY](QUALITY.md) (Unused code)
-10. Set the brand color in `SEED` in `scripts/theme.ts`; `npx tsx scripts/theme.ts` rewrites `src/styles/theme.css` (`setup.mjs` generates it with the default seed, and `src/styles/global.css` imports it). After step 9, remove the color variables that `shadcn init` wrote to `:root` and `.dark` in `global.css`: they override `theme.css`. → [MATERIAL](MATERIAL.md) (Color)
+9. `template/` already holds [Fulldev UI](STACK.md#fulldev-ui): `components.json`, `src/lib/utils.ts`, the button, and the home page button. No `shadcn init`. Add components with `npx shadcn add`, then apply `tv()` and [MATERIAL](MATERIAL.md). React island → add `@base-ui/react`, `lucide-react`, and their [Knip](STACK.md#knip) exceptions. → [COMPONENTS](COMPONENTS.md), [QUALITY](QUALITY.md) (Unused code)
+10. Set the brand color in `SEED` in `scripts/theme.ts`; `npx tsx scripts/theme.ts` rewrites `src/styles/theme.css` (`setup.mjs` generates it with the default seed, and `src/styles/global.css` imports it). → [MATERIAL](MATERIAL.md) (Color)
 
 ## Auth
 
@@ -113,7 +113,7 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 ### Starweb repository
 
 1. Pick the newest version older than 3 days that `create-emdash`, `emdash`, and `@emdash-cms/cloudflare` all have: `node scripts/update-starter.mjs --check` prints it. → [DEPS](DEPS.md) (npm min-release-age)
-2. `node scripts/update-starter.mjs <version>`, with `template/` and `starter/` committed. It runs `create-emdash`, merges the difference to `starter/` into `template/`, replaces `starter/`, and pins the three packages.
+2. `node scripts/update-starter.mjs <version>`, with `template/` and `starter/` committed. It runs `create-emdash`, merges the difference to `starter/` into `template/`, replaces `starter/`, pins `create-emdash` in the root `package.json` and the other two packages in `template/package.json`, and refreshes `template/package-lock.json`.
 3. Resolve the conflicts in `template/` (markers `<<<<<<< project`, `||||||| base`, `>>>>>>> starweb`). Handle each line under `Review by hand` and `Starter package.json changes to review`; the script changes no other `package.json` line.
 4. Read each version since the old pin in the [EmDash changelog](https://github.com/emdash-cms/emdash/blob/main/packages/core/CHANGELOG.md). Update `template/`, `rules/`, and `WHY.md` for each change that affects them. → [AGENTS](AGENTS.md) (Template)
 5. `bash scripts/test-template.sh <tmp-dir>` and `bash scripts/test-update.sh <tmp-dir>` pass.
