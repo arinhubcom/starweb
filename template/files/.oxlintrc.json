@@ -53,12 +53,13 @@
     "emdash-env.d.ts"
   ],
   "rules": {
-    "import/no-named-as-default": "off",
-    "import/no-named-as-default-member": "off",
+    "typescript/no-unsafe-type-assertion": "off",
     "import/no-unassigned-import": [
       "warn",
       {
-        "allow": ["**/*.css"]
+        "allow": [
+          "**/*.css"
+        ]
       }
     ],
     "no-await-in-loop": "off",
@@ -264,13 +265,67 @@
     "react-doctor/window-open-without-noopener": "warn",
     "react-doctor/zod-v4-no-deprecated-error-apis": "warn",
     "react-doctor/zod-v4-no-deprecated-error-customization": "warn",
-    "react-doctor/zod-v4-no-deprecated-schema-apis": "warn"
+    "react-doctor/zod-v4-no-deprecated-schema-apis": "warn",
+    "typescript/ban-ts-comment": "error",
+    "no-array-constructor": "error",
+    "typescript/no-confusing-void-expression": "error",
+    "typescript/no-deprecated": "error",
+    "typescript/no-dynamic-delete": "error",
+    "typescript/no-empty-object-type": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-invalid-void-type": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/no-mixed-enums": "error",
+    "typescript/no-namespace": "error",
+    "typescript/no-non-null-asserted-nullish-coalescing": "error",
+    "typescript/no-non-null-assertion": "error",
+    "typescript/no-require-imports": "error",
+    "typescript/no-unnecessary-condition": "error",
+    "typescript/no-unsafe-argument": "error",
+    "typescript/no-unsafe-assignment": "error",
+    "typescript/no-unsafe-call": "error",
+    "typescript/no-unsafe-function-type": "error",
+    "typescript/no-unsafe-member-access": "error",
+    "typescript/no-unsafe-return": "error",
+    "typescript/only-throw-error": "error",
+    "typescript/prefer-literal-enum-member": "error",
+    "typescript/prefer-promise-reject-errors": "error",
+    "typescript/prefer-reduce-type-parameter": "error",
+    "typescript/prefer-return-this-type": "error",
+    "typescript/related-getter-setter-pairs": "error",
+    "typescript/require-await": "error",
+    "typescript/restrict-plus-operands": "error",
+    "typescript/return-await": "error",
+    "typescript/unified-signatures": "error",
+    "typescript/use-unknown-in-catch-callback-variable": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "prefer-rest-params": "error",
+    "prefer-spread": "error"
   },
   "overrides": [
     {
-      "files": ["test/**", "**/*.test.ts", "**/*.test.tsx"],
+      "files": [
+        "test/**",
+        "**/*.test.ts",
+        "**/*.test.tsx"
+      ],
       "rules": {
         "e18e/prefer-static-regex": "off"
+      }
+    },
+    {
+      "files": [
+        "**/*.js",
+        "**/*.mjs",
+        "**/*.cjs"
+      ],
+      "rules": {
+        "typescript/no-unsafe-argument": "off",
+        "typescript/no-unsafe-assignment": "off",
+        "typescript/no-unsafe-call": "off",
+        "typescript/no-unsafe-member-access": "off",
+        "typescript/no-unsafe-return": "off"
       }
     }
   ]

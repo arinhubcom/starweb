@@ -858,15 +858,20 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 - Installed components export their full API, and the rules install some packages before any code uses them. Named `ignoreIssues`, `ignore`, and `ignoreDependencies` entries keep real unused code visible.
 
-### Why Oxlint runs next to ESLint
+### Why Oxlint is the only linter
 
-- Oxlint lints only the `<script>` blocks of `.astro` files, so `eslint-plugin-astro` stays. Oxlint runs first because it stops on cheap errors in seconds.
-- `typescript-eslint` already runs the typed rules. `--type-aware` needs `oxlint-tsgolint` and would run the same rules twice.
+- `oxlint-tsgolint` keeps the strictness: Oxlint has all 74 rules of `strictTypeChecked`.
+- EmDash works the same way: `oxlint --type-aware`, and no ESLint config in its repository.
+
+### Why `.astro` files have no linter
+
+- No linter reads `.astro` markup because `eslint-plugin-astro` needs `@typescript-eslint/parser` for TypeScript frontmatter, and the project does not use `typescript-eslint`; Oxlint lints only the `<script>` blocks, and `astro check` reports type and compile errors.
+- Tested on 2026-11-04 with eslint-plugin-astro 3.2.1: without the parser, ESLint fails with `Parsing error: The keyword 'interface' is reserved`.
 
 ### Why the Oxlint config turns off some rules
 
 - `no-await-in-loop`: `scripts/check-js-size.ts` and `scripts/lib/page-js.ts` have retry loops and walks that carry state from one step to the next, so they cannot run in parallel.
-- `import/no-named-as-default` and `import/no-named-as-default-member`: they flag the documented `eslintPluginAstro.configs` import.
+- `typescript/no-unsafe-type-assertion`: not in `strictTypeChecked`, and it flags each `as` at a boundary such as a dynamic import. EmDash needs a long exception list for it.
 - `oxc/no-map-spread`: the fix it asks for mutates objects, and the project prefers new objects.
 - `react/react-in-jsx-scope`: the template uses the automatic JSX runtime, so the rule fails on all JSX.
 - `unicorn/require-module-specifiers`: `export {}` marks `test/setup.ts` as a module, and without it `unicorn/no-empty-file` fails.
@@ -882,14 +887,9 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - The `LICENSE` file of `oxlint-plugin-react-doctor` is a Modified MIT license, although its README says MIT. It needs written permission for two uses: input to a pipeline that trains or improves an AI model, and a paid or hosted product whose value derives entirely or substantially from the plugin.
 - A project that only runs the plugin as a dev dependency does neither.
 
-### Why `strictTypeChecked` is scoped to `.ts` files
-
-- The type-checked preset sets the typescript-eslint parser. Unscoped, it replaces the Astro parser and fails on every `.astro` file with `Parsing error: Expression expected`.
-
-### Why ESLint and not Biome
+### Why no Biome
 
 - The Biome docs say that its Astro support "must be considered experimental", and you must turn it on with `html.experimentalFullSupportEnabled`.
-- The template uses ESLint with `eslint-plugin-astro` for `.astro` files.
 
 ## Email
 
