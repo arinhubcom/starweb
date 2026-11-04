@@ -1,12 +1,13 @@
 // Helpers that setup.mjs and update.mjs share.
 import { spawnSync } from "node:child_process";
 import {
-  readdirSync,
+  mkdtempSync,
   readFileSync,
   realpathSync,
-  statSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -47,15 +48,6 @@ export function sortKeys(object) {
   return Object.fromEntries(
     Object.entries(object).sort(([a], [b]) => a.localeCompare(b)),
   );
-}
-
-export function listFiles(root, base = root) {
-  return readdirSync(root).flatMap((name) => {
-    const path = join(root, name);
-    return statSync(path).isDirectory()
-      ? listFiles(path, base)
-      : [path.slice(base.length + 1)];
-  });
 }
 
 export function substitute(text, values) {
@@ -111,4 +103,51 @@ export function assertNpm() {
   fail(
     `npm 11 or later is required (found ${version}). Use the Node.js LTS version in template/.nvmrc, which ships npm 11.`,
   );
+}
+
+const MAX_CONFLICTS = 127;
+
+export function mergeThreeWay(ours, base, theirs) {
+  const dir = mkdtempSync(join(tmpdir(), "starweb-merge-"));
+  try {
+    const paths = [ours, base, theirs].map((text, i) => {
+      const path = join(dir, ["ours", "base", "theirs"][i]);
+      writeFileSync(path, text);
+      return path;
+    });
+    const result = spawnSync(
+      "git",
+      [
+        "merge-file",
+        "-p",
+        "--diff3",
+        "-L",
+        "project",
+        "-L",
+        "base",
+        "-L",
+        "starweb",
+        ...paths,
+      ],
+      { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
+    );
+    if (result.status === null || result.status > MAX_CONFLICTS) {
+      throw new Error(`git merge-file failed: ${result.stderr}`);
+    }
+    return { text: result.stdout, conflict: result.status > 0 };
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+// Decide what to do with one file. Return { action, text? }.
+export function planFile({ base, theirs, ours }) {
+  if (theirs === base) return { action: "skip" };
+  if (theirs === null) return { action: ours === null ? "skip" : "deleted" };
+  if (ours === null)
+    return { action: base === null ? "added" : "kept", text: theirs };
+  if (ours === theirs) return { action: "skip" };
+  if (ours === base) return { action: "updated", text: theirs };
+  const merged = mergeThreeWay(ours, base ?? "", theirs);
+  return { action: merged.conflict ? "conflict" : "merged", text: merged.text };
 }

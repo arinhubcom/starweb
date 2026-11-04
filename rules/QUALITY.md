@@ -9,7 +9,7 @@
 - Strict. `tsconfig.json` extends `astro/tsconfigs/strict` (or `strictest`).
 - With `strict`, add `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noUnusedLocals`, `noUnusedParameters`. Not with `strictest` (sets all).
 - `"jsx": "react-jsx"`, `"jsxImportSource": "react"` in `tsconfig.json`. The inherited `preserve` fails `vitest run --coverage` on any uncovered `.tsx` (`Support for the experimental syntax 'jsx'`).
-- Keep `exactOptionalPropertyTypes`; `setup.mjs` already fixes starter pages and `Base.astro`. Spread optional values only when set: `...(cursor ? { cursor } : {})` for `getEmDashCollection()`; `...(Astro.currentLocale ? { currentLocale: Astro.currentLocale } : {})` for `createPublicPageContext()`; pass `canonical ?? null`, `image ?? null`; spread `content` the same way.
+- Keep `exactOptionalPropertyTypes`; `template/` already fixes the starter pages and `Base.astro`. Spread optional values only when set: `...(cursor ? { cursor } : {})` for `getEmDashCollection()`; `...(Astro.currentLocale ? { currentLocale: Astro.currentLocale } : {})` for `createPublicPageContext()`; pass `canonical ?? null`, `image ?? null`; spread `content` the same way.
 - No `satisfies ExportedHandler` in `src/worker.ts` (`handler.fetch` optional → fails).
 
 ## Checks

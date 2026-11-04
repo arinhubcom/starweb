@@ -7,11 +7,11 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 ### [EmDash](STACK.md#emdash)
 
 1. Newest Node.js LTS, the major in `template/.nvmrc`; `node --version` starts with it, `npm --version` ≥ 11. → [DEPS](DEPS.md) (Install)
-2. Read the EmDash version from `devDependencies` of `template/package.json` in the [Starweb repository](https://github.com/arinhubcom/starweb). `npm create emdash@<version> my-site -- --template cloudflare:starter --install --yes`. `--sandboxed-plugins` only with sandboxed plugins (Workers paid plan). Never the `node` platform. → [CMS](CMS.md)
+2. No `create-emdash` run: `template/` holds its `cloudflare:starter` output. Sandboxed plugins (Workers paid plan) → uncomment `worker_loaders` in `wrangler.jsonc`. Never the `node` platform. → [CMS](CMS.md)
 
 ### setup.mjs
 
-3. `node <starweb>/scripts/setup.mjs my-site --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, Update). Writes `.starweb.json` (clone commit, name, site); commit it. The script: renames `AGENTS.md` → `EMDASH.md`, deletes `pnpm-workspace.yaml`, copies agent files and `rules/` ([DEPS](DEPS.md)), copies `template/` to the project root: configs, security, tests, CI, Dependabot ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), patches starter files and the [Tailwind CSS](STACK.md#tailwind-css), [Zod](STACK.md#zod), [Effect](STACK.md#effect) setup ([ARCH](ARCH.md), [DESIGN](DESIGN.md), [UI-UX](UI-UX.md)), adds the `/privacy` page and its footer link ([PRIVACY](PRIVACY.md)), adds `security.txt` generation ([SECURITY](SECURITY.md)), merges `template/package.json` (versions, scripts, `overrides`), deletes the starter lockfile, `npm install`, `npx wrangler types`, `npx tsx scripts/theme.ts`, `prettier`, `git init`. Stop and report on `Starter changed`.
+3. `node <starweb>/scripts/setup.mjs my-site --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, Update); `my-site` = new or empty folder. Writes `.starweb.json` (clone commit, name, site); commit it. The script: copies `template/` to the project root: starter files, configs, security, tests, CI, Dependabot ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), copies agent files and `rules/`, writes `package.json` without the pin-only tools, writes a new `EMDASH_ENCRYPTION_KEY` to `.env`, `npm install`, `npx wrangler types`, `npx tsx scripts/theme.ts`, `prettier`, `git init`.
 
 ## Cloudflare
 
@@ -102,6 +102,6 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 2. `node <starweb>/scripts/update.mjs <project> --dry-run`; read the plan (changes nothing).
 3. `node <starweb>/scripts/update.mjs <project>`: merges agent files, `rules/`, template files; updates unchanged `package.json` versions and scripts; `npm install`.
 4. Resolve conflicts (markers `<<<<<<< project`, `||||||| base`, `>>>>>>> starweb`); set `commit` in `.starweb.json` to the commit the script prints.
-5. `update.mjs` does not change starter files or generated files. If they are missing, add the footer link to `/privacy` in `src/layouts/Base.astro`, add `public/.well-known/security.txt` to `.gitignore`, and run `npx tsx scripts/theme.ts`.
+5. `update.mjs` does not change generated files; a project with a `.starweb.json` commit from before `template/` held the starter keeps its starter files. If they are missing, add the footer link to `/privacy` in `src/layouts/Base.astro`, add `public/.well-known/security.txt` to `.gitignore`, and run `npx tsx scripts/theme.ts`.
 6. `npm run check` and `npm run build` pass.
 7. Commit.

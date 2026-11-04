@@ -44,7 +44,6 @@ Steps that no test has run:
 Possible template additions:
 
 - [ ] Decide whether the template ships the workflows that step 30 lists (Dependabot automerge, PR preview, dev deploy, stage upload, promotion, and D1 export), in place of a manual step.
-- [ ] Decide whether `scripts/update.mjs` also handles the starter patches and the `.gitignore` lines. Now the Update section in [rules/SETUP.md](rules/SETUP.md) lists them as manual work for existing projects.
 
 Dependency updates:
 

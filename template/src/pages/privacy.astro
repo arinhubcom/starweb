@@ -12,8 +12,8 @@ import { CONTROLLER, PRIVACY_EMAIL } from "@/lib/site";
 
     <h2>Who controls your data</h2>
     <p>
-      {CONTROLLER} controls your personal data on this site. [Add the postal address]
-      Contact: <a href={`mailto:${PRIVACY_EMAIL}`}>{PRIVACY_EMAIL}</a>
+      {CONTROLLER} controls your personal data on this site. [Add the postal
+      address] Contact: <a href={`mailto:${PRIVACY_EMAIL}`}>{PRIVACY_EMAIL}</a>
     </p>
 
     <h2>Why this site uses your data</h2>
@@ -30,10 +30,12 @@ import { CONTROLLER, PRIVACY_EMAIL } from "@/lib/site";
       Cloudflare can process your data in the United States. Safeguards:
       <a href="https://www.cloudflare.com/privacypolicy/">
         EU-U.S. Data Privacy Framework certification
-      </a> and the EU Standard Contractual Clauses in the
+      </a>{" "}
+      and the EU Standard Contractual Clauses in the
       <a href="https://www.cloudflare.com/cloudflare-customer-dpa/">
         Cloudflare data processing addendum
-      </a>.
+      </a>
+      .
     </p>
 
     <h2>How long this site keeps your data</h2>
@@ -42,21 +44,21 @@ import { CONTROLLER, PRIVACY_EMAIL } from "@/lib/site";
     <h2>Cookies and local storage</h2>
     <ul>
       <li>
-        <code>astro-session</code> cookie: keeps you signed in to the admin area.
-        Lifetime: [Add the lifetime]
+        <code>astro-session</code> cookie: keeps you signed in to the admin
+        area. Lifetime: [Add the lifetime]
       </li>
       <li>
-        <code>theme</code> local storage key: remembers your color theme. Lifetime:
-        until you clear it
+        <code>theme</code> local storage key: remembers your color theme.
+        Lifetime: until you clear it
       </li>
     </ul>
 
     <h2>Your rights</h2>
     <p>
       You can ask for access to your data, a copy of it, or its deletion. To
-      make a request, email <a href={`mailto:${PRIVACY_EMAIL}`}>{PRIVACY_EMAIL}</a>.
-      You can also complain to a supervisory authority: [Add the authority and
-      its website]
+      make a request, email{" "}
+      <a href={`mailto:${PRIVACY_EMAIL}`}>{PRIVACY_EMAIL}</a>. You can also
+      complain to a supervisory authority: [Add the authority and its website]
     </p>
   </article>
 </Base>

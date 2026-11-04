@@ -1,7 +1,12 @@
 {
   "name": "starweb-template",
+  "version": "0.0.3",
   "private": true,
   "type": "module",
+  "emdash": {
+    "label": "Starter",
+    "seed": "seed/seed.json"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "tsx scripts/write-headers.ts && tsx scripts/write-security-txt.ts && astro build",

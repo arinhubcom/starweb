@@ -62,9 +62,9 @@ sync_worktree_to_clone() {
   find "$STARWEB" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
   (cd "$REPO_ROOT" && git ls-files -co --exclude-standard -z) |
     while IFS= read -r -d '' file; do
-      [ -f "$REPO_ROOT/$file" ] || continue
+      [ -f "$REPO_ROOT/$file" ] || [ -L "$REPO_ROOT/$file" ] || continue
       mkdir -p "$STARWEB/$(dirname "$file")"
-      cp -p "$REPO_ROOT/$file" "$STARWEB/$file"
+      cp -pP "$REPO_ROOT/$file" "$STARWEB/$file"
     done
   if [ -n "$(clone_git status --porcelain)" ]; then
     commit_in_clone "test: working tree of the repository"
@@ -86,11 +86,6 @@ rm -rf "$STARWEB" "$APP"
 git clone --quiet --no-hardlinks "$REPO_ROOT" "$STARWEB"
 sync_worktree_to_clone
 echo "clone at $(clone_git rev-parse --short HEAD)"
-
-step "Create the starter project with the pinned create-emdash"
-VERSION="$(node -p 'require(process.argv[1]).devDependencies["create-emdash"]' "$STARWEB/template/package.json")"
-[ -n "$VERSION" ] || fail "template/package.json has no create-emdash"
-(cd "$WORKDIR" && npm create "emdash@$VERSION" app -- --template cloudflare:starter --install --yes)
 
 step "Run setup.mjs of the clone"
 node "$STARWEB/scripts/setup.mjs" "$APP" --name upd-test --site https://example.com
@@ -134,39 +129,37 @@ if printf '%s\n' "$AGAIN_OUTPUT" | grep -E '^[A-Za-z].*: [1-9][0-9]*$'; then
   fail "update.mjs reports changes after a finished update"
 fi
 
-step "Update a project whose commit has the old template/files layout"
-mkdir "$STARWEB/template/files"
-for entry in "$STARWEB"/template/* "$STARWEB"/template/.[!.]*; do
-  case "$(basename "$entry")" in
-    files | package.json) ;;
-    *) mv "$entry" "$STARWEB/template/files/" ;;
-  esac
-done
-commit_in_clone "test: use the old template/files layout"
-LEGACY_COMMIT="$(clone_git rev-parse HEAD)"
+step "Update a project whose commit has the old layout: template/files, no starter"
+LEGACY_COMMIT=c75cbad
 node -e '
   const fs = require("node:fs");
   const [file, commit] = process.argv.slice(1);
   const state = JSON.parse(fs.readFileSync(file, "utf8"));
   fs.writeFileSync(file, JSON.stringify({ ...state, commit }, null, 2) + "\n");
-' "$APP/.starweb.json" "$LEGACY_COMMIT"
-for entry in "$STARWEB"/template/files/* "$STARWEB"/template/files/.[!.]*; do
-  mv "$entry" "$STARWEB/template/"
-done
-rmdir "$STARWEB/template/files"
-printf '// flat upstream change\n' >>"$STARWEB/template/test/setup.ts"
-commit_in_clone "test: use the flat template layout"
+' "$APP/.starweb.json" "$(clone_git rev-parse "$LEGACY_COMMIT")"
+printf '// flat upstream change\n' >>"$STARWEB/template/test/decode.test.ts"
+printf '\n<!-- starter upstream change -->\n' >>"$STARWEB/template/EMDASH.md"
+commit_in_clone "test: change a template file and a starter file"
 NEW_COMMIT="$(clone_git rev-parse HEAD)"
-sed -i '1s/^/\/\/ project change\n/' "$APP/test/setup.ts"
+sed -i '1s/^/\/\/ project change\n/' "$APP/test/decode.test.ts"
 LEGACY_OUTPUT="$(node "$STARWEB/scripts/update.mjs" "$APP")"
 printf '%s\n' "$LEGACY_OUTPUT"
-assert_contains "$APP/test/setup.ts" "// project change"
-assert_contains "$APP/test/setup.ts" "// flat upstream change"
-assert_not_contains "$APP/test/setup.ts" "<<<<<<<"
-[ -f "$APP/knip.json" ] || fail "update.mjs deleted knip.json"
+assert_contains "$APP/test/decode.test.ts" "// project change"
+assert_contains "$APP/test/decode.test.ts" "// flat upstream change"
+assert_not_contains "$APP/test/decode.test.ts" "<<<<<<<"
+assert_not_contains "$APP/EMDASH.md" "starter upstream change"
+[ -L "$APP/.claude/skills" ] || fail "update.mjs replaced the symbolic link"
 [ ! -e "$APP/files" ] || fail "update.mjs created a files folder"
 [ ! -e "$APP/template" ] || fail "update.mjs created a template folder"
 assert_equal "$(state_commit)" "$NEW_COMMIT" ".starweb.json commit after the layout change"
+
+step "Change a starter file in Starweb: update.mjs brings it into a new project"
+sed -i '1s/^/<!-- second starter change -->\n/' "$STARWEB/template/EMDASH.md"
+commit_in_clone "test: change a starter file again"
+NEW_COMMIT="$(clone_git rev-parse HEAD)"
+node "$STARWEB/scripts/update.mjs" "$APP"
+assert_contains "$APP/EMDASH.md" "second starter change"
+assert_equal "$(state_commit)" "$NEW_COMMIT" ".starweb.json commit after a starter change"
 
 step "Change the same line in Starweb and in the project: a conflict"
 sed -i '10s/$/ UPSTREAM-A/' "$STARWEB/rules/DEV.md"
@@ -181,6 +174,41 @@ assert_contains "$APP/rules/DEV.md" "<<<<<<< project"
 assert_contains "$APP/rules/DEV.md" "||||||| base"
 assert_contains "$APP/rules/DEV.md" ">>>>>>> starweb"
 assert_equal "$(state_commit)" "$NEW_COMMIT" ".starweb.json commit after a conflict"
+
+step "Run update-starter.mjs: merge a starter change into template/"
+PINNED="$(node -p 'require(process.argv[1]).devDependencies["create-emdash"]' "$STARWEB/template/package.json")"
+# Fake an older snapshot. In 404.astro the template equals the snapshot, and in
+# Base.astro the template has its own changes. The new output has no such line.
+for file in src/pages/404.astro src/layouts/Base.astro; do
+  for folder in starter template; do
+    sed -i '$a <!-- only in the old starter -->' "$STARWEB/$folder/$file"
+  done
+done
+rm "$STARWEB/starter/seed/seed.json"
+node -e '
+  const fs = require("node:fs");
+  const file = process.argv[1];
+  const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
+  pkg.devDependencies["create-emdash"] = "0.0.1";
+  fs.writeFileSync(file, JSON.stringify(pkg, null, 2) + "\n");
+' "$STARWEB/template/package.json"
+commit_in_clone "test: fake an older starter snapshot"
+STARTER_OUTPUT="$(node "$STARWEB/scripts/update-starter.mjs" "$PINNED")"
+printf '%s\n' "$STARTER_OUTPUT"
+assert_contains "$STARWEB/template/package.json" "\"create-emdash\": \"$PINNED\""
+assert_not_contains "$STARWEB/template/src/pages/404.astro" "only in the old starter"
+assert_not_contains "$STARWEB/template/src/layouts/Base.astro" "only in the old starter"
+assert_contains "$STARWEB/template/src/layouts/Base.astro" "themeScript"
+assert_not_contains "$STARWEB/starter/src/layouts/Base.astro" "themeScript"
+[ -f "$STARWEB/starter/seed/seed.json" ] || fail "starter/ has no new seed file"
+for path in .env AGENTS.md pnpm-workspace.yaml package-lock.json worker-configuration.d.ts; do
+  [ ! -e "$STARWEB/template/$path" ] || fail "update-starter.mjs wrote template/$path"
+  [ ! -e "$STARWEB/starter/$path" ] || fail "update-starter.mjs wrote starter/$path"
+done
+printf '%s\n' "$STARTER_OUTPUT" | grep -q '^Conflicts: 0$' || fail "update-starter.mjs reports conflicts"
+if node "$STARWEB/scripts/update-starter.mjs" "$PINNED" >/dev/null 2>&1; then
+  fail "update-starter.mjs ran with uncommitted changes"
+fi
 
 echo
 echo "PASS: update.mjs merges Starweb changes into a project ($STEP steps)"
