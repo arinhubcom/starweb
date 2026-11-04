@@ -143,7 +143,7 @@ Not in the stack; add when the app needs them.
 ### Workers Free plan
 
 - Over a free daily limit → errors; reset 00:00 UTC.
-- Move to Paid before launching to paying customers.
+- Move to Paid before launching to paying customers. Prices → [CLOUDFLARE](CLOUDFLARE.md#cost).
 
 ## Billing
 

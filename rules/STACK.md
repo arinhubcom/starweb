@@ -55,7 +55,7 @@ Platform index. All products below.
 
 ### Workers
 
-Runtime for site and apps. → [ARCH](ARCH.md), [PERF](PERF.md), [SECURITY](SECURITY.md), [DEV](DEV.md), [DEPLOY](DEPLOY.md), [OBSERVABILITY](OBSERVABILITY.md)
+Runtime for site and apps. → [ARCH](ARCH.md), [PERF](PERF.md), [CLOUDFLARE](CLOUDFLARE.md), [SECURITY](SECURITY.md), [DEV](DEV.md), [DEPLOY](DEPLOY.md), [OBSERVABILITY](OBSERVABILITY.md)
 
 - llms: https://developers.cloudflare.com/workers/llms.txt · https://developers.cloudflare.com/workers/llms-full.txt
 - context7: https://context7.com/llmstxt/developers_cloudflare_workers_llms-full_txt/llms.txt?tokens=10000
