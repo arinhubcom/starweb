@@ -5,6 +5,7 @@
 type AxisValue = string | readonly string[];
 
 const WHITESPACE = /\s+/;
+const FONT_FILE_AFTER_NAME = /^[a-z0-9]+\\?";src:url\(/;
 
 export interface FontFamilyConfig {
   name: string;
@@ -130,3 +131,17 @@ export const findIconProblems = (
     .filter((name) => !knownNames.has(name))
     .map((name) => `Material Symbols: no icon ${name}`);
 };
+
+// A built family has `"<name>-<hash>";src:url(` in the server code. Without a
+// file, the build has only the CSS variable, or a local fallback face.
+export const findFamiliesWithoutFile = (
+  names: readonly string[],
+  serverCode: string,
+): string[] =>
+  names.filter(
+    (name) =>
+      !serverCode
+        .split(`${name}-`)
+        .slice(1)
+        .some((part) => FONT_FILE_AFTER_NAME.test(part)),
+  );

@@ -84,6 +84,9 @@ Images, video, fonts, icons, uploads. Layout shift → [UI-UX](UI-UX.md) (Cumula
 - `fallbacks: ["sans-serif"]`-style generic; keep `optimizedFallbacks: true`. Keep `display: swap`, except for the icon font → Icons.
 - Self-hosted: `fontProviders.local()`, WOFF2 in `src/assets/fonts/`. Many weights → variable font (`weights: ["100 900"]`).
 - `<Font cssVariable="--font-roboto-flex" preload={[{ subset: "latin" }]} />` from `astro:assets` in the base layout `<head>`, once per font; `preload` only for first-view fonts and subsets.
+- `pnpm run build` ends with `scripts/check-built-fonts.ts`: it fails when a family in `src/lib/fonts.ts` has no file in the build.
+- Browser cache: no `Cache-Control` for `/_astro/*` in `public/_headers`; `@astrojs/cloudflare` adds the `immutable` rule to `dist/client/_headers`, and skips it when a rule already sets `Cache-Control`.
+- CI: each workflow that builds restores `node_modules/.astro/fonts` with `actions/cache` after `pnpm install`, as `template/.github/workflows/ci.yml` does. → [DEPLOY](DEPLOY.md) (CI)
 - [Tailwind CSS](STACK.md#tailwind-css) v4: `@theme inline` in `global.css` (`--font-sans: var(--font-roboto-flex);`) → [DESIGN](DESIGN.md).
 
 ## Icons

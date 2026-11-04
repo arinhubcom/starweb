@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "tsx scripts/write-headers.ts && tsx scripts/write-security-txt.ts && astro build",
+    "build": "tsx scripts/write-headers.ts && tsx scripts/write-security-txt.ts && astro build && tsx scripts/check-built-fonts.ts",
     "preview": "astro preview",
     "typecheck": "astro check --minimumFailingSeverity warning",
     "lint": "oxlint --type-aware --max-warnings 0",

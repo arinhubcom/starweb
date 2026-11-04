@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  findFamiliesWithoutFile,
   findFamilyProblems,
   findIconProblems,
 } from "../scripts/lib/check-fonts";
@@ -107,5 +108,29 @@ describe("findIconProblems", () => {
     expect(findIconProblems([], known)).toEqual([
       "ICON_NAMES is empty: the build would ship the whole icon font",
     ]);
+  });
+});
+
+describe("findFamiliesWithoutFile", () => {
+  const FLEX =
+    '@font-face{font-family:\\"Flex-19ab\\";src:url(\\"/_astro/fonts/8e.woff2\\")}';
+
+  it("accepts a family with a font file", () => {
+    expect(findFamiliesWithoutFile(["Flex"], FLEX)).toEqual([]);
+  });
+
+  it("reports a family with only the CSS variable", () => {
+    const code = ':root{--font-flex:\\"Flex-19ab\\",sans-serif;}';
+    expect(findFamiliesWithoutFile(["Flex"], code)).toEqual(["Flex"]);
+  });
+
+  it("does not count a local fallback face as a file", () => {
+    const code =
+      '@font-face{font-family:\\"Flex-19ab fallback: Arial\\";src:local(\\"Arial\\")}';
+    expect(findFamiliesWithoutFile(["Flex"], code)).toEqual(["Flex"]);
+  });
+
+  it("reports only the family that has no file", () => {
+    expect(findFamiliesWithoutFile(["Flex", "Icons"], FLEX)).toEqual(["Icons"]);
   });
 });
