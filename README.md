@@ -24,7 +24,7 @@ When Starweb has new rules or a better template, give this prompt to your AI age
 Update this project to the newest Starweb. Find the Starweb clone, for example ~/starweb, or clone https://github.com/arinhubcom/starweb again. Run git pull there. Read rules/UPDATE.md in the clone, not the older copy in the project, and do the steps in "Starweb update" in order. A merge does not change project code, so do the Apply steps too: change the code that breaks a new rule. If a step fails, stop and report the error.
 ```
 
-The steps are in [rules/UPDATE.md](rules/UPDATE.md). The script [scripts/update.mjs](scripts/update.mjs) merges the new rules and template files with your changes, and lists the rules that changed.
+A project that has the `starweb-update` skill needs only a short request, for example "update Starweb". The first update of an older project brings the skill in. The steps are in [rules/UPDATE.md](rules/UPDATE.md). The script [scripts/update.mjs](scripts/update.mjs) merges the new rules and template files with your changes, and lists the rules that changed.
 
 ## 🏗️ Architecture
 

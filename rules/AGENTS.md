@@ -47,6 +47,7 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project
 - No edit to `template/` without the rule that describes it; change the rule first.
 - Keep the template current with `rules/`: each rule that applies to every project and that a file, config value, package, script, or CI step can implement has that implementation in `template/` or `scripts/setup.mjs`, or a step in [SETUP](SETUP.md) that a real project can run. Conditional rules ("uses X →") need a [SETUP](SETUP.md) step. A step never names a file that neither the template nor the step creates.
 - Keep [SETUP](SETUP.md) and [UPDATE](UPDATE.md) current, in the same commit as the change: a change to `template/`, `scripts/`, CI, or a rule that changes what a new project needs updates SETUP; one that changes what an existing project must do updates UPDATE. A step never names a command, flag, file, or `update.mjs` output label that no longer exists.
+- `template/.agents/skills/` holds the starter skills and `starweb-update`. Claude Code reads only `.claude/skills`, so keep the symbolic link `.claude/skills` → `../.agents/skills`. `starweb-update` points to `rules/UPDATE.md` in the clone; no steps in the skill.
 - A new template file or behavior gets a check in `scripts/test-template.sh`.
 - Exact versions in `template/package.json`, no `^` or `~`.
 - Before a commit that touches `template/`, `scripts/`, or a rule they implement: `bash scripts/test-template.sh <tmp-dir>` (new folder outside the repository).

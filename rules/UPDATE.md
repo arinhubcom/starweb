@@ -6,6 +6,8 @@ Ordered procedures for a project that exists. `<starweb>` = the kept Starweb clo
 
 New rules and a better template reach a project through [update.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/update.mjs), which uses `.starweb.json`. It merges files. It does not change project code: the steps under Apply do that.
 
+The `starweb-update` skill in `.agents/skills/` points here. Keep the steps in this file, not in the skill.
+
 ### Prepare
 
 1. `git status` in `<project>` is empty; commit first. New branch for the update. To undo the update, delete the branch.
