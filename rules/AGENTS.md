@@ -14,6 +14,14 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project
 - Write the forbidden option and its replacement in one bullet: `No Drizzle/Prisma → Kysely.`
 - Cross-reference with `→ [FILE](FILE.md)`.
 
+## WHY.md
+
+- A commit that adds, changes, or removes a decision in `rules/` (chosen or forbidden tool, limit, number, version pin) updates its reason in [WHY.md](../WHY.md) in the same commit. Remove a reason when its decision goes.
+- A decision a reader would question needs a reason in `WHY.md`. If you cannot verify the reason, ask the user. Do not invent one.
+- A test note in `WHY.md` has the form `Tested on YYYY-MM-DD with <name> <version>`. When a template pin changes, run the test again and update the note, or keep the old date and version.
+- Before a commit that touches `rules/`, `WHY.md`, or `template/package.json`: `node scripts/check-why.mjs`. CI runs it too. It fails on a broken link or anchor, an undated test note, or another major version than the template pin. It warns on another minor version.
+- The script cannot find a false or missing reason. After a large change to `rules/`, compare `WHY.md` with `rules/` section by section.
+
 ## Verification
 
 - Verify each rule in the official docs or on GitHub before you add it.
