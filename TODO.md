@@ -54,6 +54,7 @@ Check these upstream issues and discussions. When one closes or changes, update 
 
 - [ ] `emdash` 1.4.0 pins the vulnerable `zod` 4.5.4 ([GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5)). When a new `emdash` pins `zod` 4.6.6 or later, remove the `overrides` from `template/package.json` and the rule in [rules/DEPS.md](rules/DEPS.md).
 - [ ] [emdash-cms/emdash#4658](https://github.com/emdash-cms/emdash/issues/4658): `emdash/ui` and `emdash/ui/search` make `tsc` type-check the package source. Open. Linked from [WHY.md](WHY.md).
+- [ ] [emdash-cms/emdash#4661](https://github.com/emdash-cms/emdash/issues/4661): `emdash/ui` re-exports types that `astro-portabletext` does not export, so they are lost without an error. Open. Linked from [WHY.md](WHY.md).
 - [ ] [cloudflare/polystella#66](https://github.com/cloudflare/polystella/issues/66): support Paraglide JS message files (inlang message format) in the catalog CLI. Open. Linked from [WHY.md](WHY.md).
 - [ ] [heroui-inc/tailwind-variants#321](https://github.com/heroui-inc/tailwind-variants/discussions/321): share one class merge engine with shadcn/ui `cn` (discussion). Open. Linked from [WHY.md](WHY.md).
 - [ ] [theweekendprojects/emdash-better-auth#22](https://github.com/theweekendprojects/emdash-better-auth/issues/22): extension point for server-side Better Auth plugins (payment providers like Polar, Creem). Open. Linked from [rules/API.md](rules/API.md).
