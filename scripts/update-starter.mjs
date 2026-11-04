@@ -48,7 +48,7 @@ const TEMPLATE_PINNED = ["emdash", "@emdash-cms/cloudflare"];
 const EMDASH_PACKAGES = [CREATE_PACKAGE, ...TEMPLATE_PINNED];
 const rootPackagePath = join(repoRoot, TEMPLATE_PACKAGE);
 const FORMAT_PACKAGES = ["oxfmt", "@astrojs/compiler-rs"];
-const FORMAT_FILES = [".oxfmtrc.json"];
+const FORMAT_CONFIG = ".oxfmtrc.json";
 // Starter output that does not belong in the repository: secrets and lockfiles,
 // generated types, pnpm settings (the template has its own), and a symbolic link
 // that the template already has.
@@ -150,11 +150,17 @@ function createStarter(workDir, version) {
       renameSync(join(project, from), join(project, to));
     }
   }
-  for (const name of FORMAT_FILES) {
-    cpSync(join(templateDir, name), join(project, name));
-  }
+  // The starter has no src/styles/global.css, so drop the stylesheet option.
+  const { sortTailwindcss, ...config } = readJson(
+    join(templateDir, FORMAT_CONFIG),
+  );
+  const { stylesheet, ...sortOptions } = sortTailwindcss;
+  writeJson(join(project, FORMAT_CONFIG), {
+    ...config,
+    sortTailwindcss: sortOptions,
+  });
   run(project, join(workDir, "node_modules/.bin/oxfmt"), []);
-  for (const name of FORMAT_FILES) rmSync(join(project, name));
+  rmSync(join(project, FORMAT_CONFIG));
   return project;
 }
 

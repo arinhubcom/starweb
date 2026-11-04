@@ -56,7 +56,8 @@
 ### [Oxfmt](STACK.md#oxfmt)
 
 - No formatting rules in Oxlint.
-- `.oxfmtrc.json`: `astro` (bundled `prettier-plugin-astro`; needs the `@astrojs/compiler-rs` package), `sortTailwindcss` (→ [DESIGN](DESIGN.md)), `printWidth: 80`, `sortPackageJson: false`. No Prettier plugins, no `prettier` package.
+- `.oxfmtrc.json`: `astro` (bundled `prettier-plugin-astro`; needs the `@astrojs/compiler-rs` package), `sortTailwindcss` with `stylesheet: "./src/styles/global.css"` and `functions: ["cn", "tv"]` (→ [DESIGN](DESIGN.md)), `printWidth: 80`, `sortPackageJson: false`. No Prettier plugins, no `prettier` package.
+- `stylesheet` imports the generated `theme.css`: run `scripts/theme.ts` before Oxfmt. `scripts/update-starter.mjs` drops `stylesheet`: the starter has no `global.css`.
 - No `useTabs`. Run `oxfmt` once after setup, commit.
 - `ignorePatterns`: `rules/`, `WHY.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `EMDASH.md`, `README.md`, `worker-configuration.d.ts`, `emdash-env.d.ts`, `pnpm-lock.yaml`, `.agents/`, `.claude/`, `.cursor/`, `.emdash/`, `coverage/`, `dist/`, `.astro/`, `.wrangler/`. No `.prettierignore`.
 - CI `oxfmt --check`; local `oxfmt`.

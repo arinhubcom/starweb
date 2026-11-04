@@ -931,6 +931,13 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - `@astrojs/compiler-rs` is a direct dev dependency because Oxfmt does not bundle it.
 - Tested on 2026-11-05 with `oxfmt` 0.75.0: output is the same as Prettier 3.9.10 on all 64 template files.
 
+### Why Oxfmt reads `global.css`
+
+- Without `stylesheet`, Oxfmt counts classes from Starweb tokens as unknown and sorts them first.
+- Without `functions`, classes in `tv()` and `cn()` stay unsorted, although most component classes live there.
+- The cost: Oxfmt fails when `theme.css` is missing, so `theme.ts` runs first, and the starter config drops `stylesheet`.
+- Tested on 2026-11-05 with `oxfmt` 0.75.0.
+
 ### Why Knip has named exceptions
 
 - Installed components export their full API, and the rules install some packages before any code uses them. Named `ignoreIssues`, `ignore`, and `ignoreDependencies` entries keep real unused code visible.
