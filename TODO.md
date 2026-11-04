@@ -47,7 +47,7 @@ Possible template additions:
 
 Dependency updates:
 
-- [ ] Move to TypeScript 7 when `@astrojs/check` allows it. `@astrojs/check` 0.9.12 needs `typescript` `^5.0.0 || ^6.0.0`, so the template stays on 6.0.3.
+- [ ] Move to TypeScript 7 when its 7.1 release is stable and `tsc` with `@astrojs/ts-content-mapper` reports no errors in `node_modules/emdash/src`. Replace `astro check` then: it does not support TypeScript 7. See [WHY.md](WHY.md#why-astro-check-stays-on-typescript-6). The template stays on 6.0.3 until then.
 
 ## Follow the issues opened in other repositories
 

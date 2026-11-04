@@ -36,6 +36,33 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Run commands in the project at the same time. Print the output of each command
+# that fails. The commands must not read what another one writes.
+run_parallel() {
+  local logs="$WORKDIR/logs" command log index failed=0
+  local -a pids=() commands=()
+  rm -rf "$logs"
+  mkdir -p "$logs"
+  for command in "$@"; do
+    log="$logs/${command//[^a-z]/-}.log"
+    # shellcheck disable=SC2086 # Each command is a plain list of words.
+    (cd "$APP_DIR" && $command) >"$log" 2>&1 &
+    pids+=("$!")
+    commands+=("$command")
+  done
+  for index in "${!pids[@]}"; do
+    command="${commands[$index]}"
+    if wait "${pids[$index]}"; then
+      echo "ok: $command"
+    else
+      failed=1
+      echo "FAILED: $command" >&2
+      cat "$logs/${command//[^a-z]/-}.log" >&2
+    fi
+  done
+  [ "$failed" -eq 0 ] || fail "a command failed"
+}
+
 free_port() {
   node -e '
     const net = require("node:net");
@@ -174,18 +201,19 @@ if printf '%s\n' "$OXLINT_OUTPUT" | grep -qF "react(react-in-jsx-scope)"; then
 fi
 echo "ok: oxlint runs the eslint, jsx-a11y, e18e, react-doctor, and type-aware rules"
 
-step "Run npm run check"
-(cd "$APP_DIR" && npm run check)
+step "Run the checks and npm audit at the same time"
+# The test runs the parts of npm run check, so check the script text.
+grep -qF '"check": "npm run format:check && npm run typecheck && npm run lint && npm run knip && npm run test"' "$APP_DIR/package.json" || fail "the check script changed: update this step"
+# astro check writes .astro/types.d.ts, and the type-aware lint reads it, so lint
+# starts after typecheck.
+run_parallel "npm run format:check" "npm run typecheck" "npm run knip" "npm audit --omit=dev --audit-level=high" "npm audit signatures"
+run_parallel "npm run lint" "npm run test"
 
 step "Run npm run build"
 (cd "$APP_DIR" && npm run build)
 
 step "Run npm run size"
 (cd "$APP_DIR" && npm run size)
-
-step "Run npm audit"
-(cd "$APP_DIR" && npm audit --omit=dev --audit-level=high)
-(cd "$APP_DIR" && npm audit signatures)
 
 step "Start npm run preview"
 PORT="$(free_port)"
