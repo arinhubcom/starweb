@@ -82,6 +82,7 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 
 - `pnpm dlx @astrojs/upgrade` upgrades `astro` and official integrations together; never `astro` alone.
 - `astro`, `@astrojs/cloudflare`, `wrangler`, `emdash` within peer ranges: `@astrojs/cloudflare` needs matching `astro` and `wrangler`; `emdash` and `@emdash-cms/cloudflare` need `astro`; `@emdash-cms/cloudflare` also needs `wrangler` and `@astrojs/cloudflare`.
+- `@emdash-cms/plugin-forms` and `@emdash-cms/plugin-field-kit` pin the peer `@cloudflare/kumo` to one exact version: it must match the version that `emdash` uses.
 - Before upgrading: `pnpm view <package>@<version> peerDependencies` for it and its dependents; upgrade others first if the range excludes it.
 - After: `pnpm exec wrangler types`, `pnpm exec astro check`, `pnpm run build`, `pnpm run preview`; fix all errors before merge.
 

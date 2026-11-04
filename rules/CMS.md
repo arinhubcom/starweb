@@ -50,6 +50,22 @@ Own plugins work on Free, as native plugins or in the site process.
 - Third-party plugin that needs isolation → Paid + `sandbox()`. No `sandbox: false` in production.
 - Free limits → [SAAS](SAAS.md#workers-free-plan). Prices → [CLOUDFLARE](CLOUDFLARE.md#cost).
 
+### [EmDash Field Kit](STACK.md#emdash-field-kit)
+
+- `fieldKitPlugin()` in `emdash()` `plugins`. Widgets for `json` fields through field `options` in a seed file.
+
+### [EmDash Forms](STACK.md#emdash-forms)
+
+- `formsPlugin()` in `emdash()` `plugins`. For site forms that editors manage. App forms stay Astro Actions. → [ARCH](ARCH.md) (Astro)
+- Render with `<Form id="<slug>" />` from `@emdash-cms/plugin-forms/ui`, or with the Portable Text block. A page with a form gets an entry in `page-js-limits.json`. → [PERF](PERF.md#client-javascript)
+- No `defaultSpamProtection`: `createPlugin()` ignores it → `src/lib/forms/policy.ts`, called from `src/middleware.ts`.
+- Check `POST`, `PUT`, `PATCH`, and `DELETE`: the plugin routes accept each of them.
+- `forms/create` and `forms/update`: `400` unless `spamProtection` is `turnstile` and `retentionDays` is 1 to `FORM_RETENTION_DAYS` (365); `413` over `FORM_BODY_LIMIT_BYTES` (1 MiB). No body rewrite: `next(request)` does not send a new body to the route.
+- `submit`: `FORMS_LIMITER` in `wrangler.jsonc`, 10 requests per 60 s per `CF-Connecting-IP`; `429` + `Retry-After`.
+- Turnstile keys: admin plugin settings `turnstileSiteKey`, `turnstileSecretKey`. No keys → `submit` returns `500`. → [SECURITY](SECURITY.md) (Turnstile)
+- Form webhook: empty, or an endpoint you own. The plugin does not sign it. → [SAAS](SAAS.md) (Outgoing webhooks)
+- Notifications need an email provider. → [AUTH](AUTH.md)
+
 ## Drafts and preview
 
 ### Preview mode

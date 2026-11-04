@@ -2,6 +2,7 @@
 // Privacy policy skeleton. Replace each "[Add" marker before the first
 // production deploy. See the Privacy policy section in rules/PRIVACY.md.
 import Base from "../layouts/Base.astro";
+import { FORM_RETENTION_DAYS } from "@/lib/forms/policy";
 import { CONTROLLER, PRIVACY_EMAIL } from "@/lib/site";
 ---
 
@@ -18,10 +19,18 @@ import { CONTROLLER, PRIVACY_EMAIL } from "@/lib/site";
 
     <h2>Why this site uses your data</h2>
     <p>[Add each purpose and its legal basis]</p>
+    <p>
+      When you send a form, this site stores what you enter, your IP address,
+      browser details (user agent), the page you came from (referer), and your
+      country.
+    </p>
 
     <h2>Who receives your data</h2>
     <ul>
-      <li>Cloudflare: hosting, database, file storage, and logs</li>
+      <li>
+        Cloudflare: hosting, database, file storage, logs, and Turnstile bot
+        protection on pages with a form
+      </li>
       <li>[Add each other processor, or remove this item]</li>
     </ul>
 
@@ -39,7 +48,11 @@ import { CONTROLLER, PRIVACY_EMAIL } from "@/lib/site";
     </p>
 
     <h2>How long this site keeps your data</h2>
-    <p>[Add the retention period for each kind of data]</p>
+    <p>
+      Form submissions: up to {FORM_RETENTION_DAYS} days, and a weekly job can
+      take up to 7 more days to delete them.
+    </p>
+    <p>[Add the retention period for each other kind of data]</p>
 
     <h2>Cookies and local storage</h2>
     <ul>

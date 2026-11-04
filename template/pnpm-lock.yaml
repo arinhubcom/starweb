@@ -20,6 +20,12 @@ importers:
       '@emdash-cms/cloudflare':
         specifier: 1.4.0
         version: 1.4.0(ef1216c8edf32046a55cb6674d16ea75)
+      '@emdash-cms/plugin-field-kit':
+        specifier: 0.1.2
+        version: 0.1.2(66f59c906b297e45be245afed52dbfa6)
+      '@emdash-cms/plugin-forms':
+        specifier: 0.2.12
+        version: 0.2.12(256cfae91f598ad536add67e48216dad)
       '@tailwindcss/vite':
         specifier: 4.3.3
         version: 4.3.3(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
@@ -814,6 +820,23 @@ packages:
 
   '@emdash-cms/gutenberg-to-portable-text@1.4.0':
     resolution: {integrity: sha512-WanDT+G6wtYRb9TZDTm/XvCqQyjkWa85slZVgWH39BaZ0j2WjuipD6IFaFdMPDiVlk6yxs6lL6zDw1xUu96Qgg==}
+
+  '@emdash-cms/plugin-field-kit@0.1.2':
+    resolution: {integrity: sha512-5M0inRDnlxV4VpWXumyve8l5mThGO5B5NkPg409zEiPSpycSFyu7F65sf0BXtk47xBLQ+/g13MpW1/gXBe1xyQ==}
+    peerDependencies:
+      '@cloudflare/kumo': 2.6.0
+      '@phosphor-icons/react': ^2.1.10
+      emdash: '>=0.9.0'
+      react: ^18.0.0 || ^19.0.0
+
+  '@emdash-cms/plugin-forms@0.2.12':
+    resolution: {integrity: sha512-u1zEp914Nsc+zTpOQ3z0zELSvicNgb2geWuhP+EbQIrq1wQ5NAvGV1UMXicdc+HCderHKAQqqi/uZpr3Pd8Tcg==}
+    peerDependencies:
+      '@cloudflare/kumo': 2.6.0
+      '@phosphor-icons/react': ^2.1.10
+      astro: '>=6.0.0-beta.0'
+      emdash: '>=0.11.0'
+      react: ^18.0.0 || ^19.0.0
 
   '@emdash-cms/plugin-types@0.6.0':
     resolution: {integrity: sha512-uImNUlOCEBVG1v7H1/lNqpQQRmAVi+L92ICMiPwWu+DvGap55mCMS18Msb5IGxLwoaN0mGFEaPRvtc4f/t+nhw==}
@@ -6632,6 +6655,22 @@ snapshots:
     dependencies:
       '@wordpress/block-serialization-default-parser': 5.57.0
       parse5: 7.3.0
+
+  '@emdash-cms/plugin-field-kit@0.1.2(66f59c906b297e45be245afed52dbfa6)':
+    dependencies:
+      '@cloudflare/kumo': 2.6.0(@date-fns/tz@1.5.0)(@phosphor-icons/react@2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@types/react@19.3.0)(date-fns@4.4.0)(echarts@6.1.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.7)
+      '@phosphor-icons/react': 2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      emdash: 1.4.0(@astrojs/react@7.1.2(@types/node@26.6.6)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(esbuild@0.28.2)(jiti@2.7.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(tsx@4.23.15)(yaml@2.9.1))(@atcute/cbor@2.3.8(@atcute/cid@2.5.0))(@atcute/cid@2.5.0)(@atcute/identity@2.0.2(@atcute/lexicons@2.1.1)(typescript@6.0.3))(@date-fns/tz@1.5.0)(@floating-ui/dom@1.8.0)(@tiptap/extensions@3.32.2(@tiptap/core@3.32.2(@tiptap/pm@3.32.2))(@tiptap/pm@3.32.2))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(astro@7.4.4(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))(date-fns@4.4.0)(echarts@6.1.0)(prosemirror-model@1.25.12)(prosemirror-state@1.4.4)(prosemirror-view@1.42.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@6.0.3)
+      react: 19.3.1
+
+  '@emdash-cms/plugin-forms@0.2.12(256cfae91f598ad536add67e48216dad)':
+    dependencies:
+      '@cloudflare/kumo': 2.6.0(@date-fns/tz@1.5.0)(@phosphor-icons/react@2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@types/react@19.3.0)(date-fns@4.4.0)(echarts@6.1.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.7)
+      '@phosphor-icons/react': 2.1.10(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      astro: 7.4.4(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1)
+      emdash: 1.4.0(@astrojs/react@7.1.2(@types/node@26.6.6)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(esbuild@0.28.2)(jiti@2.7.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(tsx@4.23.15)(yaml@2.9.1))(@atcute/cbor@2.3.8(@atcute/cid@2.5.0))(@atcute/cid@2.5.0)(@atcute/identity@2.0.2(@atcute/lexicons@2.1.1)(typescript@6.0.3))(@date-fns/tz@1.5.0)(@floating-ui/dom@1.8.0)(@tiptap/extensions@3.32.2(@tiptap/core@3.32.2(@tiptap/pm@3.32.2))(@tiptap/pm@3.32.2))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(astro@7.4.4(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))(date-fns@4.4.0)(echarts@6.1.0)(prosemirror-model@1.25.12)(prosemirror-state@1.4.4)(prosemirror-view@1.42.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@6.0.3)
+      react: 19.3.1
+      ulidx: 2.4.1
 
   '@emdash-cms/plugin-types@0.6.0':
     dependencies:

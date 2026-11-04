@@ -335,6 +335,32 @@ expect_status 403 "cross-origin POST /" -X POST \
   --data 'x' "$BASE_URL/"
 expect_status 200 "same-origin GET /" -H "Origin: $BASE_URL" "$BASE_URL/"
 
+step "Check the Forms and Field Kit plugins"
+grep -q 'plugins: \[fieldKitPlugin(), formsPlugin()\]' "$APP_DIR/astro.config.mjs" || fail "astro.config.mjs does not load the plugins"
+grep -q '"name": "FORMS_LIMITER"' "$APP_DIR/wrangler.jsonc" || fail "wrangler.jsonc has no FORMS_LIMITER binding"
+printf '%s\n' "$CSP" | grep -q 'frame-src https://challenges.cloudflare.com' || fail "CSP does not allow the Turnstile frame"
+printf '%s\n' "$CSP" | grep -qE "script-src [^;]*https://challenges.cloudflare.com" || fail "CSP does not allow the Turnstile script"
+FORMS_API="$BASE_URL/_emdash/api/plugins/emdash-forms"
+expect_status 400 "POST forms/create with the admin defaults" -X POST \
+  -H "Origin: $BASE_URL" -H 'Content-Type: application/json' -H 'X-EmDash-Request: 1' \
+  --data '{"settings":{"retentionDays":0,"spamProtection":"honeypot"}}' "$FORMS_API/forms/create"
+expect_status 401 "POST forms/create without a session" -X POST \
+  -H "Origin: $BASE_URL" -H 'Content-Type: application/json' -H 'X-EmDash-Request: 1' \
+  --data '{"settings":{"retentionDays":30,"spamProtection":"turnstile"}}' "$FORMS_API/forms/create"
+LIMIT_STATUS=""
+for _ in $(seq 1 11); do
+  LIMIT_STATUS="$(status_of -X POST -H 'Content-Type: application/json' -H 'CF-Connecting-IP: 203.0.113.7' \
+    --data '{"formId":"none","data":{}}' "$FORMS_API/submit")"
+done
+[ "$LIMIT_STATUS" = "429" ] || fail "the 11th POST submit returned $LIMIT_STATUS, not 429"
+expect_status 429 "PATCH submit shares the rate limit" -X PATCH -H 'Content-Type: application/json' \
+  -H 'CF-Connecting-IP: 203.0.113.7' --data '{"formId":"none","data":{}}' "$FORMS_API/submit"
+expect_status 400 "PATCH forms/update away from Turnstile" -X PATCH \
+  -H "Origin: $BASE_URL" -H 'Content-Type: application/json' -H 'X-EmDash-Request: 1' \
+  --data '{"id":"1","settings":{"spamProtection":"none"}}' "$FORMS_API/forms/update"
+curl -s --max-time 30 "$BASE_URL/privacy" | grep -q 'Form submissions: up to 365 days' || fail "/privacy does not state the form retention"
+echo "ok: plugins load, policy and rate limit apply, and the privacy page states the retention"
+
 step "Check the button on the home page"
 HOME_HTML="$(curl -s --max-time 30 "$BASE_URL/")"
 printf '%s\n' "$HOME_HTML" | grep -q 'data-slot="button"' || fail "the home page has no Fulldev button"

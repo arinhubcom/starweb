@@ -1,7 +1,8 @@
 import { defineMiddleware } from "astro:middleware";
+import { env } from "cloudflare:workers";
+import { guardFormRequest, MUTATING_METHODS } from "@/lib/forms/policy";
 import { withSecurityHeaders } from "@/lib/security/headers";
 
-const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 const EMDASH_PREFIX = "/_emdash/";
 
 export const onRequest = defineMiddleware(async (context, next) => {
@@ -18,5 +19,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
       new Response("Cross-site request blocked", { status: 403 }),
     );
   }
+  const blocked = await guardFormRequest(
+    request,
+    url.pathname,
+    env.FORMS_LIMITER,
+  );
+  if (blocked) return withSecurityHeaders(blocked);
   return withSecurityHeaders(await next());
 });

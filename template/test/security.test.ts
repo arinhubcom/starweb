@@ -21,6 +21,12 @@ describe("csp", () => {
     expect(scriptDirective.resources).toContain("'self'");
   });
 
+  it("allows the Turnstile script and frame", () => {
+    const origin = "https://challenges.cloudflare.com";
+    expect(scriptDirective.resources).toContain(origin);
+    expect(directives).toContain(`frame-src ${origin}`);
+  });
+
   it("sends frame-ancestors", () => {
     expect(directives).toContain(frameAncestors);
   });

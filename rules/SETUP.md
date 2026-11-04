@@ -18,7 +18,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 ### [Wrangler](STACK.md#wrangler)
 
 4. `pnpm exec wrangler login`.
-5. Create the [D1](STACK.md#d1) database with a location hint, set `database_id` in `wrangler.jsonc`, and change the Targeted Placement region if the database is not near the template default `aws:eu-central-1`. → [PERF](PERF.md) (Placement), [SAAS](SAAS.md) (Architecture)
+5. Create the [D1](STACK.md#d1) database with a location hint, set `database_id` in `wrangler.jsonc`, and change the Targeted Placement region if the database is not near the template default `aws:eu-central-1`. Give `FORMS_LIMITER` a `namespace_id` that no other Worker in the account uses. → [PERF](PERF.md) (Placement), [SAAS](SAAS.md), [CMS](CMS.md#emdash-forms) (Architecture)
 6. No scheduled publishing → remove the Cron Trigger and the `scheduled` handler in `src/worker.ts`. → [CMS](CMS.md) (Drafts and preview)
 7. Uses [Queues](STACK.md#queues) → producers, consumers, a dead letter queue, `queue()` export in `src/worker.ts`. → [ARCH](ARCH.md) (Backend)
 
@@ -74,7 +74,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 
 ## Checks
 
-20. `pnpm run dev`; open `http://localhost:4321/_emdash/admin/`; complete the setup wizard. → [DEV](DEV.md)
+20. `pnpm run dev`; open `http://localhost:4321/_emdash/admin/`; complete the setup wizard. To test a form, set the [Turnstile test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) in the Forms plugin settings. → [DEV](DEV.md), [CMS](CMS.md#emdash-forms)
 21. `pnpm run check`, `pnpm run build`, `pnpm run size`, `pnpm run preview` all pass before the first commit. → [QUALITY](QUALITY.md) (Order), [PERF](PERF.md#client-javascript), [DEV](DEV.md)
 22. `pnpm exec emdash doctor`; read only the scheduler line (its database check looks for local SQLite, not D1). → [CMS](CMS.md) (Drafts and preview)
 23. Commit.
@@ -91,5 +91,5 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 29. Prod secrets `EMDASH_ENCRYPTION_KEY`, `BETTER_AUTH_SECRET` before the first stage upload. → [DEPLOY](DEPLOY.md) (Secrets)
 30. Dependabot automerge workflow and the CI workflows the template lacks: PR preview, dev deploy, stage upload on release tag, promotion; scheduled D1 export if the site has app data. → [DEPS](DEPS.md) (Update), [DEPLOY](DEPLOY.md) (CI)
 31. First dev deploy: `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""` per app database, `wrangler deploy --env=""`. Then each push to `main` deploys dev. → [DEPLOY](DEPLOY.md) (Migrations, CI)
-32. First release: push tag `<worker>-YYYY-MM-DD-r1`, approve the `production` job, test the stage URL, run the promotion workflow (traffic in steps). → [DEPLOY](DEPLOY.md) (Releases, CI)
+32. First release: push tag `<worker>-YYYY-MM-DD-r1`, approve the `production` job, test the stage URL, run the promotion workflow (traffic in steps). Site uses forms → create a Turnstile widget and set its keys in the Forms plugin settings on production. → [DEPLOY](DEPLOY.md) (Releases, CI), [CMS](CMS.md#emdash-forms)
 33. Dev-bypass routes return `403` on prod. → [SECURITY](SECURITY.md) (Auth)

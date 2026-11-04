@@ -46,6 +46,7 @@ Technical rules, not legal advice. → [SAAS](SAAS.md), [AUTH](AUTH.md) (users, 
 
 - Only fields a feature needs (5(1)(c)); no field, column, or event property "for later".
 - Retention period per personal-data table (5(1)(e)); delete after it with the cleanup job. → [SAAS](SAAS.md) (Cleanup)
+- [EmDash Forms](STACK.md#emdash-forms): at most `FORM_RETENTION_DAYS` per form; the plugin deletes weekly. Each submission stores the IP address, user agent, referer, and country; `src/pages/privacy.astro` states them and the period. → [CMS](CMS.md#emdash-forms)
 - No personal data in logs, analytics events, error reports, fixtures, screenshots → IDs.
 - Fake data in tests and dev databases; no production import.
 

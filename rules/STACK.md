@@ -211,6 +211,19 @@ CMS, plugins, SEO fields, i18n, media. Reference for Kysely on D1. → [CMS](CMS
 - github: https://github.com/emdash-cms/emdash
 - skills: https://skills.sh/emdash-cms/emdash/building-emdash-site · https://skills.sh/emdash-cms/emdash/emdash-cli · https://skills.sh/emdash-cms/skills/upgrading-emdash
 
+### EmDash Field Kit
+
+Admin widgets for `json` fields (`@emdash-cms/plugin-field-kit`). → [CMS](CMS.md)
+
+- docs: https://docs.emdashcms.com/plugins/field-kit/
+- github: https://github.com/emdash-cms/emdash/tree/main/packages/plugins/field-kit
+
+### EmDash Forms
+
+Site forms and a submission inbox (`@emdash-cms/plugin-forms`). → [CMS](CMS.md), [SECURITY](SECURITY.md), [PRIVACY](PRIVACY.md)
+
+- github: https://github.com/emdash-cms/emdash/tree/main/packages/plugins/forms
+
 ### PolyStella
 
 AI translation of EmDash content (`@cloudflare/polystella-emdash` plugin, Workers AI). Not for UI strings. → [I18N](I18N.md), [SETUP](SETUP.md)

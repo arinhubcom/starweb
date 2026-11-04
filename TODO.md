@@ -40,6 +40,9 @@ Steps that no test has run:
 - [ ] Run `pnpm run dev` and the admin setup wizard (step 20), and `pnpm exec emdash doctor` (step 22) on a generated project.
 - [ ] Run the optional steps 8-18 on a generated project, and confirm that `pnpm run check` and `pnpm run build` still pass.
 
+- [ ] Measure the CPU time of `@emdash-cms/plugin-forms` and `@emdash-cms/plugin-field-kit` as [rules/CMS.md](rules/CMS.md#emdash-plugin-cpu-budget) requires: `/`, and a page with a form. The Chrome DevTools Protocol `Profiler` hung through the `wrangler dev` inspector proxy, so use the DevTools UI or `$workers.cpuTimeMs` after a real deploy.
+- [ ] Wait for a real weekly run of the Forms `cleanup` task, and confirm that it deletes old submissions and their files. No test has run the cron task.
+
 Possible template additions:
 
 - [ ] Decide whether the template ships the workflows that step 30 lists (Dependabot automerge, PR preview, dev deploy, stage upload, promotion, and D1 export), in place of a manual step.
@@ -53,6 +56,7 @@ Dependency updates:
 Check these upstream issues and discussions. When one closes or changes, update the rule or decision that links to it, and then remove it from this list.
 
 - [ ] `emdash` 1.4.0 pins the vulnerable `zod` 4.5.4 ([GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5)). When a new `emdash` pins `zod` 4.6.6 or later, remove the `overrides` from `template/package.json` and the rule in [rules/DEPS.md](rules/DEPS.md).
+- [ ] `@emdash-cms/plugin-forms` 0.2.12 ignores `defaultSpamProtection`. A person must reproduce it and review the text before an agent opens the issue (emdash `AI_POLICY.md`). When a release fixes it and adds a default retention, review `src/lib/forms/policy.ts`.
 - [ ] [emdash-cms/emdash#4658](https://github.com/emdash-cms/emdash/issues/4658): `emdash/ui` and `emdash/ui/search` make `tsc` type-check the package source. Open. Linked from [WHY.md](WHY.md).
 - [ ] [emdash-cms/emdash#4661](https://github.com/emdash-cms/emdash/issues/4661): `emdash/ui` re-exports types that `astro-portabletext` does not export, so they are lost without an error. Open. Linked from [WHY.md](WHY.md).
 - [ ] [cloudflare/polystella#66](https://github.com/cloudflare/polystella/issues/66): support Paraglide JS message files (inlang message format) in the catalog CLI. Open. Linked from [WHY.md](WHY.md).

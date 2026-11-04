@@ -97,6 +97,27 @@ EmDash plugins keep the same target. EmDash says that a native plugin runs in th
 - **Headless SaaS CMS (Contentful, Sanity):** a separate service with its own cost, limits, and API calls on each request.
 - **Markdown in Git (Astro content collections):** good for developers, but editors cannot publish without Git and a rebuild.
 
+### Why the template includes Field Kit and Forms
+
+- Field Kit replaces the single-line raw JSON input of `json` fields, and adds 0.85 KiB to the Worker. If you remove it, the data stays in place.
+- Forms gives editors a form builder and a submission inbox, so a contact form needs no developer. App forms stay Astro Actions because they run app code and validation.
+- Forms adds 53.93 KiB to the Worker. A page that renders a form loads 2,085 bytes (brotli) more JavaScript. The plugin renders a real `<form method="POST">`, so a form works without that script.
+- Neither plugin has a hook on the page request path. Forms registers only `plugin:activate` and `cron`. CPU time on a request is not measured yet: see [TODO.md](TODO.md).
+- No `@emdash-cms/plugin-embeds`: the YouTube block loads an `i.ytimg.com` image before a click, the CSP blocks its frame, it adds 2.1 MiB, and `astro-embed` 0.12.0 does not accept Astro 7.
+- Tested on 2026-11-05 with @emdash-cms/plugin-forms 0.2.12, @emdash-cms/plugin-field-kit 0.1.2, and emdash 1.4.0.
+
+### Why middleware enforces the Forms policy
+
+- `defaultSpamProtection` has no effect: `createPlugin(_options)` ignores its options, and the admin UI always starts a new form with `honeypot` and `retentionDays: 0` (forever). No plugin option sets a retention period.
+- [rules/SECURITY.md](rules/SECURITY.md) requires Turnstile on public forms, and [rules/PRIVACY.md](rules/PRIVACY.md) requires a retention period. A manual step can fail, so the middleware rejects a form that breaks either rule. The admin UI shows the message, and the editor can set both values in the same screen.
+- The middleware rejects the request and does not rewrite it: a test that called `next(new Request(...))` stored the original body, so Astro did not send the new body to the route.
+- The check covers `POST`, `PUT`, `PATCH`, and `DELETE`. The plugin routes declare no methods, and a test with `PATCH forms/update` and `PUT submit` passed a `POST`-only check: it stored `honeypot` and passed the rate limit.
+- The middleware runs before the route checks the session and the body size, so it stops reading at 1 MiB. The check reads a copy, so the route can read the original.
+- 365 days is the upper limit, so the privacy page can state it. A project with a shorter need changes `FORM_RETENTION_DAYS`.
+- The Forms handlers have no rate limit. Turnstile stops bots, and `FORMS_LIMITER` stops one client from filling the Turnstile verification and the database.
+- The Turnstile secret stays in the plugin settings because the plugin reads only that value. EmDash encrypts secret settings with `EMDASH_ENCRYPTION_KEY`.
+- Tested on 2026-11-05 with @emdash-cms/plugin-forms 0.2.12 and Astro 7.4.4: admin flow, production CSP, widget, submission, wrong secret, missing token, and rate limit.
+
 ## Translation
 
 Content and UI strings use two tools: [PolyStella](https://github.com/cloudflare/polystella) translates EmDash content, and [Paraglide JS](https://paraglidejs.com) holds UI strings.

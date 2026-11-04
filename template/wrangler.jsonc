@@ -26,6 +26,13 @@
   // Sandboxed plugins require Worker Loader, available on Workers paid plans. Uncomment to enable:
   // "worker_loaders": [{ "binding": "LOADER" }],
   // General maintenance cron trigger
+  "ratelimits": [
+    {
+      "name": "FORMS_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 10, "period": 60 },
+    },
+  ],
   "triggers": {
     "crons": ["* * * * *"],
   },

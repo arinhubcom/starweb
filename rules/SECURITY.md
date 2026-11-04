@@ -84,7 +84,7 @@
 
 ### Rate Limiting binding
 
-- Rate-limit sign-in, sign-up, password reset, and form routes → [API](API.md) (Limits).
+- Rate-limit sign-in, sign-up, password reset, and form routes → [API](API.md) (Limits). EmDash Forms → [CMS](CMS.md#emdash-forms).
 
 ### [Turnstile](STACK.md#turnstile)
 
@@ -94,7 +94,7 @@
 - `<div class="cf-turnstile" data-sitekey="...">` inside `<form>` (adds `cf-turnstile-response`).
 - Server: `POST https://challenges.cloudflare.com/turnstile/v0/siteverify` with `secret` + `response`; reject on `success: false`. Widget alone is not trust.
 - One verification per token, within 5 minutes (`timeout-or-duplicate`).
-- Secret key = Worker secret, never client code → [DEPLOY](DEPLOY.md) (Secrets).
+- Secret key = Worker secret, never client code → [DEPLOY](DEPLOY.md) (Secrets). [EmDash Forms](STACK.md#emdash-forms) reads only its encrypted plugin setting → [CMS](CMS.md#emdash-forms).
 
 ### OWASP SSRF
 
