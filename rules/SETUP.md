@@ -6,12 +6,12 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 
 ### [EmDash](STACK.md#emdash)
 
-1. Newest Node.js LTS, the major in `template/files/.nvmrc`; `node --version` starts with it, `npm --version` ≥ 11. → [DEPS](DEPS.md) (Install)
+1. Newest Node.js LTS, the major in `template/.nvmrc`; `node --version` starts with it, `npm --version` ≥ 11. → [DEPS](DEPS.md) (Install)
 2. Read the EmDash version from `devDependencies` of `template/package.json` in the [Starweb repository](https://github.com/arinhubcom/starweb). `npm create emdash@<version> my-site -- --template cloudflare:starter --install --yes`. `--sandboxed-plugins` only with sandboxed plugins (Workers paid plan). Never the `node` platform. → [CMS](CMS.md)
 
 ### setup.mjs
 
-3. `node <starweb>/scripts/setup.mjs my-site --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, Update). Writes `.starweb.json` (clone commit, name, site); commit it. The script: renames `AGENTS.md` → `EMDASH.md`, deletes `pnpm-workspace.yaml`, copies agent files and `rules/` ([DEPS](DEPS.md)), copies config/security/test/CI/Dependabot files of `template/files/` ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), patches starter files and the [Tailwind CSS](STACK.md#tailwind-css), [Zod](STACK.md#zod), [Effect](STACK.md#effect) setup ([ARCH](ARCH.md), [DESIGN](DESIGN.md), [UI-UX](UI-UX.md)), adds the `/privacy` page and its footer link ([PRIVACY](PRIVACY.md)), adds `security.txt` generation ([SECURITY](SECURITY.md)), pins versions and the `overrides`, deletes the starter lockfile, `npm install`, `npx wrangler types`, `npx tsx scripts/theme.ts`, `prettier`, `git init`. Stop and report on `Starter changed`.
+3. `node <starweb>/scripts/setup.mjs my-site --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, Update). Writes `.starweb.json` (clone commit, name, site); commit it. The script: renames `AGENTS.md` → `EMDASH.md`, deletes `pnpm-workspace.yaml`, copies agent files and `rules/` ([DEPS](DEPS.md)), copies `template/` to the project root: configs, security, tests, CI, Dependabot ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), patches starter files and the [Tailwind CSS](STACK.md#tailwind-css), [Zod](STACK.md#zod), [Effect](STACK.md#effect) setup ([ARCH](ARCH.md), [DESIGN](DESIGN.md), [UI-UX](UI-UX.md)), adds the `/privacy` page and its footer link ([PRIVACY](PRIVACY.md)), adds `security.txt` generation ([SECURITY](SECURITY.md)), merges `template/package.json` (versions, scripts, `overrides`), deletes the starter lockfile, `npm install`, `npx wrangler types`, `npx tsx scripts/theme.ts`, `prettier`, `git init`. Stop and report on `Starter changed`.
 
 ## Cloudflare
 
@@ -32,7 +32,7 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 
 ### [Fulldev UI](STACK.md#fulldev-ui)
 
-9. `npx shadcn@<version> init https://ui.full.dev/r/styles/base-vega/base.json`; `<version>` = `shadcn` in `devDependencies` of `template/package.json` (init adds `shadcn`). Install `@base-ui/react`, `lucide-react`, `tailwind-variants`; `npm rm class-variance-authority`. Add the [Knip](STACK.md#knip) exceptions for Fulldev. → [COMPONENTS](COMPONENTS.md), [QUALITY](QUALITY.md) (Unused code)
+9. `npx shadcn@<version> init https://ui.full.dev/r/styles/base-vega/base.json`; `<version>` = `shadcn` in `devDependencies` of `template/package.json` (init adds `shadcn`). Add `@base-ui/react`, `lucide-react`, `tailwind-variants`; remove `class-variance-authority`. Add the [Knip](STACK.md#knip) exceptions for Fulldev. → [COMPONENTS](COMPONENTS.md), [QUALITY](QUALITY.md) (Unused code)
 10. Set the brand color in `SEED` in `scripts/theme.ts`; `npx tsx scripts/theme.ts` rewrites `src/styles/theme.css` (`setup.mjs` generates it with the default seed, and `src/styles/global.css` imports it). After step 9, remove the color variables that `shadcn init` wrote to `:root` and `.dark` in `global.css`: they override `theme.css`. → [MATERIAL](MATERIAL.md) (Color)
 
 ## Auth
@@ -60,7 +60,7 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 
 ### [Storybook](STACK.md#storybook)
 
-17. Component library → install Storybook with [Storybook Astro](STACK.md#storybook-astro) by hand, create `.storybook/main.ts`. → [TESTING](TESTING.md) (Components)
+17. Component library → Storybook with [Storybook Astro](STACK.md#storybook-astro), not `npm create storybook`; create `.storybook/main.ts`. → [TESTING](TESTING.md) (Components)
 
 ### [Playwright](STACK.md#playwright)
 

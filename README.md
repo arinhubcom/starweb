@@ -14,7 +14,7 @@ Set up a new Starweb project named my-site. Clone https://github.com/arinhubcom/
 
 Replace `my-site` with your project name.
 
-The steps are in [rules/SETUP.md](rules/SETUP.md). The script [scripts/setup.mjs](scripts/setup.mjs) copies the tested files from [template/](template/) into the new project and pins the package versions. To bring later Starweb changes into the project, run [scripts/update.mjs](scripts/update.mjs) (see the Update section in [rules/SETUP.md](rules/SETUP.md)). CI tests the template every week. Read [why](WHY.md#why-a-template-setupmjs-and-ci).
+The steps are in [rules/SETUP.md](rules/SETUP.md). The [template/](template/) folder holds `package.json` and the tested configs, and the new project takes it over: the script [scripts/setup.mjs](scripts/setup.mjs) merges `package.json` and copies all other files to the project root. The rules hold decisions, not install commands. To bring later Starweb changes into the project, run [scripts/update.mjs](scripts/update.mjs) (see the Update section in [rules/SETUP.md](rules/SETUP.md)). CI tests the template every week. Read [why](WHY.md#why-a-template-setupmjs-and-ci).
 
 ## 🏗️ Architecture
 

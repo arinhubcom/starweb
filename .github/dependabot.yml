@@ -16,7 +16,7 @@ updates:
   - package-ecosystem: "github-actions"
     directories:
       - "/"
-      - "/template/files"
+      - "/template"
     schedule:
       interval: "weekly"
       day: "monday"

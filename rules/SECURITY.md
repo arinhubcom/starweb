@@ -22,7 +22,7 @@
 - App middleware sets the security headers for Worker-rendered pages and API routes, except `Content-Security-Policy` (`set` would replace Astro's policy and drop `script-src`). Copy first: `const response = new Response(original.body, original)` from `await next()`, then `response.headers.set(...)`; return the copy.
 - `public/_headers` covers prerendered pages and static assets (not Worker responses): same headers plus `Content-Security-Policy: frame-ancestors 'none'`. Limits: 100 rules, 2,000 characters per line.
 - Header values live once in `src/lib/security/headers.ts` (`securityHeaders`, no CSP); the middleware imports it.
-- `scripts/write-headers.ts` writes `public/_headers`: one `/*` rule with `securityHeaders` plus `Content-Security-Policy: <frameAncestors>`, via `writeFileSync`. `tsx` as devDependency; `"build": "tsx scripts/write-headers.ts && astro build"`. No hand edits; `public/_headers` in `.gitignore`.
+- `scripts/write-headers.ts` writes `public/_headers`: one `/*` rule with `securityHeaders` plus `Content-Security-Policy: <frameAncestors>`, via `writeFileSync`. `"build": "tsx scripts/write-headers.ts && astro build"`. No hand edits; `public/_headers` in `.gitignore`.
 
 ### [MDN](STACK.md#mdn) HTTP headers
 

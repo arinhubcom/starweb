@@ -19,7 +19,7 @@
 ### [Tailwind CSS](STACK.md#tailwind-css)
 
 - Tailwind v4 for all styles; no second styling system.
-- Install: `npx astro add tailwind` (adds `@tailwindcss/vite`, creates `src/styles/global.css` with `@import "tailwindcss";`). Import `global.css` once, in the base layout.
+- `@tailwindcss/vite` in `astro.config.mjs`; `@import "tailwindcss";` in `src/styles/global.css`. Import `global.css` once, in the base layout.
 - Tokens (colors, fonts, radius, spacing) as theme variables in `@theme` in `global.css`; components use token classes (`bg-primary`), no hardcoded colors or sizes.
 - Keep `@custom-variant dark (&:is(.dark *));` from `shadcn init`; `.dark` on `<html>` via the theme script in `<head>` of the base layout. → [UI-UX](UI-UX.md) (Theme)
 - Merge classes with `cn()` from the [`cn`](https://github.com/shadcn-ui/cn) package (re-exported in `src/lib/utils.ts` by `shadcn init`). No manual string joins, no `clsx`/`tailwind-merge`.

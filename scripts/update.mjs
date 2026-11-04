@@ -17,7 +17,8 @@ import {
   PIN_ONLY_TOOLS,
   REPO_DOCS,
   STATE_FILE,
-  TEMPLATE_FILES,
+  TEMPLATE_DIR,
+  TEMPLATE_PACKAGE,
   assertNpm,
   fail,
   gitOut,
@@ -68,34 +69,45 @@ function assertCommit(commit) {
   }
 }
 
+const LEGACY_TEMPLATE_PREFIX = `${TEMPLATE_DIR}/files/`;
+
 const showAt = (commit, path) => gitOut(["show", `${commit}:${path}`]);
 
-// Map each Starweb-owned path at a commit to its path in the project.
+// Map each project path to its Starweb-owned path at a commit. A project can
+// point to a commit from before the template files moved out of template/files.
 function ownedPaths(commit) {
-  const names = gitOut([
-    "ls-tree",
-    "-r",
-    "--name-only",
-    commit,
-    "--",
-    ...REPO_DOCS,
-    TEMPLATE_FILES,
-  ]);
-  const prefix = `${TEMPLATE_FILES}/`;
-  return (names ?? "")
+  const names = (
+    gitOut([
+      "ls-tree",
+      "-r",
+      "--name-only",
+      commit,
+      "--",
+      ...REPO_DOCS,
+      TEMPLATE_DIR,
+    ]) ?? ""
+  )
     .split("\n")
-    .filter(Boolean)
-    .map((source) => ({
-      source,
-      target: source.startsWith(prefix) ? source.slice(prefix.length) : source,
-    }));
+    .filter(Boolean);
+  const prefix = names.some((name) => name.startsWith(LEGACY_TEMPLATE_PREFIX))
+    ? LEGACY_TEMPLATE_PREFIX
+    : `${TEMPLATE_DIR}/`;
+  const entries = names.flatMap((source) => {
+    if (!source.startsWith(`${TEMPLATE_DIR}/`)) return [[source, source]];
+    const target = source.startsWith(prefix) ? source.slice(prefix.length) : "";
+    return target === "" || target === TEMPLATE_PACKAGE
+      ? []
+      : [[target, source]];
+  });
+  return new Map(entries);
 }
 
 // Read a Starweb file at a commit, as setup.mjs wrote it into the project.
 function starwebText(commit, source, target, values) {
+  if (source === undefined) return null;
   const text = showAt(commit, source);
   if (text === null) return null;
-  if (source.startsWith(`${TEMPLATE_FILES}/`)) return substitute(text, values);
+  if (source.startsWith(`${TEMPLATE_DIR}/`)) return substitute(text, values);
   return target === "AGENTS.md" ? withEmdashRule(text) : text;
 }
 
@@ -145,19 +157,21 @@ function planFile({ base, theirs, ours }) {
 }
 
 function planFiles(dir, state, head) {
-  const targets = new Map();
-  for (const commit of [state.commit, head]) {
-    for (const { source, target } of ownedPaths(commit)) {
-      targets.set(target, { source, target });
-    }
-  }
-  return [...targets.values()]
-    .sort((a, b) => a.target.localeCompare(b.target))
-    .map(({ source, target }) => {
+  const baseSources = ownedPaths(state.commit);
+  const headSources = ownedPaths(head);
+  const targets = new Set([...baseSources.keys(), ...headSources.keys()]);
+  return [...targets]
+    .toSorted((a, b) => a.localeCompare(b))
+    .map((target) => {
       const projectPath = join(dir, target);
       const ours = existsSync(projectPath) ? readText(projectPath) : null;
-      const base = starwebText(state.commit, source, target, state);
-      const theirs = starwebText(head, source, target, state);
+      const base = starwebText(
+        state.commit,
+        baseSources.get(target),
+        target,
+        state,
+      );
+      const theirs = starwebText(head, headSources.get(target), target, state);
       return { path: target, ...planFile({ base, theirs, ours }) };
     });
 }

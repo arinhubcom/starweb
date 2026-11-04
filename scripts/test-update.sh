@@ -99,7 +99,7 @@ assert_equal "$(state_commit)" "$BASE_COMMIT" ".starweb.json commit"
 
 step "Change Starweb: a rule line, a template file, and two scripts"
 sed -i '7s/$/ (upstream)/' "$STARWEB/rules/DEV.md"
-printf '// upstream change\n' >>"$STARWEB/template/files/test/setup.ts"
+printf '// upstream change\n' >>"$STARWEB/template/test/setup.ts"
 edit_package_json "$STARWEB/template/package.json" starweb-test "echo starweb-test"
 edit_package_json "$STARWEB/template/package.json" lint "eslint . --max-warnings 0 --cache"
 commit_in_clone "test: change a rule, a template file, and scripts"
@@ -133,6 +133,40 @@ AGAIN_OUTPUT="$(node "$STARWEB/scripts/update.mjs" "$APP" --dry-run)"
 if printf '%s\n' "$AGAIN_OUTPUT" | grep -E '^[A-Za-z].*: [1-9][0-9]*$'; then
   fail "update.mjs reports changes after a finished update"
 fi
+
+step "Update a project whose commit has the old template/files layout"
+mkdir "$STARWEB/template/files"
+for entry in "$STARWEB"/template/* "$STARWEB"/template/.[!.]*; do
+  case "$(basename "$entry")" in
+    files | package.json) ;;
+    *) mv "$entry" "$STARWEB/template/files/" ;;
+  esac
+done
+commit_in_clone "test: use the old template/files layout"
+LEGACY_COMMIT="$(clone_git rev-parse HEAD)"
+node -e '
+  const fs = require("node:fs");
+  const [file, commit] = process.argv.slice(1);
+  const state = JSON.parse(fs.readFileSync(file, "utf8"));
+  fs.writeFileSync(file, JSON.stringify({ ...state, commit }, null, 2) + "\n");
+' "$APP/.starweb.json" "$LEGACY_COMMIT"
+for entry in "$STARWEB"/template/files/* "$STARWEB"/template/files/.[!.]*; do
+  mv "$entry" "$STARWEB/template/"
+done
+rmdir "$STARWEB/template/files"
+printf '// flat upstream change\n' >>"$STARWEB/template/test/setup.ts"
+commit_in_clone "test: use the flat template layout"
+NEW_COMMIT="$(clone_git rev-parse HEAD)"
+sed -i '1s/^/\/\/ project change\n/' "$APP/test/setup.ts"
+LEGACY_OUTPUT="$(node "$STARWEB/scripts/update.mjs" "$APP")"
+printf '%s\n' "$LEGACY_OUTPUT"
+assert_contains "$APP/test/setup.ts" "// project change"
+assert_contains "$APP/test/setup.ts" "// flat upstream change"
+assert_not_contains "$APP/test/setup.ts" "<<<<<<<"
+[ -f "$APP/knip.json" ] || fail "update.mjs deleted knip.json"
+[ ! -e "$APP/files" ] || fail "update.mjs created a files folder"
+[ ! -e "$APP/template" ] || fail "update.mjs created a template folder"
+assert_equal "$(state_commit)" "$NEW_COMMIT" ".starweb.json commit after the layout change"
 
 step "Change the same line in Starweb and in the project: a conflict"
 sed -i '10s/$/ UPSTREAM-A/' "$STARWEB/rules/DEV.md"

@@ -30,12 +30,14 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project
 
 ## Template
 
-- A rule and the file in `template/files/` or `scripts/setup.mjs` that implements it change in the same commit.
-- No edit to `template/files/` without the rule that describes it; change the rule first.
+- `template/` holds `package.json` and the configs. A new project takes over the folder: `scripts/setup.mjs` merges `package.json` and copies all other files to the project root. No `files/` subfolder.
+- No install commands in `rules/` (`npm i`, `npm rm`, `npx astro add`). A package every project needs goes in `template/package.json`, its config in `template/`. A rule for an optional feature names the packages only.
+- A rule and the file in `template/` or `scripts/setup.mjs` that implements it change in the same commit.
+- No edit to `template/` without the rule that describes it; change the rule first.
 - Keep the template current with `rules/`: each rule that applies to every project and that a file, config value, package, script, or CI step can implement has that implementation in `template/` or `scripts/setup.mjs`, or a step in [SETUP](SETUP.md) that a real project can run. Conditional rules ("uses X →") need a [SETUP](SETUP.md) step. A step never names a file that neither the template nor the step creates.
 - A new template file or behavior gets a check in `scripts/test-template.sh`.
 - Exact versions in `template/package.json`, no `^` or `~`.
 - Before a commit that touches `template/`, `scripts/`, or a rule they implement: `bash scripts/test-template.sh <tmp-dir>` (new folder outside the repository).
 - Before each template test, check every package in `template/package.json` for a newer version (`npm view <package> time`); pin the newest that is older than 3 days and within peer ranges and the [DEPS](DEPS.md) ignore list, then test with it.
-- New `astro` minor or major: read its post in the [Astro blog feed](https://astro.build/rss.xml) (`Astro X.Y` for each minor it passes, plus the monthly "What's new in Astro" posts since the old pin). Update the rules, `WHY.md`, and `template/files/` for each new feature, deprecation, or fixed workaround in the same commit as the version bump.
+- New `astro` minor or major: read its post in the [Astro blog feed](https://astro.build/rss.xml) (`Astro X.Y` for each minor it passes, plus the monthly "What's new in Astro" posts since the old pin). Update the rules, `WHY.md`, and `template/` for each new feature, deprecation, or fixed workaround in the same commit as the version bump.
 - Also `bash scripts/test-update.sh <tmp-dir>` (another new folder) when the change touches `scripts/update.mjs`, `scripts/setup.mjs`, `scripts/lib.mjs`, `.starweb.json`, or the files `update.mjs` merges. It edits lines 7, 10, and 13 of `rules/DEV.md`; keep that file at 13 or more lines.

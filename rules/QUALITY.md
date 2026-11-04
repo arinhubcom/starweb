@@ -17,7 +17,6 @@
 ### [Astro](STACK.md#astro) check
 
 - `npm run typecheck` before commit: no errors or warnings.
-- `@astrojs/check` as dev dependency.
 - `typecheck` = `astro check --minimumFailingSeverity warning`.
 
 ## Lint
@@ -25,7 +24,7 @@
 ### [Oxlint](STACK.md#oxlint)
 
 - First lint pass, next to ESLint. Do not remove ESLint: Oxlint lints only the `<script>` blocks of `.astro` files, and typed rules stay in `typescript-eslint`.
-- `npm i -D --save-exact oxlint oxlint-plugin-react-doctor @e18e/eslint-plugin`. JS plugins are alpha and outside semver.
+- Exact versions of `oxlint`, `oxlint-plugin-react-doctor`, `@e18e/eslint-plugin`: JS plugins are alpha and outside semver.
 - Config `.oxlintrc.json`. Lint with `oxlint --max-warnings 0`; fix or disable the rule.
 - `plugins` replaces the default set: `typescript`, `unicorn`, `oxc`, `import`, `promise`, `vitest`, `react`, `jsx-a11y`. No `react-perf`.
 - `categories`: `correctness` = error; `suspicious`, `perf` = warn.
@@ -52,7 +51,6 @@
 ### [ESLint](STACK.md#eslint)
 
 - Flat config `eslint.config.mjs`. No `.eslintrc`, no Biome (`.astro` support experimental).
-- `npm i -D eslint @eslint/js typescript-eslint eslint-plugin-astro eslint-config-prettier`.
 - Config array: `eslintPluginAstro.configs.recommended` (sets Astro parser), `js.configs.recommended`, last `eslintConfigPrettier` (from `eslint-config-prettier/flat`). No `eslint-plugin-prettier`.
 - Lint with `eslint .` (no `src/**` glob: skips `scripts/`, root `sentry.*.config.ts`).
 - `globalIgnores(['dist/', '.astro/', '.wrangler/', 'worker-configuration.d.ts', '.agents/', '.claude/', '.cursor/'])` from `eslint/config`.
@@ -80,7 +78,7 @@
 
 ### [Knip](STACK.md#knip)
 
-- `npm i -D knip`. Astro plugin auto-adds `src/pages/**`, `src/content.config.ts`, `src/middleware.ts`.
+- Astro plugin auto-adds `src/pages/**`, `src/content.config.ts`, `src/middleware.ts`.
 - `knip` in CI, zero issues. Delete unused code/deps; no ignore-list additions except the named exceptions below.
 - Wrangler plugin adds `main` (`src/worker.ts`) as entry; do not list it.
 - `entry` in `knip.json` (replaces default `index`, `main`, `cli`; not an ignore list): at least `src/live.config.ts`, `src/apps/*/pages/**/*.astro!`, `src/apps/*/middleware.ts!`, `src/apps/*/admin/{plugin.ts,pages.tsx}!`, `scripts/*.ts`; add a glob per other file kind registered via `injectRoute()`, `addMiddleware()`, `adminEntry`. `!` = production code for `knip --production`.
@@ -95,8 +93,7 @@
 
 ### [npm](STACK.md#npm) scripts
 
-- Keep template `dev`, `build`, `preview`; add `typecheck`.
-- Add `lint` (`oxlint --max-warnings 0 && eslint . --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
+- Template `package.json`: `dev`, `build`, `preview`, `typecheck`, `lint` (`oxlint --max-warnings 0 && eslint . --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
 - `check` = `npm run format:check && npm run typecheck && npm run lint && npm run knip && npm run test`.
 - Not in `test` or `check`: `build`, `size` (needs `dist/`; → [PERF](PERF.md#client-javascript)), API checks, dependency checks, screenshot and e2e tests (CI only).
 

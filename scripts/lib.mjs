@@ -19,7 +19,10 @@ export const REPO_DOCS = [
   "WHY.md",
   "rules",
 ];
-export const TEMPLATE_FILES = "template/files";
+// A new project takes over this folder. setup.mjs and update.mjs merge
+// its package.json, and copy all other files.
+export const TEMPLATE_DIR = "template";
+export const TEMPLATE_PACKAGE = "package.json";
 // Tools that template/package.json pins but the project does not install:
 // a project devDependency that no code uses would fail Knip.
 export const PIN_ONLY_TOOLS = ["create-emdash", "shadcn"];
@@ -106,6 +109,6 @@ export function assertNpm() {
   const version = result.status === 0 ? result.stdout.trim() : "none";
   if (Number.parseInt(version, 10) >= 11) return;
   fail(
-    `npm 11 or later is required (found ${version}). Use the Node.js LTS version in template/files/.nvmrc, which ships npm 11.`,
+    `npm 11 or later is required (found ${version}). Use the Node.js LTS version in template/.nvmrc, which ships npm 11.`,
   );
 }
