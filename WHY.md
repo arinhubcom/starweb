@@ -846,6 +846,10 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 - One island's own chunk was 156 B in a probe, but the page needs about 60 kB brotli, because every island loads the shared React renderer. A per-island limit alone misses that cost, and a per-page limit alone does not say which island grew.
 
+### Why limits have 10 % headroom
+
+- On a page with a React island (about 63 kB brotli), 10 % leaves about 6.3 kB, less than one 10 kB island, while 20 % leaves about 12.6 kB, so a whole new island could pass the check unnoticed.
+
 ### Why the page limit uses a preview server and not `dist`
 
 - `output: "server"` renders SSR pages at request time, so `dist` has no HTML for them.

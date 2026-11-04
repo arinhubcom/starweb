@@ -20,6 +20,14 @@
 - The script starts `astro preview` on a free port and fetches each path; a redirect to another path, a non-200 status, or a script that fails to load fails the check.
 - Parsing: [parse5](STACK.md#parse5) for HTML, [es-module-lexer](STACK.md#es-module-lexer) (`/js` build) for imports; no regexes. Code in `scripts/check-js-size.ts`, `scripts/lib/page-js.ts`.
 
+### Limit values
+
+- New limit: the `npm run size` measurement plus 10 %, rounded up to a whole kB. → [WHY](../WHY.md#why-limits-have-10--headroom)
+- Before you raise a limit: walk the order in [ARCH](ARCH.md) (Astro), try a lower hydration directive, then lazy `import()`.
+- Raise a limit only in its own commit; the message gives the old value, the new value, and the reason.
+- Lower a limit, in the same commit as the change that shrinks the page or island, when the new limit rule gives a value at least 20 % below the current limit.
+- Code review checks these rules; `npm run size` fails only over a limit, not far under one.
+
 ## Backend
 
 ### [Workers](STACK.md#workers)
