@@ -4,7 +4,7 @@ import type { AstroUserConfig } from "astro";
 import { fontProviders } from "astro/config";
 
 // The Material Symbols font holds only these icons. Add a name here to use it
-// in the Icon component. Names: https://fonts.google.com/icons
+// in the MaterialIcon component. Names: https://fonts.google.com/icons
 export const ICON_NAMES = ["search"] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];

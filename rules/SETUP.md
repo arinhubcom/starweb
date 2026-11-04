@@ -32,7 +32,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 
 ### [Fulldev UI](STACK.md#fulldev-ui)
 
-9. `template/` already holds [Fulldev UI](STACK.md#fulldev-ui): `components.json`, `src/lib/utils.ts`, the button, and the home page button. No `shadcn init`. Add components with `pnpm exec shadcn add`, then apply `tv()` and [MATERIAL](MATERIAL.md). React island → add `@base-ui/react`, `lucide-react`, and their [Knip](STACK.md#knip) exceptions. → [COMPONENTS](COMPONENTS.md), [QUALITY](QUALITY.md) (Unused code)
+9. `template/` already holds [Fulldev UI](STACK.md#fulldev-ui): `components.json`, `src/lib/utils.ts`, the button, and the home page button. No `shadcn init`. Add components with `pnpm exec shadcn add`, then apply `tv()` and [MATERIAL](MATERIAL.md). React island → add `@base-ui/react` and its [Knip](STACK.md#knip) exception. → [COMPONENTS](COMPONENTS.md), [QUALITY](QUALITY.md) (Unused code)
 10. Set the brand color in `SEED` in `scripts/theme.ts`; `pnpm exec tsx scripts/theme.ts` rewrites `src/styles/theme.css` (`setup.mjs` generates it with the default seed, and `src/styles/global.css` imports it). → [MATERIAL](MATERIAL.md) (Color). Keep or change the fonts in `src/lib/fonts.ts`; `pnpm run fonts` checks them. → [MEDIA](MEDIA.md) (Fonts)
 
 ## Auth

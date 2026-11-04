@@ -90,15 +90,15 @@ Images, video, fonts, icons, uploads. Layout shift → [UI-UX](UI-UX.md) (Cumula
 
 ### [Material Symbols](STACK.md#material-symbols)
 
-- UI icons: `<Icon name="search" />` from `@/components/ui/icon`. No Lucide or other icon package for new UI icons.
+- All icons: `<MaterialIcon name="search" />` from `@/components/ui/material-icon`; in a React island, from `@/components/ui/react/material-icon`. No Lucide, Simple Icons, or other icon package; `no-restricted-imports` in `.oxlintrc.json` fails on `lucide-react` and `@lucide/*`, [Knip](STACK.md#knip) on an unused `lucide-static` or `simple-icons`.
 - `fontProviders.googleicons()`, `options.experimental.glyphs` from `ICON_NAMES` in `src/lib/fonts.ts`: a new icon → add its name there; `IconName` rejects other names. Never an empty list (the provider then serves the whole font).
 - One family: Material Symbols Outlined. `display: "block"`, `fallbacks: []`, `optimizedFallbacks: false`, `preload`.
 - Size with a font size: `text-2xl` is 24px, the default. In a button, the size comes from the button.
 - `filled` prop for the `FILL` axis. Other axes follow CSS: `wght` from `font-weight`, `opsz` from the font size.
-- `Icon` is decorative (`aria-hidden`). An icon-only control needs its own `aria-label`.
-- Registry components keep their SVG icons; the button sizes both (`[&_svg]`, `[&_.icon]`).
+- `MaterialIcon` is decorative (`aria-hidden`). An icon-only control needs its own `aria-label`.
+- A registry item with an icon → replace it after `shadcn add` → [COMPONENTS](COMPONENTS.md) (Fulldev UI).
 
 ### SVG
 
-- Logos and other non-icon graphics: local SVG as components (`import Logo from "../assets/logo.svg"`); attributes such as `class` pass as props to `<svg>`.
+- Logos, brand marks (Material Symbols has none), and other graphics: local SVG as components (`import Logo from "../assets/logo.svg"`); attributes such as `class` pass as props to `<svg>`.
 - No inline user SVG; reject SVG uploads.

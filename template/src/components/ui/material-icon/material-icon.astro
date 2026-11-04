@@ -2,7 +2,8 @@
 import type { HTMLAttributes } from "astro/types";
 
 import type { IconName } from "@/lib/fonts";
-import { cn } from "@/lib/utils";
+
+import { iconClass } from "./icon-class";
 
 type Props = Omit<HTMLAttributes<"span">, "children"> & {
   name: IconName;
@@ -13,10 +14,10 @@ const { name, filled = false, class: className, ...props } = Astro.props;
 ---
 
 <span
-  data-slot="icon"
+  data-slot="material-icon"
   aria-hidden="true"
   translate="no"
-  class={cn("icon", filled && "icon-filled", className)}
+  class={iconClass(filled, className)}
   {...props}
 >
   {name}

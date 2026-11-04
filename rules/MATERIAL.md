@@ -112,6 +112,7 @@
   | L | 96 | 48 | 32 | 12 | `h-24 px-12 gap-3 [&_svg]:size-8` |
   | XL | 136 | 64 | 40 | 16 | `h-34 px-16 gap-4 [&_svg]:size-10` |
 
+- `MaterialIcon` in a button follows the same icon sizes: `[&_.icon]:text-xl` (20), `text-2xl` (24), `text-[2rem]` (32), `text-[2.5rem]` (40). `[&_svg]` is for a local SVG, such as a brand mark. → [MEDIA](MEDIA.md) (Icons)
 - XS and S buttons and icon buttons: 48x48px target (Targets).
 
 ### Icon buttons

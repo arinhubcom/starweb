@@ -5,7 +5,7 @@ import { createPublicPageContext } from "emdash/page";
 import LiveSearch from "emdash/ui/search";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
 import { Font } from "astro:assets";
-import { Icon } from "@/components/ui/icon";
+import { MaterialIcon } from "@/components/ui/material-icon";
 import { themeScript } from "@/lib/theme-script";
 import "@/styles/global.css";
 
@@ -97,7 +97,7 @@ const pageCtx = createPublicPageContext({
             {item.label}
           </a>
         ))}
-        <Icon name="search" />
+        <MaterialIcon name="search" />
         <LiveSearch placeholder="Search..." collections={["posts", "pages"]} />
       </nav>
     </header>

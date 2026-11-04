@@ -69,6 +69,12 @@
             "name": "class-variance-authority",
             "message": "Use tv() from tailwind-variants: rules/COMPONENTS.md."
           }
+        ],
+        "patterns": [
+          {
+            "group": ["lucide-react", "lucide-react/**", "@lucide/**"],
+            "message": "Use the Material Symbols Icon component: rules/MEDIA.md."
+          }
         ]
       }
     ],

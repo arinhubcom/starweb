@@ -12,7 +12,11 @@ Tested on 2026-11-04 with astro 7.4.4, which uses unifont 1.0.3:
 - We use Roboto Flex because the Fulldev UI theme sets no font, and it fits Material Symbols. With `opsz` and weights 400 to 700, its `latin` file has 84.6 KB and its `latin-ext` file has 59.1 KB. Inter has 73.0 KB and 133.7 KB. Czech and other Central European text needs both files, so Roboto Flex is about 63 KB smaller there.
 - Roboto Flex has no real italics, only the `slnt` axis, so we set `styles: ["normal"]` and the browser slants the text.
 - We do not set `glyphs` on the text font. It removes every other character, and CMS content can hold any character.
-- A Material Symbols file with one icon has 2.1 KB, so UI icons cost almost nothing. A font icon also takes its color and size from the text.
+- A Material Symbols file with one icon has 2.1 KB, so icons cost almost nothing. A font icon also takes its color and size from the text.
+- All icons are Material Symbols, so a page has one icon style and one source. The registries would bring in three packages: Fulldev UI uses `@lucide/astro` and `lucide-static`, and shadcn/ui uses `lucide-react`. Tested with `shadcn add @fulldev/select @fulldev/icon`: Oxlint fails on the `@lucide/astro` imports, and Knip fails on the unused `lucide-static` and `simple-icons`, which load with `import.meta.glob` and not with an import.
+- The cost is a manual step after each `shadcn add`. The `shadcn` `iconLibrary` setting cannot help: the base-vega registry has only Lucide, Tabler, Hugeicons, Phosphor, and Remix Icon variants.
+- The component is `MaterialIcon` in `src/components/ui/material-icon/` because `@fulldev/icon` writes to `src/components/ui/icon/`, and 18 registry items depend on it, among them headers and footers.
+- Material Symbols has no brand marks, so these stay local SVG files.
 - `display: "block"` applies only to icons. With `swap`, the browser shows the icon name as text until the font loads.
 - `pnpm run fonts` exists because the providers accept bad values without an error. An unknown or out-of-range `variableAxis` value is dropped. An unknown icon name is left out of the subset. With only unknown names, or with an empty list, the build ships the whole icon font.
 - Astro calls `getFontProperties` itself, but it only logs a warning, and it ignores `axes` and icon names. The script uses the same hook and fails.

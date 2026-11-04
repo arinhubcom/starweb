@@ -373,7 +373,7 @@ v4 styles. → [DESIGN](DESIGN.md), [UI-UX](UI-UX.md)
 
 ### Material Symbols
 
-Icon font for UI icons, through the Astro Google Icons font provider. → [MEDIA](MEDIA.md)
+Icon font for all icons, through the Astro Google Icons font provider. → [MEDIA](MEDIA.md)
 
 - docs: https://developers.google.com/fonts/docs/material_symbols
 - github: https://github.com/google/material-design-icons

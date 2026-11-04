@@ -256,6 +256,24 @@ if printf '%s\n' "$OXLINT_OUTPUT" | grep -qF "react(react-in-jsx-scope)"; then
 fi
 echo "ok: oxlint runs the eslint, jsx-a11y, e18e, react-doctor, and type-aware rules"
 
+step "Check that Material Symbols is the only icon source"
+[ -f "$APP_DIR/src/components/ui/material-icon/material-icon.astro" ] || fail "the project has no MaterialIcon"
+[ -f "$APP_DIR/src/components/ui/react/material-icon.tsx" ] || fail "the project has no React MaterialIcon"
+[ ! -e "$APP_DIR/src/components/ui/icon" ] || fail "src/components/ui/icon collides with @fulldev/icon"
+if grep -rqE 'lucide|simple-icons' "$APP_DIR/src" "$APP_DIR/package.json"; then
+  fail "the project uses an icon package, not Material Symbols"
+fi
+ASTRO_PROBE="$APP_DIR/src/icon-probe.astro"
+REACT_PROBE="$APP_DIR/src/icon-probe.tsx"
+printf -- '---\nimport CheckIcon from "@lucide/astro/icons/check";\n---\n\n<CheckIcon />\n' > "$ASTRO_PROBE"
+printf 'import { CheckIcon } from "lucide-react";\n\nexport const Probe = () => <CheckIcon />;\n' > "$REACT_PROBE"
+ICON_LINT="$(cd "$APP_DIR" && pnpm exec oxlint --format=unix src/icon-probe.astro src/icon-probe.tsx || true)"
+rm "$ASTRO_PROBE" "$REACT_PROBE"
+for import in "@lucide/astro/icons/check" "lucide-react"; do
+  printf '%s\n' "$ICON_LINT" | grep -qF "'$import' import is restricted" || fail "oxlint did not report $import: $ICON_LINT"
+done
+echo "ok: MaterialIcon exists, and oxlint fails on Lucide in .astro and .tsx files"
+
 step "Run the checks and pnpm audit at the same time"
 # The test runs the parts of pnpm run check, so check the script text.
 grep -qF '"check": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run fonts && pnpm run test"' "$APP_DIR/package.json" || fail "the check script changed: update this step"
@@ -318,7 +336,7 @@ echo "ok: the home page has the Material 3 button"
 step "Check the fonts and the icon on the home page"
 printf '%s\n' "$HOME_HTML" | grep -q -- '--font-roboto-flex:' || fail "the home page has no text font"
 printf '%s\n' "$HOME_HTML" | grep -q -- '--font-material-symbols:' || fail "the home page has no icon font"
-printf '%s\n' "$HOME_HTML" | grep -q 'data-slot="icon"' || fail "the home page has no icon"
+printf '%s\n' "$HOME_HTML" | grep -q 'data-slot="material-icon"' || fail "the home page has no icon"
 if printf '%s\n' "$HOME_HTML" | grep -qE 'fonts\.(googleapis|gstatic)\.com'; then
   fail "the home page loads a font from Google"
 fi
