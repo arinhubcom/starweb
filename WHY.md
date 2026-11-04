@@ -907,7 +907,8 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 ### Why a template, setup.mjs, and CI
 
-- A list of 60 manual steps gave a different result each time: an agent could skip a step, change a version, or copy a config with a mistake. Files in `template/files/` are the same each time and carry the config that a test project proved.
+- A list of 60 manual steps gave a different result each time: an agent could skip a step, change a version, or copy a config with a mistake. Files in `template/` are the same each time and carry the config that a test project proved.
+- `template/` has the layout of a project: `package.json` and the configs sit at its root, and a new project takes over the folder. So the rules hold decisions and no install commands, which could drift from the pinned versions.
 - `template/package.json` pins every version, including the `create-emdash` version. So the starter and the added packages are the ones that were tested together, and not the newest ones of the day.
 - `template/package.json` also pins `shadcn`, so that `shadcn init` runs at a tested version and not at `@latest`. `setup.mjs` does not add `shadcn` (or `create-emdash`) to the project: a devDependency that no code uses fails Knip before Fulldev UI is installed. The init adds `shadcn` to the project.
 - `scripts/setup.mjs` does the mechanical part: it copies the files, patches the starter files, merges the pinned versions, and installs. The manual steps in [SETUP.md](rules/SETUP.md) keep only the work that needs a decision or an account: Cloudflare, optional features, and deploy.
@@ -916,7 +917,7 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - The template uses the newest Node.js LTS version (24 on 2026-10-15). The first CI run used Node.js 22.23.3, which ships npm 10.9, and `npm install` failed with `Cannot read properties of null (reading 'edgesOut')`. The same install failed locally with npm 10.9.4, also without `.npmrc`, and passed with npm 11.11.0. Node.js 24 ships npm 11, so `setup.mjs` and `update.mjs` stop early when npm is older than 11. Node.js 26 is newer but not LTS yet.
 - CI runs `scripts/test-template.sh` on each change to `template/`, `scripts/`, or `rules/`, and every Monday. The script creates the pinned starter, runs `setup.mjs`, and runs `npm run check`, `npm run build`, and `npm run preview` with checks of the responses. The weekly run finds a change in the starter or in a registry package that no commit in this repository caused.
 - Dependabot groups the whole template in one group, `stack`, in the Starweb repository. One PR updates the set, and one CI run tests the set together. Separate PRs would test each package alone, and a pair that must match (for example `astro` and `@astrojs/cloudflare`) could fail in both.
-- The project `dependabot.yml` in `template/files/` uses the groups from [DEPS.md](rules/DEPS.md), because a project has its own review flow.
+- The project `dependabot.yml` in `template/` uses the groups from [DEPS.md](rules/DEPS.md), because a project has its own review flow.
 
 ### Why update.mjs uses a three-way merge
 

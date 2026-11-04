@@ -7,11 +7,11 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 ### [npm](STACK.md#npm)
 
 - npm only ([SETUP](SETUP.md)); no pnpm/Yarn/Bun; only `package-lock.json` in the repository. Commit it with each `package.json` change.
-- Add with `npm i <package>` / `npm i -D <package>`; never edit versions by hand.
+- Package that every project needs: exact version in `template/package.json`. Project package: let npm write the version; never edit it by hand.
 - CI: `npm ci`, not `npm install`.
-- No `--legacy-peer-deps`; fix the conflict. `emdash-better-auth` needs React ≥ 19.2.6 and the starter pins 19.2.4: template pins 19.3.1 → `npm i emdash-better-auth`; without the template → `npm i react@^19.2.6 react-dom@^19.2.6 emdash-better-auth`.
+- No `--legacy-peer-deps`; fix the conflict. `emdash-better-auth` needs React ≥ 19.2.6: template pins 19.3.1.
 - Delete `pnpm-workspace.yaml` from the starter (else `shadcn init` uses pnpm, writes `pnpm-lock.yaml`). `setup.mjs` does it.
-- After adding `min-release-age`: delete the starter `package-lock.json` and `node_modules`, run `npm install` (starter lock may pin versions younger than 3 days). `setup.mjs` does it.
+- `setup.mjs` deletes the starter `package-lock.json` and `node_modules` and installs again with `min-release-age` (starter lock may pin versions younger than 3 days).
 - Node.js: newest LTS; major in `.nvmrc` (`24`); move up once the next major reaches LTS on the [Node.js release schedule](https://github.com/nodejs/release#release-schedule). No non-LTS. Astro ≥ 7.4.2 needs Node.js ≥ 22.23.4.
 - npm ≥ 11; npm 10 fails with `Cannot read properties of null (reading 'edgesOut')`. Node.js 24 ships npm 11.
 - CI Node.js: `actions/setup-node` with `node-version-file` or `node-version` from the same value as local, `cache: npm`.
@@ -71,7 +71,7 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 - Size before/after: `npx wrangler deploy --outdir bundled/ --dry-run`. Limit 64 MiB uncompressed; startup limit 1 second.
 - Maintained: release in last 12 months, open issues answered (npmjs.com, GitHub).
 - `devDependencies` if only build/tests/scripts use it; `dependencies` if the Worker bundle needs it.
-- Remove: `npm uninstall <package>`, commit the lockfile.
+- Unused package → remove it, commit the lockfile.
 
 ## Compatibility
 

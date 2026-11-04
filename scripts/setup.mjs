@@ -16,6 +16,8 @@ import {
   REPO_DOCS,
   assertNpm,
   STATE_FILE,
+  TEMPLATE_DIR,
+  TEMPLATE_PACKAGE,
   fail,
   listFiles,
   readJson,
@@ -30,7 +32,7 @@ import {
 } from "./lib.mjs";
 import { starterPatches } from "./setup-patches.mjs";
 
-const templateDir = join(repoRoot, "template");
+const templateDir = join(repoRoot, TEMPLATE_DIR);
 const DEFAULT_SITE = "https://example.com";
 const GITIGNORE_LINES = [
   "test-results/",
@@ -117,11 +119,13 @@ function prepareAgentFiles(dir) {
 }
 
 function copyOverlay(dir, values) {
-  const filesDir = join(templateDir, "files");
-  for (const relative of listFiles(filesDir)) {
+  const relatives = listFiles(templateDir).filter(
+    (relative) => relative !== TEMPLATE_PACKAGE,
+  );
+  for (const relative of relatives) {
     const target = join(dir, relative);
     mkdirSync(dirname(target), { recursive: true });
-    const text = readText(join(filesDir, relative));
+    const text = readText(join(templateDir, relative));
     writeFileSync(target, substitute(text, values));
   }
 }
@@ -129,7 +133,7 @@ function copyOverlay(dir, values) {
 function mergePackageJson(dir, name) {
   const projectPath = join(dir, "package.json");
   const project = readJson(projectPath);
-  const template = readJson(join(templateDir, "package.json"));
+  const template = readJson(join(templateDir, TEMPLATE_PACKAGE));
   const { deploy: _deploy, ...starterScripts } = project.scripts ?? {};
   const templateDevDeps = Object.fromEntries(
     Object.entries(template.devDependencies).filter(

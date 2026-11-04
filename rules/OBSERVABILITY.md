@@ -58,7 +58,7 @@
 
 ### Sentry for [Astro](STACK.md#astro) on Cloudflare
 
-- Install `@sentry/astro` and `@sentry/cloudflare`. Astro ≥ 6, `@astrojs/cloudflare` ≥ 13.
+- Packages `@sentry/astro`, `@sentry/cloudflare`. Astro ≥ 6, `@astrojs/cloudflare` ≥ 13.
 - Keep `"main": "./src/worker.ts"`. Not `sentry.server.config.ts`, not the `@astrojs/cloudflare/entrypoints/server` handler (replaces the [EmDash](STACK.md#emdash) handler). → [ARCH](ARCH.md) (Background work)
 - `src/worker.ts`: `export default Sentry.withSentry((env) => ({ dsn: env.SENTRY_DSN, ... }), { ...handler, scheduled: createScheduledHandler() })`, `handler` from `@emdash-cms/cloudflare/worker`. Wraps `fetch`, `scheduled`, `email`, `queue`, `tail` of that object; keep `queue()` in it.
 - [Workflow](STACK.md#workflows) and [Durable Object](STACK.md#durable-objects) classes: separate named exports of `src/worker.ts`, not wrapped → `Sentry.instrumentWorkflowWithSentry` / `instrumentDurableObjectWithSentry`.

@@ -43,7 +43,7 @@
 ### [Storybook Astro](STACK.md#storybook-astro)
 
 - `@storybook-astro/framework` in `.storybook/main.ts`; not the `storybook-astro` package.
-- Manual install: `npm install -D storybook @storybook/builder-vite @storybook/react @storybook-astro/framework`; not `npm create storybook`.
+- Dev packages `storybook`, `@storybook/builder-vite`, `@storybook/react`, `@storybook-astro/framework`; not `npm create storybook`.
 - `@storybook-astro/framework` 1.13 or newer for `@astrojs/react` 7 and Vitest 5; no TypeScript 7 (peer `typescript ^5.0.0 || ^6.0.0`, docgen is skipped).
 - React islands: `react({ include: ['**/react/**'] })` from `@storybook-astro/framework/integrations` (`src/components/ui/react/*.tsx`).
 - Meta of each React story: `parameters: { renderer: 'react' }`, not `'@storybook/react'`.

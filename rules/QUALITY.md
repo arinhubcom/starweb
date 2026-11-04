@@ -17,7 +17,6 @@
 ### [Astro](STACK.md#astro) check
 
 - `npm run typecheck` before commit: no errors or warnings.
-- `@astrojs/check` as dev dependency.
 - `typecheck` = `astro check --minimumFailingSeverity warning`.
 
 ## Lint
@@ -66,7 +65,7 @@
 
 ### [Knip](STACK.md#knip)
 
-- `npm i -D knip`. Astro plugin auto-adds `src/pages/**`, `src/content.config.ts`, `src/middleware.ts`.
+- Astro plugin auto-adds `src/pages/**`, `src/content.config.ts`, `src/middleware.ts`.
 - `knip` in CI, zero issues. Delete unused code/deps; no ignore-list additions except the named exceptions below.
 - Wrangler plugin adds `main` (`src/worker.ts`) as entry; do not list it.
 - `entry` in `knip.json` (replaces default `index`, `main`, `cli`; not an ignore list): at least `src/live.config.ts`, `src/apps/*/pages/**/*.astro!`, `src/apps/*/middleware.ts!`, `src/apps/*/admin/{plugin.ts,pages.tsx}!`, `scripts/*.ts`; add a glob per other file kind registered via `injectRoute()`, `addMiddleware()`, `adminEntry`. `!` = production code for `knip --production`.
@@ -81,8 +80,7 @@
 
 ### [npm](STACK.md#npm) scripts
 
-- Keep template `dev`, `build`, `preview`; add `typecheck`.
-- Add `lint` (`oxlint --type-aware --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
+- Template `package.json`: `dev`, `build`, `preview`, `typecheck`, `lint` (`oxlint --type-aware --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
 - `check` = `npm run format:check && npm run typecheck && npm run lint && npm run knip && npm run test`.
 - Not in `test` or `check`: `build`, `size` (needs `dist/`; → [PERF](PERF.md#client-javascript)), API checks, dependency checks, screenshot and e2e tests (CI only).
 
