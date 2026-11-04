@@ -58,7 +58,7 @@
 - `entry` in `knip.json` (replaces default `index`, `main`, `cli`; not an ignore list): at least `src/live.config.ts`, `src/apps/*/pages/**/*.astro!`, `src/apps/*/middleware.ts!`, `src/apps/*/admin/{plugin.ts,pages.tsx}!`, `scripts/*.ts`; add a glob per other file kind registered via `injectRoute()`, `addMiddleware()`, `adminEntry`. `!` = production code for `knip --production`.
 - Keep the template `knip.json` (`entry` only, no ignore list).
 - After installing Fulldev UI only: `"ignoreIssues": { "src/components/ui/**": ["files", "exports", "types"], "src/lib/utils.ts": ["files"] }`, `"ignoreDependencies": ["cn", "tailwind-variants"]`. No other folders. Remove `"files"` entries and the two packages once pages use the components and `cn`.
-- `ignoreDependencies`, only after installing and until code uses them: `@base-ui/react`, `lucide-react` (React components); `@storybook/builder-vite` (Storybook); `@vitest/expect`, `@vitest/spy`, `@vitest/utils`, `@vitest/pretty-format` (Storybook with Vitest). No other packages.
+- `ignoreDependencies`, only after installing and until code uses them: `@base-ui/react`, `lucide-react` (React components); `@storybook/builder-vite` (Storybook). No other packages.
 - No `.agents/**` in `ignore` (not reported).
 - Storybook, Vitest, Playwright plugins find stories, `.storybook/`, tests, `playwright.config.ts`: not in `entry`.
 - `knip --production` finds code used only by tests and stories.

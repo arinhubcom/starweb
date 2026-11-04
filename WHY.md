@@ -582,27 +582,28 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 ### Why Storybook Astro
 
 - Storybook does not support Astro officially. Astro is not on the list of supported frameworks.
-- [`@storybook-astro/framework`](https://github.com/storybook-astro/storybook-astro) is a community framework. Version 1.12.0 supports Astro 5, 6, and 7 and Storybook 10. It renders `.astro` components with the Astro Container API and renders React islands next to them, so one Storybook covers the whole UI.
+- [`@storybook-astro/framework`](https://github.com/storybook-astro/storybook-astro) is a community framework. Version 1.15.0 supports Astro 5, 6, and 7 and Storybook 10. It renders `.astro` components with the Astro Container API and renders React islands next to them, so one Storybook covers the whole UI.
 - Portable stories (`composeStories()`, `renderStory()`) let tests reuse the states from the stories, as qset v4 does with `composeStories()` for React.
-- The Storybook Test addon works with Astro since version 1.11.0 ([PR #174](https://github.com/storybook-astro/storybook-astro/pull/174), released on 2026-08-27). The project roadmap still lists it as unreleased.
+- The Storybook Test addon works with Astro since version 1.11.0 ([PR #174](https://github.com/storybook-astro/storybook-astro/pull/174), released on 2026-08-27).
 
 ### Storybook Astro, tested locally
 
-Tested on 2026-10-14 in a temporary project with Astro 7.3.8, `@astrojs/cloudflare` 14.3.4, `@astrojs/react` 6.0.6, React 19.3.1, Storybook 10.6.2, `@storybook-astro/framework` 1.12.0, Vitest 4.1.11, and Playwright 1.64.1:
+Tested on 2026-11-04 in a temporary project with Astro 7.4.4, `@astrojs/cloudflare` 14.4.3, `@astrojs/react` 7.1.2, React 19.3.1, Storybook 10.6.5, `@storybook-astro/framework` 1.15.0, Vitest 5.0.5, and Playwright 1.64.1:
 
 - `storybook build` and `storybook dev --smoke-test` work with the Cloudflare adapter in `astro.config.mjs`. The build prints a non-fatal `Failed to create the dev server app: transport was disconnected` error.
-- `@astrojs/react` 7.x fails to install with `ERESOLVE`: the peer range of the framework is `^4.2.3 || ^5.0.0 || ^6.0.0`.
-- `storybook build` fails without `@storybook/react` (`failed to resolve import "@storybook/react/entry-preview"`). The README install line does not list it.
-- A React story needs `parameters: { renderer: 'react' }`. The docs show `renderer: '@storybook/react'`, which fails with `Renderer '@storybook/react' not found. Available renderers: react`.
+- `@astrojs/react` 7 and Vitest 5 install without `ERESOLVE`. Version 1.13.0 widened the peer ranges.
+- `storybook build` fails without `@storybook/react` (`failed to resolve import "@storybook/react/entry-preview"`). The install docs now list it.
+- A React story needs `parameters: { renderer: 'react' }`, as the docs now show. `renderer: '@storybook/react'` fails with `Renderer '@storybook/react' not found. Available renderers: react`.
 - `renderStory()` renders only Astro components. A React story fails with `Story meta.component must be an Astro component factory`.
-- In browser mode, npm hoisted the 3.2.4 copies of `@vitest/expect`, `@vitest/spy`, `@vitest/utils`, and `@vitest/pretty-format` that Storybook depends on, and the tests failed with missing exports (`createDOMElementFilter`, `ChaiStyleAssertions`). Installing them at the Vitest version fixed it.
-- `@storybook/addon-vitest` ran the Card smoke test and the Counter `play` function in Chromium. A wrong expected value made the `play` function fail, so the test really runs.
-- Upstream issues from this test: [#191](https://github.com/storybook-astro/storybook-astro/issues/191) (docs: renderer value, install line, fonts note, roadmap status), [#192](https://github.com/storybook-astro/storybook-astro/issues/192) (`@astrojs/react` 7), and [#193](https://github.com/storybook-astro/storybook-astro/issues/193) (Vitest 5). When one is fixed, update the matching rule in [TESTING.md](rules/TESTING.md) or [DEPS.md](rules/DEPS.md).
+- In browser mode, a clean install passes without `@vitest/*` packages in `package.json`. npm still hoists the 3.2.4 copy of `@vitest/expect` that Storybook depends on, and it does not break Vitest 5.0.5. On Vitest 4.1.11, npm hoisted 3.2.4 copies of four `@vitest/*` packages, and the tests failed with missing exports (`createDOMElementFilter`, `ChaiStyleAssertions`).
+- `@storybook/addon-vitest` ran the Card smoke test and the Counter `play` function in Chromium, and an ARIA snapshot test passed next to them. A wrong expected value made the `play` function and the ARIA snapshot fail, so the tests really run.
+- `it.effect()` from `@effect/vitest` 4.1.1 passes in Node.js and in workerd with `@cloudflare/vitest-plugin` 1.4.11. A wrong expected value makes it fail.
+- Upstream issues from the first test on 2026-10-14, all fixed: [#191](https://github.com/storybook-astro/storybook-astro/issues/191) (docs, in 1.14.0), [#192](https://github.com/storybook-astro/storybook-astro/issues/192) (`@astrojs/react` 7, in 1.13.0), and [#193](https://github.com/storybook-astro/storybook-astro/issues/193) (Vitest 5, in 1.13.0).
 
 ### Risks of Storybook Astro
 
 - The project is in active development, and its APIs can change between releases.
-- Its peer dependencies block Vitest 5 (`vitest ^4.1.0`) and `@astrojs/react` 7.
+- Its peer dependencies exclude TypeScript 7 (`typescript ^5.0.0 || ^6.0.0`). With TypeScript 7, docgen skips component descriptions and props tables and prints a warning, per the 1.13.0 changelog.
 - In static builds, Controls do not change the args of Astro stories.
 - `npm create storybook` does not detect Astro, so the setup is manual.
 - `renderMode: 'server'` needs a Node.js server. Static mode needs no server.
@@ -613,7 +614,7 @@ Tested on 2026-10-14 in a temporary project with Astro 7.3.8, `@astrojs/cloudfla
 
 ### Astro fonts in Storybook
 
-Storybook Astro does not serve fonts the same way as the site. This is from the source of `vitePluginAstroFonts.ts` in version 1.12.0, and from the roadmap:
+Storybook Astro does not serve fonts the same way as the site. This is from the built source of version 1.15.0, and from the README:
 
 - It reads the font families from `fonts` in `astro.config.*` and calls each provider (Google, Bunny, Fontsource, local) to get `@font-face` data.
 - It writes `@font-face` rules with the remote URLs that the provider returns. It does not copy the font files into the Storybook build, as `astro build` does.
@@ -626,10 +627,10 @@ What this means for tests:
 - A screenshot test of a story needs network access to the font provider. trendaro-fe blocks all external requests in screenshot tests, so its screenshots never use the web font.
 - A story screenshot can differ from the real page. Take screenshots of full pages with Playwright against `astro preview`, which serves the built font files.
 
-### Why Vitest 4.1 and not Vitest 5
+### Why Vitest 5
 
-- `@storybook-astro/framework` 1.12.0 accepts only `vitest ^4.1.0`. `@cloudflare/vitest-plugin` 1.4.2 and `@storybook/addon-vitest` 10.6.2 also accept Vitest 5.
-- `@effect/vitest` 4.x needs Vitest 5 (`>=5.0.0 <6.0.0`), so it cannot run next to Storybook Astro. Until Storybook Astro supports Vitest 5, tests run Effect code with `Effect.runPromise()`.
+- `@storybook-astro/framework` accepts `vitest ^4.1.0 || ^5.0.0` since 1.13.0. `@cloudflare/vitest-plugin` 1.4.11 and `@storybook/addon-vitest` 10.6.5 also accept Vitest 5.
+- `@effect/vitest` 4.x needs Vitest 5 (`>=5.0.0 <6.0.0`), so it can now run next to Storybook Astro.
 
 ### Why `@cloudflare/vitest-plugin`
 
@@ -695,12 +696,6 @@ What Dependabot does not have, and what the rules do instead:
 - **One schedule per ecosystem.** Renovate can set a schedule for one package. Dependabot sets `schedule` per entry in `updates`.
 
 Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference) and the `fetch-metadata` README (v3.1.0). A `dependabot.yml` with `cooldown`, two groups, and three `ignore` items passes `check-jsonschema --builtin-schema vendor.dependabot`, and the check rejects a misspelled `cooldown` key.
-
-### Why Dependabot holds back Vitest 5 and `@astrojs/react` 7
-
-- `@storybook-astro/framework` 1.12.0 accepts only `vitest ^4.1.0` and `@astrojs/react ^4.2.3 || ^5.0.0 || ^6.0.0`. Read [Why Vitest 4.1 and not Vitest 5](#why-vitest-41-and-not-vitest-5).
-- Without `ignore`, Dependabot opens major update PRs for these packages, and `@astrojs/react` 7 would arrive in the `astro` group PR. A local install of `@astrojs/react` 7 next to Storybook Astro failed with `ERESOLVE`.
-- Upstream issues: [#192](https://github.com/storybook-astro/storybook-astro/issues/192) (`@astrojs/react` 7) and [#193](https://github.com/storybook-astro/storybook-astro/issues/193) (Vitest 5). Remove the `ignore` items when they are fixed.
 
 ## Architecture
 

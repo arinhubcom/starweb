@@ -34,11 +34,6 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 - npm group `astro`: `patterns: ["astro", "@astrojs/*", "wrangler", "emdash", "@emdash-cms/*"]`. Merge by hand after the Compatibility checks.
 - npm group `dev-dependencies`: `dependency-type: "development"`, `update-types: ["minor", "patch"]`.
 
-### Dependabot ignore
-
-- npm `ignore` until Storybook Astro supports them: `vitest` and `@vitest/*` with `versions: [">=5.0.0"]`; `@astrojs/react` with `versions: [">=7.0.0"]`. → [TESTING](TESTING.md)
-- Remove an item when `@storybook-astro/framework` peer dependencies allow the new major.
-
 ### Dependabot automerge
 
 - Workflow `.github/workflows/dependabot-automerge.yml` (no automerge option in `dependabot.yml`).

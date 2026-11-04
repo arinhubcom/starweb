@@ -22,13 +22,6 @@ updates:
         update-types:
           - "minor"
           - "patch"
-    ignore:
-      - dependency-name: "vitest"
-        versions: [">=5.0.0"]
-      - dependency-name: "@vitest/*"
-        versions: [">=5.0.0"]
-      - dependency-name: "@astrojs/react"
-        versions: [">=7.0.0"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

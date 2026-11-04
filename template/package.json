@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.3",
-    "@astrojs/react": "6.0.6",
+    "@astrojs/react": "7.1.2",
     "@emdash-cms/cloudflare": "1.4.0",
     "@tailwindcss/vite": "4.3.3",
     "astro": "7.4.4",
@@ -31,14 +31,14 @@
   "devDependencies": {
     "@astrojs/check": "0.9.12",
     "@cloudflare/vitest-plugin": "1.4.11",
-    "@cloudflare/workers-types": "5.20261031.1",
+    "@cloudflare/workers-types": "5.20261101.1",
     "@eslint/js": "10.0.1",
-    "@vitest/coverage-istanbul": "4.1.11",
+    "@vitest/coverage-istanbul": "5.0.5",
     "create-emdash": "1.4.0",
     "eslint": "10.14.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-astro": "3.2.1",
-    "knip": "6.44.0",
+    "knip": "6.44.1",
     "prettier": "3.9.10",
     "prettier-plugin-astro": "1.1.2",
     "prettier-plugin-tailwindcss": "0.8.1",
@@ -46,7 +46,7 @@
     "tsx": "4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1",
-    "vitest": "4.1.11",
+    "vitest": "5.0.5",
     "wrangler": "4.156.0"
   }
 }

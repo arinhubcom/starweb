@@ -4,10 +4,9 @@
 
 ### [Vitest](STACK.md#vitest)
 
-- Vitest 4.1; no Vitest 5 while `@storybook-astro/framework` peers only `vitest ^4.1.0` → [WHY](../WHY.md#why-vitest-41-and-not-vitest-5).
-- `@vitest/expect`, `@vitest/spy`, `@vitest/utils`, `@vitest/pretty-format` at the same version as `vitest`; no hoisted 3.x copies from Storybook.
+- Vitest 5 → [WHY](../WHY.md#why-vitest-5).
 - Relative imports in tests and tested code; `@/` does not resolve (else add `resolve.alias` `@` in `vitest.config.ts`; the template uses relative).
-- No `@effect/vitest` 4.x; `Effect.runPromise()` in tests.
+- `Effect.runPromise()` in tests, or `it.effect()` from `@effect/vitest` at the `effect` version.
 - No `vitest -u` in the PR workflow (no snapshot writes when `CI` is set; a missing snapshot fails). Update only in the manual workflow (Screenshots).
 
 ## Unit and integration tests
@@ -45,7 +44,7 @@
 
 - `@storybook-astro/framework` in `.storybook/main.ts`; not the `storybook-astro` package.
 - Manual install: `npm install -D storybook @storybook/builder-vite @storybook/react @storybook-astro/framework`; not `npm create storybook`.
-- `@astrojs/react` 6.x; no 7.x while the framework peers `^4.2.3 || ^5.0.0 || ^6.0.0`.
+- `@storybook-astro/framework` 1.13 or newer for `@astrojs/react` 7 and Vitest 5; no TypeScript 7 (peer `typescript ^5.0.0 || ^6.0.0`, docgen is skipped).
 - React islands: `react({ include: ['**/react/**'] })` from `@storybook-astro/framework/integrations` (`src/components/ui/react/*.tsx`).
 - Meta of each React story: `parameters: { renderer: 'react' }`, not `'@storybook/react'`.
 - `renderMode: 'static'` (default); no `'server'`.
