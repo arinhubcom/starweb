@@ -25,7 +25,7 @@
 - New limit: the `npm run size` measurement plus 10 %, rounded up to a whole kB. → [WHY](../WHY.md#why-limits-have-10--headroom)
 - Before you raise a limit: walk the order in [ARCH](ARCH.md) (Astro), try a lower hydration directive, then lazy `import()`.
 - Raise a limit only in its own commit; the message gives the old value, the new value, and the reason.
-- Lower a limit, in the same commit as the change that shrinks the page or island, when the new limit rule gives a value at least 20 % below the current limit.
+- Lower a limit, in the same commit as the change that shrinks the page or island, when the new limit rule gives a value at least 10 % below the current limit.
 - Code review checks these rules; `npm run size` fails only over a limit, not far under one.
 
 ## Backend
@@ -49,7 +49,7 @@
 ### [Astro](STACK.md#astro) route caching
 
 - `cache: { provider: cacheCloudflare() }` (from `@astrojs/cloudflare/cache`) in `astro.config` turns on Workers Cache. Rules: `Astro.cache.set({ maxAge, swr, tags })` or `routeRules`; per-user pages `Astro.cache.set(false)`; purge `cache.invalidate()`.
-- Verify Workers Cache on the account first (private-beta origin: without access nothing is served from cache and `cache.invalidate()` throws); test a hit on the deployed Worker.
+- Test a cache hit on the deployed Worker.
 - Cache API for page data (slow upstream `fetch`): `caches.default` `match()`/`put()`, `put()` inside `Astro.locals.cfContext.waitUntil()`; single data center.
 - Workers KV for small, rarely changing, widely read data (config, flags): `env.MY_KV.get(key, { cacheTtl })` from `cloudflare:workers`; writes take ≥ 60 s to propagate, never for data that must be fresh.
 - Images, fonts, LCP image → [MEDIA](MEDIA.md).

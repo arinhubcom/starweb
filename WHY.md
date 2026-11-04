@@ -38,7 +38,7 @@ This page explains why Starweb uses Astro, Cloudflare Workers, and EmDash, and w
 
 Cloudflare gives three cache layers:
 
-1. **CDN cache (main layer):** the Cloudflare edge caches full responses, including SSR pages. Astro route caching (`Astro.cache.set()` with the `cacheCloudflare()` provider) sets the cache rules. A cache hit does not run the Worker, so it is the fastest and cheapest path.
+1. **Workers Cache (main layer):** Cloudflare caches full responses, including SSR pages. Astro route caching (`Astro.cache.set()` with the `cacheCloudflare()` provider) sets the cache rules. A cache hit does not run the Worker, so it is the fastest and cheapest path.
 2. **Cache API:** the Worker reads and writes responses with `caches.default`. The data stays in one data center. Use it for fine control in code.
 3. **Workers KV:** a global key-value store. Use it for data that many locations read often and that changes rarely.
 
@@ -222,6 +222,13 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 - shadcn/ui also has `radix-*` styles that import `radix-ui`. The style cannot change after init, so a project set up with a Radix style must start again.
 - Component sizes (for example `h-9`) are not MD3 sizes. We change them after install.
 
+## [Kumo](https://github.com/cloudflare/kumo)
+
+### Why
+
+- `@emdash-cms/admin` depends on `@cloudflare/kumo`. An admin page of a native plugin that uses Kumo looks the same as the rest of the EmDash admin.
+- Site and app code stay on Fulldev UI and Material Design 3, so the site has one design system.
+
 ## [Material Design 3](https://m3.material.io/foundations/layout/layout-overview)
 
 ### Why
@@ -243,6 +250,11 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 
 - The Expressive segmented menu item is 44px, but the Targets rule needs a 48px target, and stacked items cannot extend their targets into each other. The Compose standard menu item is 48dp (`MenuListItemContainerHeight`).
 - MDC chips are 32dp with a 48dp minimum touch target. Rows need 16px between them so the hit areas do not overlap.
+
+### Why the expanded rail and not the navigation drawer
+
+- The Material Components for Android docs say that the navigation drawer is being deprecated in Material 3 Expressive, and they point to the expanded navigation rail.
+- The same docs say that the expanded rail has "mostly the same functionality" and "adapts better across window size classes".
 
 ### What we do not take
 
@@ -312,7 +324,7 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 
 ### Why the theme script has a CSP hash
 
-- Astro's CSP hashes only the scripts that it processes. It does not hash `is:inline` scripts (tested with Astro 7.3.8), so the one allowed inline script needs its hash in `csp.scriptDirective.hashes`.
+- Astro's CSP hashes only the scripts that it processes. It does not hash `is:inline` scripts (tested on 2026-11-04 with Astro 7.4.4), so the one allowed inline script needs its hash in `csp.scriptDirective.hashes`.
 
 ### Why a session flash message
 
@@ -361,6 +373,7 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 ### x402
 
 - Stripe supports x402: payments in USDC go to a Stripe deposit address and are recorded as PaymentIntents. This is a preview API, mainnet needs the Coinbase CDP facilitator, and stablecoin payments are open by default only to US businesses.
+- `@emdash-cms/x402` 1.4.0 has one facilitator option, `facilitatorUrl`, which defaults to the x402.org testnet facilitator. The package has no option for Coinbase CDP API keys.
 - No MoR in the table supports x402. Treat x402 as an extra channel for agents, not as the main billing.
 
 ## SaaS
@@ -385,6 +398,12 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 - Cloudflare is certified under the EU-U.S. Data Privacy Framework, and its DPA includes the EU Standard Contractual Clauses.
 - A database without a jurisdiction needs only a location hint, and the Worker can run near it with Targeted Placement.
 
+### Why no D1 read replication
+
+- EmDash server-rendered requests make several D1 round trips, so the EmDash docs run the Worker near the primary with Targeted Placement. The same docs say: "Do not enable D1 read replicas with Targeted Placement."
+- Without replicas, every query uses the nearby primary, even with `session: "auto"` and `coalesce: true`. The rules remove both options, so the config does not suggest replication.
+- Cost: reads do not scale out to replicas, and a visitor far from the primary waits longer.
+
 ### Why one project and one domain
 
 - A small app does not need a second Worker. One deploy, one domain, and one session cookie are simpler.
@@ -395,7 +414,7 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 
 - No multi-tenancy: only global roles, no per-organization data scoping. Issue [emdash-cms/emdash#52](https://github.com/emdash-cms/emdash/issues/52) asked for it and was closed without a feature.
 - Content types fit editorial content (drafts, revisions, slugs), not high-volume app data.
-- No documented public API to write content from app code on the server.
+- No documented direct call to write content from app code on the server. App code uses the REST API, the MCP server, or a plugin with `ctx.content`. `emdash` 1.4.0 exports `handleContentCreate` from its package root, but the docs do not describe it as a public API.
 - Every request runs EmDash middleware, unless the `outer` option skips it.
 - Plugin API routes need admin permissions by default, so they do not fit customer traffic.
 
@@ -415,6 +434,7 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 - A native EmDash plugin puts the app admin next to the content admin, with the same login and roles.
 - Analytics Engine stores many small events cheaply. One D1 row per event costs writes and storage.
 - Presigned URLs send large uploads straight to R2, so they do not use Worker CPU time or memory.
+- Standard Webhooks gives fixed headers and signatures, so customers verify outgoing webhooks with existing libraries. Svix adds a customer portal, so it comes in only when customers need one.
 - A test that checks tenant isolation catches the most costly SaaS bug: one customer sees the data of another.
 
 ### Why micro frontends per app
@@ -425,8 +445,8 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 - We compose the apps at build time, with Astro integrations (`injectRoute`, `addMiddleware`). All apps run in one Worker, so a request has no extra hop, and all apps share one login, one layout, and one design system.
 - Runtime composition (each app in its own Worker, joined by routes or service bindings) gives separate deploys, but each Worker needs its own copy of the auth and layout code. We keep it as the next step, not the start.
 - The admin of an app is a native EmDash plugin in the same folder. It runs in the same Worker, so it can use the app repositories and bindings. Staff manage app data in the EmDash admin, with no second admin panel.
-- Tested on 2026-10-14 with Astro 7.3 and `@astrojs/cloudflare`: injected pages, catch-all routes, app middleware, and grouped actions work in `wrangler dev`.
-- Tested on 2026-10-14 with EmDash 1.2.0: a native plugin in `src/apps/app1/admin/` shows an admin page in the EmDash sidebar and reads `APP1_DB` through the app repository, in `astro dev` and in the production build with `wrangler dev`.
+- Tested on 2026-11-04 with Astro 7.4.4 and `@astrojs/cloudflare` 14.4.3: injected pages, catch-all routes, app middleware, and grouped actions work in `astro preview`. A prerendered injected page comes from static assets, so app middleware does not run for it.
+- Tested on 2026-11-04 with EmDash 1.4.0: a native plugin in `src/apps/app1/admin/` shows an admin page in the EmDash sidebar and reads `APP1_DB` through the app repository, in `astro dev` and in the production build with `astro preview`. The preview test reused a session cookie from `astro dev`, not a passkey login.
 
 ### When to split the app into a separate Worker
 
@@ -483,6 +503,12 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 
 - `Content-Type` often carries `; charset=utf-8`, so a strict string match rejects valid JSON.
 - A `DELETE` without a body has no media type to check.
+
+### Why cursor pagination
+
+- AIP-158 says that page tokens "must be opaque (but URL-safe) strings". A client cannot depend on what is in a cursor, so the query behind it can change.
+- `cursor` and `nextCursor` are the project names for the AIP-158 fields `page_token` and `next_page_token`.
+- AIP-158 allows an optional `skip` field and does not require it. The rules leave out offsets and page numbers, so each list has one way to page.
 
 ## Deploy
 
@@ -548,6 +574,11 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 - It has no replacement for `wrangler tail` ([cf#68](https://github.com/cloudflare/cf/issues/68)).
 - Check again when `cf` reaches 1.0 and these issues are closed.
 
+### Why `astro preview` and not `wrangler dev`
+
+- `astro build` and `astro preview` run the built Worker in workerd. The Astro Cloudflare docs say that this closely mirrors production behavior.
+- The docs do not say that `wrangler dev` fails. The rule is a project choice: one command, `npm run preview`, so each check runs the same way.
+
 ## Testing
 
 ### Why ARIA snapshots and not DOM snapshots
@@ -556,14 +587,14 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 - An ARIA snapshot stores only the accessibility tree: roles, names, and states. It fails when a label, a role, or a heading level changes, which DOM snapshots miss.
 - trendaro-fe (qset v4) uses `toMatchSnapshot()` on the DOM of each story, through `composeStories()` in jsdom.
 - In Vitest, ARIA snapshots are experimental (Vitest 4.1.4+, per the docs). In Playwright, they are stable.
-- In Vitest, ARIA snapshots work only in browser mode. Tested on 2026-10-14: in happy-dom, `toMatchAriaSnapshot()` fails with `Invalid Chai property` in Vitest 4.1.11 and 5.0.4. The matcher lives in `@vitest/browser` (`packages/browser/src/client/tester/aria.ts`).
-- Tested on 2026-10-14 in Vitest 4.1.11 browser mode: a React story rendered with `composeStories()` from `@storybook/react` and `await Story.run()` gives `- button "Increment": "1"`, so the `play` function runs first. In a `play` function, `expect` from `storybook/test` has no ARIA matchers (`Invalid Chai property`).
+- In Vitest, ARIA snapshots work only in browser mode. Tested on 2026-11-04: in happy-dom, `toMatchAriaSnapshot()` fails with `Invalid Chai property` in Vitest 5.0.5. The matcher lives in `@vitest/browser` (`dist/expect-element.js` in the package).
+- Tested on 2026-11-04 in Vitest 5.0.5 browser mode: a React story rendered with `composeStories()` from `@storybook/react` and `await Story.run()` gives `- button "Increment": "1"`, so the `play` function runs first. `expect` from `storybook/test` has no ARIA matchers (`Invalid Chai property`).
 - Astro stories cannot use Vitest ARIA snapshots: `renderStory()` needs the Vitest config of Storybook Astro, which fails in browser mode (`Module "module" has been externalized for browser compatibility`). Astro components use `screen.getByRole()` queries in happy-dom, and pages use Playwright ARIA snapshots.
 
 ### Why one tool for screenshots
 
 - Vitest `toMatchScreenshot()` needs browser mode, and Astro stories cannot render in browser mode (see above). It would cover only React islands.
-- Playwright takes screenshots of every story in the built Storybook (`iframe.html?id=<story-id>&viewMode=story`) and of full pages on `astro preview`. Tested on 2026-10-14 with Playwright 1.64.1 and Storybook Astro 1.12.0: an Astro story and a React story both give stable baselines.
+- Playwright takes screenshots of every story in the built Storybook (`iframe.html?id=<story-id>&viewMode=story`) and of full pages on `astro preview`. Tested on 2026-11-04 with Playwright 1.64.1 and Storybook Astro 1.15.0: an Astro story and a React story both give stable baselines.
 - One tool gives one baseline format, one update command, and one CI workflow.
 
 ### Why baselines come only from CI
@@ -698,6 +729,9 @@ Dependabot covers what the rules in [DEPS.md](rules/DEPS.md) need:
 What Dependabot does not have, and what the rules do instead:
 
 - **No automerge option.** A GitHub Actions workflow reads the PR with `dependabot/fetch-metadata` and runs `gh pr merge --auto`, as in the [Dependabot automerge guide](https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/automate-dependabot-with-actions). The workflow is one more file to maintain, and it runs with write permissions.
+  - `0.x`: SemVer says that in major version zero "Anything MAY change at any time", so a minor update can break.
+  - Major: SemVer uses a major version for backward-incompatible changes.
+  - `astro` group: these packages must stay within each other's peer ranges and pass the Compatibility checks in [DEPS.md](rules/DEPS.md), so a person merges them.
 - **No lockfile maintenance.** Renovate `lockFileMaintenance` deletes the lockfile and runs npm again. Dependabot `versioning-strategy: lockfile-only` only skips updates that need a change in `package.json`. The rules use a monthly `npm update` PR instead.
 - **No Dependency Dashboard.** The open Dependabot PRs show the pending updates, but not the updates that `cooldown` holds back. Per the [Renovate bot comparison](https://docs.renovatebot.com/bot-comparison/), Dependabot has no similar feature.
 - **No preset monorepo groups.** Renovate `config:recommended` includes `group:monorepos`. With Dependabot, you write each group, for example the `astro` group.
@@ -722,6 +756,10 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - Throwing in a batch handler retries the whole batch, so use per-message `ack()` and `retry()`.
 - Queue bindings are not inherited by `env.production`.
 
+### Why no `nodejs_compat` flag
+
+- With a compatibility date of `2026-08-04` or later, Workers enable `nodejs_compat` and `nodejs_compat_v2` by default. The Cloudflare docs recommend that you omit the flags from new configurations.
+
 ## Data
 
 ### Why one migration system
@@ -738,6 +776,13 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - Time Travel keeps 7 days (Free) or 30 days (Paid). Exports give a longer history and a copy that you control.
 - Exports hold personal data, so they stay out of git.
 - A running export blocks other requests, so run it off-peak.
+
+### Why no interactive transactions
+
+- `kysely-d1` does not implement transactions: `beginTransaction` throws `Transactions are not supported yet.`
+- The EmDash source (`packages/core/src/database/transaction.ts`) says that on workerd this error crosses request contexts and can hang the Worker.
+- D1 `batch()` runs its statements as a SQL transaction and rolls back the whole sequence when a statement fails.
+- Cost: you cannot read in the middle of a batch and branch on the result, so each write must be safe alone.
 
 ## Security
 
@@ -770,6 +815,11 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - Wrangler and the Cloudflare Vite plugin load `.env` into the Worker `env` in local development, but only when no `.dev.vars` file exists.
 - The emdash-better-auth README says that `.env` is not available to the deployed Worker, so production needs a real Worker secret. Set it with `wrangler versions secret put` (see DEPLOY.md).
 
+### Why no SVG uploads
+
+- An SVG file can hold a `<script>` element, so it is active content and not only an image. A public file could run a script against other users.
+- Raster formats do not run code.
+
 ## Observability
 
 ### Why Sentry wraps `src/worker.ts`
@@ -787,6 +837,12 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - The deletion of `./dist/client/**/*.map` runs even when the upload is skipped (no `SENTRY_AUTH_TOKEN`). The client files keep their `sourceMappingURL` comment, so DevTools reports missing maps.
 - Wrangler does not warn when a server file has no `sourceMappingURL`: it uploads no map. So the rules ask for a check that `dist/server/entry.mjs` ends with `//# sourceMappingURL=entry.mjs.map`.
 - The browser cannot read `env.SENTRY_DSN`, so the client config reads `PUBLIC_SENTRY_DSN` from `.env` at build time.
+
+### Why Sentry does not collect user data and bodies
+
+- The `dataCollection` defaults send user fields and all HTTP body types. `userInfo: false` and `httpBodies: []` turn them off.
+- In SDK v10, these defaults apply only when you set `dataCollection`. Without it, the deprecated `sendDefaultPii` option controls data collection. From v11, the defaults always apply. So the rules set the option.
+- Data that the app sets with `Sentry.setUser()` is always sent, so the app decides what to send.
 
 ## Quality
 
@@ -806,7 +862,17 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 - The type-checked preset sets the typescript-eslint parser. Unscoped, it replaces the Astro parser and fails on every `.astro` file with `Parsing error: Expression expected`.
 
+### Why ESLint and not Biome
+
+- The Biome docs say that its Astro support "must be considered experimental", and you must turn it on with `html.experimentalFullSupportEnabled`.
+- The template uses ESLint with `eslint-plugin-astro` for `.astro` files.
+
 ## Email
+
+### Why only Cloudflare Email Service
+
+- The whole stack is built for Cloudflare, so email stays on the same platform. One `send_email` binding (`EMAIL`) serves auth and app emails, with no second vendor.
+- Risk: the Cloudflare docs label Email Sending as Beta (checked on 2026-11-04).
 
 ### Why auth emails do not use the Queue
 
@@ -851,6 +917,11 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 ### Why limits have 10 % headroom
 
 - On a page with a React island (about 63 kB brotli), 10 % leaves about 6.3 kB, less than one 10 kB island, while 20 % leaves about 12.6 kB, so a whole new island could pass the check unnoticed.
+
+### Why a limit goes down at 10 %
+
+- A limit stays until the new limit rule gives a value at least 10 % lower, so a small shrink needs no limit change.
+- On the same page, the rule gives 70 kB, and a limit can stay at up to 77.8 kB, about 15 kB over the measurement. A 10 kB island can still pass the check, so code review also checks the limits.
 
 ### Why the page limit uses a preview server and not `dist`
 

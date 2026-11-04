@@ -101,7 +101,7 @@
 - Admin = native EmDash plugin in the app folder `src/apps/app1/admin/`: `descriptor.ts`, `plugin.ts`, `pages.tsx`. No separate npm package. UI: [Kumo](STACK.md#kumo). → [DESIGN](DESIGN.md)
 - Register: `integrations: [emdash({ plugins: [app1Admin()] }), app1()]`.
 - `descriptor.ts` holds the factory (only file imported in `astro.config`): returns `id`, `version`, `format: "native"`, `entrypoint`, `adminEntry`.
-- `plugin.ts`: `export default function createPlugin() { return definePlugin({ ... }) }` with `routes` and `admin.pages`.
+- `plugin.ts`: `export function createPlugin() { return definePlugin({ ... }) }` (named export; EmDash imports `{ createPlugin }`) with `routes` and `admin.pages`.
 - `entrypoint`/`adminEntry` = project-root paths: `"/src/apps/app1/admin/plugin.ts"`, `"/src/apps/app1/admin/pages.tsx"`. No `import.meta.url` (`new URL` throws "Invalid URL string" in the Worker; EmDash fails, `/_emdash` routes 404).
 - Admin entry path as one constant in `descriptor.ts`, used for both `adminEntry` and `admin.entry` (must match).
 - Name `<app>-admin` (`app1-admin`). Pages `/_emdash/admin/plugins/app1-admin/<path>`, routes `/_emdash/api/plugins/app1-admin/<route>`.
