@@ -11,6 +11,15 @@ describe("buttonVariants", () => {
     );
   });
 
+  it.each([
+    ["default", "[&_svg]:size-5", "[&_.icon]:text-xl"],
+    ["icon", "[&_svg]:size-6", "[&_.icon]:text-2xl"],
+    ["lg", "[&_svg]:size-8", "[&_.icon]:text-[2rem]"],
+    ["xl", "[&_svg]:size-10", "[&_.icon]:text-[2.5rem]"],
+  ] as const)("sizes a font icon like an SVG icon in %s", (size, svg, icon) => {
+    expect(classes({ size })).toEqual(expect.arrayContaining([svg, icon]));
+  });
+
   it("has a state layer and no hover color of its own", () => {
     const list = classes();
     expect(list).toEqual(

@@ -81,14 +81,14 @@
 ### [pnpm](STACK.md#pnpm) scripts
 
 - Template `package.json`: `dev`, `build`, `preview`, `typecheck`, `lint` (`oxlint --type-aware --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
-- `check` = `pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run test`.
+- `check` = `pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run fonts && pnpm run test`.
 - Not in `test` or `check`: `build`, `size` (needs `dist/`; → [PERF](PERF.md#client-javascript)), API checks, dependency checks, screenshot and e2e tests (CI only).
 
 ## Order
 
 ### [GitHub Actions](STACK.md#github-actions)
 
-- Order, fastest first, stop at first failure: `format:check`, `typecheck`, `lint`, `knip`, `test`.
+- Order, fastest first, stop at first failure: `format:check`, `typecheck`, `lint`, `knip`, `fonts`, `test`.
 - `pnpm run check` locally before commit; same scripts in the PR workflow.
 - PR workflow after `check`, in order, stop at first failure:
   1. `pnpm run build` (e2e and screenshot tests need its output).

@@ -1,6 +1,6 @@
 # MATERIAL
 
-[Material Design 3](STACK.md#material-design-3) (MD3) Expressive: layout, spacing, states, motion, color, component sizes. Fonts and radius stay from the [Fulldev UI](STACK.md#fulldev-ui) theme; colors per Color.
+[Material Design 3](STACK.md#material-design-3) (MD3) Expressive: layout, spacing, states, motion, color, component sizes. Radius stays from the [Fulldev UI](STACK.md#fulldev-ui) theme; fonts and icons per [MEDIA](MEDIA.md); colors per Color.
 
 ## Sources
 

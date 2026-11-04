@@ -74,14 +74,31 @@ Images, video, fonts, icons, uploads. Layout shift → [UI-UX](UI-UX.md) (Cumula
 
 ### Astro fonts
 
-- `fonts` in `astro.config` (Astro 6+) with `fontProviders` from `astro/config`. No `@font-face`, no `<link>` to a font provider.
+- `fonts` in `astro.config` with `fontProviders` from `astro/config`. No `@font-face`, no `<link>` to a font provider.
+- Families in `src/lib/fonts.ts`, imported by `astro.config.mjs`.
+- Default: Roboto Flex, `fontProviders.google()`, `subsets: ["latin", "latin-ext"]`, `styles: ["normal"]`. Another family → change `src/lib/fonts.ts` and the `--font-sans` line in `global.css`.
 - Per font: `name`, `provider`, `cssVariable`; `weights`, `styles`, `subsets` only as used. Fix each build warning about a value the provider cannot serve.
-- `fallbacks: ["sans-serif"]`-style generic; keep `optimizedFallbacks: true`. Keep `display: swap`.
+- `pnpm run fonts` (`scripts/check-fonts.ts`, part of `pnpm run check`) fails on a value the provider cannot serve: family, weight, style, subset (from `getFontProperties`), variable axis, or icon name.
+- Variable font: `options.experimental.variableAxis` for axes other than `wght` and `ital` (`opsz: [["8", "144"]]`). `opsz` needs no `font-variation-settings`; `font-optical-sizing: auto` sets it.
+- No `options.experimental.glyphs` on a font that renders CMS or user text; only on fixed text or icons.
+- `fallbacks: ["sans-serif"]`-style generic; keep `optimizedFallbacks: true`. Keep `display: swap`, except for the icon font → Icons.
 - Self-hosted: `fontProviders.local()`, WOFF2 in `src/assets/fonts/`. Many weights → variable font (`weights: ["100 900"]`).
-- `<Font cssVariable="--font-sans" />` from `astro:assets` in the base layout `<head>`, once per font; `preload` only for first-view fonts.
-- [Tailwind CSS](STACK.md#tailwind-css) v4: `@theme inline` in `global.css` (`--font-sans: var(--font-roboto);`) → [DESIGN](DESIGN.md).
+- `<Font cssVariable="--font-roboto-flex" preload={[{ subset: "latin" }]} />` from `astro:assets` in the base layout `<head>`, once per font; `preload` only for first-view fonts and subsets.
+- [Tailwind CSS](STACK.md#tailwind-css) v4: `@theme inline` in `global.css` (`--font-sans: var(--font-roboto-flex);`) → [DESIGN](DESIGN.md).
 
 ## Icons
 
-- Local SVG as components (`import Logo from "../assets/logo.svg"`); attributes such as `class` pass as props to `<svg>`.
+### [Material Symbols](STACK.md#material-symbols)
+
+- UI icons: `<Icon name="search" />` from `@/components/ui/icon`. No Lucide or other icon package for new UI icons.
+- `fontProviders.googleicons()`, `options.experimental.glyphs` from `ICON_NAMES` in `src/lib/fonts.ts`: a new icon → add its name there; `IconName` rejects other names. Never an empty list (the provider then serves the whole font).
+- One family: Material Symbols Outlined. `display: "block"`, `fallbacks: []`, `optimizedFallbacks: false`, `preload`.
+- Size with a font size: `text-2xl` is 24px, the default. In a button, the size comes from the button.
+- `filled` prop for the `FILL` axis. Other axes follow CSS: `wght` from `font-weight`, `opsz` from the font size.
+- `Icon` is decorative (`aria-hidden`). An icon-only control needs its own `aria-label`.
+- Registry components keep their SVG icons; the button sizes both (`[&_svg]`, `[&_.icon]`).
+
+### SVG
+
+- Logos and other non-icon graphics: local SVG as components (`import Logo from "../assets/logo.svg"`); attributes such as `class` pass as props to `<svg>`.
 - No inline user SVG; reject SVG uploads.

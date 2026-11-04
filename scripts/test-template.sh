@@ -258,10 +258,10 @@ echo "ok: oxlint runs the eslint, jsx-a11y, e18e, react-doctor, and type-aware r
 
 step "Run the checks and pnpm audit at the same time"
 # The test runs the parts of pnpm run check, so check the script text.
-grep -qF '"check": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run test"' "$APP_DIR/package.json" || fail "the check script changed: update this step"
+grep -qF '"check": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run fonts && pnpm run test"' "$APP_DIR/package.json" || fail "the check script changed: update this step"
 # astro check writes .astro/types.d.ts, and the type-aware lint reads it, so lint
 # starts after typecheck.
-FIRST=("pnpm run format:check" "pnpm run typecheck" "pnpm run knip")
+FIRST=("pnpm run format:check" "pnpm run typecheck" "pnpm run knip" "pnpm run fonts")
 [ "$QUICK" -eq 1 ] || FIRST+=("pnpm audit --prod --audit-level high" "pnpm audit signatures")
 run_parallel "${FIRST[@]}"
 run_parallel "pnpm run lint" "pnpm run test"
@@ -314,6 +314,21 @@ printf '%s\n' "$HOME_HTML" | grep -q 'data-slot="button"' || fail "the home page
 printf '%s\n' "$HOME_HTML" | grep -q 'href="/posts"' || fail "the button does not link to /posts"
 printf '%s\n' "$HOME_HTML" | grep -q 'before:bg-current' || fail "the button has no state layer"
 echo "ok: the home page has the Material 3 button"
+
+step "Check the fonts and the icon on the home page"
+printf '%s\n' "$HOME_HTML" | grep -q -- '--font-roboto-flex:' || fail "the home page has no text font"
+printf '%s\n' "$HOME_HTML" | grep -q -- '--font-material-symbols:' || fail "the home page has no icon font"
+printf '%s\n' "$HOME_HTML" | grep -q 'data-slot="icon"' || fail "the home page has no icon"
+if printf '%s\n' "$HOME_HTML" | grep -qE 'fonts\.(googleapis|gstatic)\.com'; then
+  fail "the home page loads a font from Google"
+fi
+ICON_FACE="$(printf '%s\n' "$HOME_HTML" | grep -oE 'Material Symbols Outlined[^;]*";src:url\("/_astro/fonts/[a-z0-9]+\.woff2' | head -1 || true)"
+ICON_FILE="${ICON_FACE##*url(\"}"
+[ -n "$ICON_FILE" ] || fail "the icon font has no local file"
+expect_status 200 "GET the icon font" "$BASE_URL$ICON_FILE"
+ICON_SIZE="$(curl -s -o /dev/null -w '%{size_download}' --max-time 30 "$BASE_URL$ICON_FILE")"
+[ "$ICON_SIZE" -lt 100000 ] || fail "the icon font has $ICON_SIZE bytes: it is not a subset"
+echo "ok: self-hosted fonts and an icon font subset of $ICON_SIZE bytes"
 
 step "Check the security.txt file and the privacy page"
 expect_status 200 "GET /.well-known/security.txt" "$BASE_URL/.well-known/security.txt"

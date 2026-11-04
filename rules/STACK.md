@@ -371,6 +371,14 @@ v4 styles. → [DESIGN](DESIGN.md), [UI-UX](UI-UX.md)
 - github: https://github.com/heroui-inc/tailwind-variants
 - mcp: https://www.tailwind-variants.org/api/mcp
 
+### Material Symbols
+
+Icon font for UI icons, through the Astro Google Icons font provider. → [MEDIA](MEDIA.md)
+
+- docs: https://developers.google.com/fonts/docs/material_symbols
+- github: https://github.com/google/material-design-icons
+- tools: https://fonts.google.com/icons
+
 ### Fulldev UI
 
 `.astro` components and blocks via the shadcn CLI. → [COMPONENTS](COMPONENTS.md), [SETUP](SETUP.md)

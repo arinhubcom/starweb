@@ -4,6 +4,8 @@ import { EmDashHead, EmDashBodyStart, EmDashBodyEnd } from "emdash/ui";
 import { createPublicPageContext } from "emdash/page";
 import LiveSearch from "emdash/ui/search";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
+import { Font } from "astro:assets";
+import { Icon } from "@/components/ui/icon";
 import { themeScript } from "@/lib/theme-script";
 import "@/styles/global.css";
 
@@ -63,6 +65,8 @@ const pageCtx = createPublicPageContext({
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{fullTitle}</title>
     <script is:inline set:html={themeScript} />
+    <Font cssVariable="--font-roboto-flex" preload={[{ subset: "latin" }]} />
+    <Font cssVariable="--font-material-symbols" preload />
     <EmDashHead page={pageCtx} />
   </head>
   <body class="@container">
@@ -93,6 +97,7 @@ const pageCtx = createPublicPageContext({
             {item.label}
           </a>
         ))}
+        <Icon name="search" />
         <LiveSearch placeholder="Search..." collections={["posts", "pages"]} />
       </nav>
     </header>

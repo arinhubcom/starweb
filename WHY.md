@@ -4,6 +4,20 @@ This page explains why Starweb uses Astro, Cloudflare Workers, and EmDash, and w
 
 ## [Astro](https://docs.astro.build/)
 
+### Fonts and icons
+
+Tested on 2026-11-04 with astro 7.4.4, which uses unifont 1.0.3:
+
+- Astro downloads the provider files at build time and serves them from `/_astro/fonts/`. A page makes no request to Google, so no consent is needed, and the CSP stays `font-src 'self'`. The `<style>` that `<Font />` writes gets a hash in `style-src`.
+- We use Roboto Flex because the Fulldev UI theme sets no font, and it fits Material Symbols. With `opsz` and weights 400 to 700, its `latin` file has 84.6 KB and its `latin-ext` file has 59.1 KB. Inter has 73.0 KB and 133.7 KB. Czech and other Central European text needs both files, so Roboto Flex is about 63 KB smaller there.
+- Roboto Flex has no real italics, only the `slnt` axis, so we set `styles: ["normal"]` and the browser slants the text.
+- We do not set `glyphs` on the text font. It removes every other character, and CMS content can hold any character.
+- A Material Symbols file with one icon has 2.1 KB, so UI icons cost almost nothing. A font icon also takes its color and size from the text.
+- `display: "block"` applies only to icons. With `swap`, the browser shows the icon name as text until the font loads.
+- `pnpm run fonts` exists because the providers accept bad values without an error. An unknown or out-of-range `variableAxis` value is dropped. An unknown icon name is left out of the subset. With only unknown names, or with an empty list, the build ships the whole icon font.
+- Astro calls `getFontProperties` itself, but it only logs a warning, and it ignores `axes` and icon names. The script uses the same hook and fails.
+- The icon names come from the Google icon metadata, because `getFontProperties` does not list them.
+
 ### Why
 
 - Hybrid rendering: SSR by default, prerender static pages where it helps.
@@ -258,7 +272,7 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 
 ### What we do not take
 
-- We do not take the MD3 type and shapes. The fonts and the radius come from the Fulldev UI theme.
+- We do not take the MD3 type scale and shapes. The radius comes from the Fulldev UI theme. The fonts come from `src/lib/fonts.ts`.
 - We do not take the MD3 color role names in components. The roles fill the shadcn/ui variables, so Fulldev UI and shadcn/ui components work without changes.
 - We do not take the MD3 Expressive shape morph (a corner that changes on press or select). It changes the radius, which the theme owns.
 - MD3 spacing tokens are only implemented in Jetpack Compose, not for the web. We map them to Tailwind steps by hand.

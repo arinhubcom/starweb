@@ -39,6 +39,7 @@
 }
 
 @theme inline {
+  --font-sans: var(--font-roboto-flex);
   --font-heading: var(--font-sans);
   --shadow-2xl: var(--shadow-2xl);
   --shadow-xl: var(--shadow-xl);
@@ -127,6 +128,34 @@
   --shadow-xl:
     0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+}
+
+/* Material Symbols. The opsz axis follows the font size (font-optical-sizing).
+   In the components layer, so a text-* utility on an icon sets its size. */
+@layer components {
+  .icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+    overflow: hidden;
+    direction: ltr;
+    font-family: var(--font-material-symbols);
+    font-size: 1.5rem;
+    font-weight: 400;
+    font-feature-settings: "liga";
+    font-variation-settings: "FILL" var(--icon-fill, 0);
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .icon-filled {
+    --icon-fill: 1;
+  }
 }
 
 @layer base {
