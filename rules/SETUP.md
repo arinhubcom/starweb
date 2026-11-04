@@ -75,7 +75,7 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 ## Checks
 
 20. `npm run dev`; open `http://localhost:4321/_emdash/admin/`; complete the setup wizard. → [DEV](DEV.md)
-21. `npm run check`, `npm run build`, `npm run preview` all pass before the first commit. → [QUALITY](QUALITY.md) (Order), [DEV](DEV.md)
+21. `npm run check`, `npm run build`, `npm run size`, `npm run preview` all pass before the first commit. → [QUALITY](QUALITY.md) (Order), [PERF](PERF.md#client-javascript), [DEV](DEV.md)
 22. `npx emdash doctor`; read only the scheduler line (its database check looks for local SQLite, not D1). → [CMS](CMS.md) (Drafts and preview)
 23. Commit.
 

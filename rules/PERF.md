@@ -8,6 +8,18 @@
 - Field: [Web Analytics](STACK.md#web-analytics) dashboard → site → **Core Web Vitals** (CLS from Chromium only); setup → [PRIVACY](PRIVACY.md). CrUX via PageSpeed Insights and the Search Console Core Web Vitals report.
 - Lab: Lighthouse or Chrome DevTools before each release; INP not measurable in lab → Total Blocking Time proxy, INP in the field. Field data decides.
 
+## Client JavaScript
+
+### [Size Limit](STACK.md#size-limit)
+
+- Per island: `.size-limit.mjs` lists each `src/components/islands/*.tsx` and `src/apps/*/islands/*.tsx` (no `*.stories.tsx`, `*.test.tsx`); measures its own chunk, brotli. Default `10 kB`; raise one island in `LIMIT_OVERRIDES` (name without extension → limit). An empty list skips the check.
+- Per page: `page-js-limits.json`, `{ "<path>": <max brotli bytes> }`. Counts everything the page loads: scripts, `modulepreload`, island `component-url`, `renderer-url`, `before-hydration-url`, inline scripts, and their static imports, from any origin. Lazy `import()` does not count.
+- Each new public route gets an entry. Page with no script: limit `0`; `Base.astro` adds the inline theme script, so its pages need more.
+- `npm run size` after `npm run build` (needs `dist/`); in the PR workflow and in `scripts/test-template.sh`. Not in `check`.
+- Admin (`/_emdash/**`) is out of scope: no entry, and no limit on all of `dist/client/_astro/`.
+- The script starts `astro preview` on a free port and fetches each path; a redirect to another path, a non-200 status, or a script that fails to load fails the check.
+- Parsing: [parse5](STACK.md#parse5) for HTML, [es-module-lexer](STACK.md#es-module-lexer) (`/js` build) for imports; no regexes. Code in `scripts/check-js-size.ts`, `scripts/lib/page-js.ts`.
+
 ## Backend
 
 ### [Workers](STACK.md#workers)

@@ -565,6 +565,28 @@ Unused files, exports, dependencies. → [QUALITY](QUALITY.md)
 - github: https://github.com/webpro-nl/knip
 - skills: https://skills.sh/brianlovin/agent-config/knip
 
+### Size Limit
+
+Per-island client JavaScript limit (`.size-limit.mjs`, `@size-limit/file`). → [PERF](PERF.md), [QUALITY](QUALITY.md)
+
+- github: https://github.com/ai/size-limit
+- docs: https://raw.githubusercontent.com/ai/size-limit/main/README.md
+
+### es-module-lexer
+
+Static import discovery in built chunks for the per-page limit (`es-module-lexer/js`). → [PERF](PERF.md)
+
+- github: https://github.com/guybedford/es-module-lexer
+- docs: https://raw.githubusercontent.com/guybedford/es-module-lexer/main/README.md
+
+### parse5
+
+HTML parsing for the per-page limit (scripts, preloads, islands). → [PERF](PERF.md)
+
+- docs: https://parse5.js.org/
+- context7: https://context7.com/inikulin/parse5/llms.txt?tokens=10000
+- github: https://github.com/inikulin/parse5
+
 ## Operations
 
 ### Sentry

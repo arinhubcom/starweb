@@ -71,7 +71,7 @@
 - Keep template `dev`, `build`, `preview`; add `typecheck`.
 - Add `lint` (`eslint . --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
 - `check` = `npm run format:check && npm run typecheck && npm run lint && npm run knip && npm run test`.
-- Not in `test` or `check`: `build`, API checks, dependency checks, screenshot and e2e tests (CI only).
+- Not in `test` or `check`: `build`, `size` (needs `dist/`; → [PERF](PERF.md#client-javascript)), API checks, dependency checks, screenshot and e2e tests (CI only).
 
 ## Order
 
@@ -81,7 +81,8 @@
 - `npm run check` locally before commit; same scripts in the PR workflow.
 - PR workflow after `check`, in order, stop at first failure:
   1. `npm run build` (e2e and screenshot tests need its output).
-  2. API: regenerate `openapi.json` + `git diff --exit-code`, `redocly lint`, `oasdiff breaking`. → [API](API.md)
-  3. Dependencies: `npm audit --omit=dev --audit-level=high`, `npm audit signatures`. → [DEPS](DEPS.md)
-  4. e2e, then screenshot tests. → [TESTING](TESTING.md#ci)
+  2. `npm run size`. → [PERF](PERF.md#client-javascript)
+  3. API: regenerate `openapi.json` + `git diff --exit-code`, `redocly lint`, `oasdiff breaking`. → [API](API.md)
+  4. Dependencies: `npm audit --omit=dev --audit-level=high`, `npm audit signatures`. → [DEPS](DEPS.md)
+  5. e2e, then screenshot tests. → [TESTING](TESTING.md#ci)
 - `npm run typecheck` before each release. → [DEPLOY](DEPLOY.md)

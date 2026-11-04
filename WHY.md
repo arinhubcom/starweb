@@ -836,6 +836,19 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - web.dev says: "Only field measurement can accurately capture the complete picture."
 - Lighthouse cannot measure INP, because no real user interacts with the page.
 
+### Why two client JavaScript limits
+
+- One island's own chunk was 156 B in a probe, but the page needs about 60 kB brotli, because every island loads the shared React renderer. A per-island limit alone misses that cost, and a per-page limit alone does not say which island grew.
+
+### Why the page limit uses a preview server and not `dist`
+
+- `output: "server"` renders SSR pages at request time, so `dist` has no HTML for them.
+- `dist/client/_astro/` also holds the EmDash admin (about 89 chunks, 18 MB), so a limit on the folder measures the admin, not the site.
+
+### Why parse5 and es-module-lexer and not regexes
+
+- A regex finds `<script src>` inside HTML comments and `from "./x.js"` inside strings in chunk code, and it misses single-quoted and unquoted attributes. A parser reads what the browser reads. The tests cover each case.
+
 ## Internationalization
 
 ### Why branch on `isPrerendered`

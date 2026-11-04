@@ -124,6 +124,9 @@ step "Run npm run check"
 step "Run npm run build"
 (cd "$APP_DIR" && npm run build)
 
+step "Run npm run size"
+(cd "$APP_DIR" && npm run size)
+
 step "Start npm run preview"
 PORT="$(free_port)"
 [ "$PORT" != "0" ] || fail "no free port between 4501 and 4599"
