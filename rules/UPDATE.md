@@ -49,7 +49,7 @@ A project whose `.starweb.json` commit is older than the `create-emdash` output 
 ### Starweb repository
 
 1. Pick the newest version older than 3 days that `create-emdash`, `emdash`, and `@emdash-cms/cloudflare` all have: `node scripts/update-starter.mjs --check` prints it. → [DEPS](DEPS.md) (npm min-release-age)
-2. `node scripts/update-starter.mjs <version>`, with `template/` and `starter/` committed. It runs `create-emdash`, merges the difference to `starter/` into `template/`, replaces `starter/`, and pins the three packages.
+2. `node scripts/update-starter.mjs <version>`, with `template/` and `starter/` committed. It runs `create-emdash`, merges the difference to `starter/` into `template/`, replaces `starter/`, pins `create-emdash` in the root `package.json` and the other two packages in `template/package.json`, and refreshes `template/package-lock.json`.
 3. Resolve the conflicts in `template/` (markers `<<<<<<< project`, `||||||| base`, `>>>>>>> starweb`). Handle each line under `Review by hand` and `Starter package.json changes to review`; the script changes no other `package.json` line.
 4. Read each version since the old pin in the [EmDash changelog](https://github.com/emdash-cms/emdash/blob/main/packages/core/CHANGELOG.md). Update `template/`, `rules/`, and `WHY.md` for each change that affects them. → [AGENTS](AGENTS.md) (Template)
 5. `bash scripts/test-template.sh <tmp-dir>` and `bash scripts/test-update.sh <tmp-dir>` pass.

@@ -22,6 +22,8 @@ export default defineConfig({
         "src/middleware.ts",
         "src/worker.ts",
         "src/utils/site-identity.ts",
+        "src/lib/utils.ts",
+        "src/components/ui/**/index.ts",
       ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },

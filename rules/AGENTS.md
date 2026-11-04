@@ -39,7 +39,8 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project
 ## Template
 
 - `template/` holds the `create-emdash` output (`cloudflare:starter`) with the Starweb changes in place, `package.json`, and the configs, formatted with Prettier. A new project takes over the folder: `scripts/setup.mjs` copies it to the project root. No `files/` subfolder, no `create-emdash` run in a project.
-- Not in `template/`: `.env` (`setup.mjs` writes a new key per project), lockfile, `pnpm-workspace.yaml`, `worker-configuration.d.ts`.
+- Not in `template/`: `.env` (`setup.mjs` writes a new key per project), `pnpm-workspace.yaml`, `worker-configuration.d.ts`.
+- `template/package-lock.json` matches `template/package.json` (`setup.mjs` runs `npm ci`). After a change to `template/package.json`: `npm install --package-lock-only` in `template/`.
 - `starter/` holds the last `create-emdash` output, shaped like `template/` (renamed, formatted, without the files above): the merge base. No hand edits.
 - EmDash update → [UPDATE](UPDATE.md) (EmDash update). `.github/workflows/starter-check.yml` runs `node scripts/update-starter.mjs --check` every Monday, and opens or updates one issue when `create-emdash` gives other files than `starter/` or a newer version is ready to pin.
 - No install commands in `rules/` (`npm i`, `npm rm`, `npx astro add`). A package every project needs goes in `template/package.json`, its config in `template/`. A rule for an optional feature names the packages only.
@@ -50,7 +51,7 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project
 - `template/.agents/skills/` holds the starter skills and `starweb-update`. Claude Code reads only `.claude/skills`, so keep the symbolic link `.claude/skills` → `../.agents/skills`. `starweb-update` points to `rules/UPDATE.md` in the clone; no steps in the skill.
 - A new template file or behavior gets a check in `scripts/test-template.sh`.
 - Exact versions in `template/package.json`, no `^` or `~`.
-- Before a commit that touches `template/`, `scripts/`, or a rule they implement: `bash scripts/test-template.sh <tmp-dir>` (new folder outside the repository).
+- Before a commit that touches `template/`, `scripts/`, or a rule they implement: `bash scripts/test-template.sh <tmp-dir>` (new folder outside the repository). `--quick` stops after the checks, for iteration only.
 - Before each template test, check every package in `template/package.json` for a newer version (`npm view <package> time`); pin the newest that is older than 3 days and within peer ranges and the [DEPS](DEPS.md) ignore list, then test with it.
 - New minor or major of `@astrojs/cloudflare`, `wrangler`, `tailwindcss`, `zod`, `effect`, `typescript-eslint`, `oxlint`, `@e18e/eslint-plugin`, `vitest`, `knip`, and any new version of `oxlint-plugin-react-doctor`, in a Dependabot pull request or a pin change: read the release notes of each version it passes (sources in [STACK](STACK.md)). Update the rules, `WHY.md`, and `template/` for each new feature that fits the stack, deprecation, or fixed workaround, in the same pull request. `oxlint-plugin-react-doctor`: also compare the rules. → [QUALITY](QUALITY.md) (React Doctor rules)
 - New `astro` minor or major: read its post in the [Astro blog feed](https://astro.build/rss.xml) (`Astro X.Y` for each minor it passes, plus the monthly "What's new in Astro" posts since the old pin). Update the rules, `WHY.md`, and `template/` for each new feature, deprecation, or fixed workaround in the same commit as the version bump.

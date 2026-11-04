@@ -57,12 +57,21 @@
     "import/no-unassigned-import": [
       "warn",
       {
-        "allow": [
-          "**/*.css"
-        ]
+        "allow": ["**/*.css"]
       }
     ],
     "no-await-in-loop": "off",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "class-variance-authority",
+            "message": "Use tv() from tailwind-variants: rules/COMPONENTS.md."
+          }
+        ]
+      }
+    ],
     "oxc/no-map-spread": "off",
     "react/react-in-jsx-scope": "off",
     "unicorn/require-module-specifiers": "off",
@@ -305,21 +314,13 @@
   },
   "overrides": [
     {
-      "files": [
-        "test/**",
-        "**/*.test.ts",
-        "**/*.test.tsx"
-      ],
+      "files": ["test/**", "**/*.test.ts", "**/*.test.tsx"],
       "rules": {
         "e18e/prefer-static-regex": "off"
       }
     },
     {
-      "files": [
-        "**/*.js",
-        "**/*.mjs",
-        "**/*.cjs"
-      ],
+      "files": ["**/*.js", "**/*.mjs", "**/*.cjs"],
       "rules": {
         "typescript/no-unsafe-argument": "off",
         "typescript/no-unsafe-assignment": "off",

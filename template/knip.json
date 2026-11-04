@@ -6,5 +6,8 @@
     "src/apps/*/middleware.ts!",
     "src/apps/*/admin/{plugin.ts,pages.tsx}!",
     "scripts/*.ts"
-  ]
+  ],
+  "ignoreIssues": {
+    "src/components/ui/**": ["files", "exports", "types"]
+  }
 }

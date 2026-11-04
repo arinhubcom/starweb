@@ -2,16 +2,33 @@
 # Test the Starweb template end to end: create a project from template/ with
 # setup.mjs, check that update.mjs has nothing to change, run the checks and
 # the build, then test the built Worker.
-# Usage: bash scripts/test-template.sh <workdir>
+# Usage: bash scripts/test-template.sh <workdir> [--quick] [--fresh]
+# --quick stops after the checks, to iterate. It does not replace the full run.
+# --fresh skips the template lockfile and runs the npm run check script in order.
 set -euo pipefail
 
-if [ "$#" -ne 1 ]; then
-  echo "Usage: bash scripts/test-template.sh <workdir>" >&2
+USAGE="Usage: bash scripts/test-template.sh <workdir> [--quick] [--fresh]"
+if [ "$#" -lt 1 ]; then
+  echo "$USAGE" >&2
   exit 2
 fi
+WORKDIR_ARG="$1"
+shift
+QUICK=0
+FRESH=0
+for arg in "$@"; do
+  case "$arg" in
+    --quick) QUICK=1 ;;
+    --fresh) FRESH=1 ;;
+    *)
+      echo "$USAGE" >&2
+      exit 2
+      ;;
+  esac
+done
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-WORKDIR="$(mkdir -p "$1" && cd "$1" && pwd)"
+WORKDIR="$(mkdir -p "$WORKDIR_ARG" && cd "$WORKDIR_ARG" && pwd)"
 APP_DIR="$WORKDIR/app"
 PREVIEW_LOG="$APP_DIR/.astro/preview.log"
 PREVIEW_PID=""
@@ -127,7 +144,9 @@ wait_for_ok() {
 
 step "Run setup.mjs"
 rm -rf "$APP_DIR"
-node "$REPO_ROOT/scripts/setup.mjs" "$APP_DIR" --name tpl-test --site https://example.com
+SETUP_ARGS=(--name tpl-test --site https://example.com)
+[ "$FRESH" -eq 0 ] || SETUP_ARGS+=(--fresh-lock)
+node "$REPO_ROOT/scripts/setup.mjs" "$APP_DIR" "${SETUP_ARGS[@]}"
 
 step "Check the starter files and the encryption key"
 [ -f "$APP_DIR/EMDASH.md" ] || fail "the project has no EMDASH.md"
@@ -143,8 +162,9 @@ grep -qF "rules/UPDATE.md" "$APP_DIR/.claude/skills/starweb-update/SKILL.md" || 
 grep -qE '^EMDASH_ENCRYPTION_KEY=emdash_enc_v1_[A-Za-z0-9_-]{43}$' "$APP_DIR/.env" || fail ".env has no encryption key"
 grep -q '"name": "tpl-test"' "$APP_DIR/package.json" || fail "package.json has the wrong name"
 if grep -q '"create-emdash"' "$APP_DIR/package.json"; then
-  fail "package.json has the pin-only tool create-emdash"
+  fail "package.json has create-emdash, which only the Starweb repository uses"
 fi
+grep -q '"name": "tpl-test"' "$APP_DIR/package-lock.json" || fail "package-lock.json has the wrong name"
 if node "$REPO_ROOT/scripts/setup.mjs" "$APP_DIR" --name tpl-test >/dev/null 2>&1; then
   fail "setup.mjs ran on a folder that is not empty"
 fi
@@ -152,6 +172,23 @@ for package in emdash @emdash-cms/cloudflare; do
   grep -qF "dependency-name: \"$package\"" "$APP_DIR/.github/dependabot.yml" || fail "dependabot.yml does not ignore $package"
 done
 echo "ok: starter files, encryption key, Dependabot exception, and empty folder check"
+
+step "Check Fulldev UI and the button"
+[ -f "$APP_DIR/components.json" ] || fail "the project has no components.json"
+for package in cn shadcn tailwind-variants tw-animate-css; do
+  grep -q "\"$package\": \"[0-9]" "$APP_DIR/package.json" || fail "package.json has no exact pin of $package"
+done
+if grep -rq 'class-variance-authority' "$APP_DIR/src" "$APP_DIR/package.json"; then
+  fail "the project uses class-variance-authority, not tailwind-variants"
+fi
+for color in '--background: oklch' '--primary: oklch'; do
+  if grep -qF -- "$color" "$APP_DIR/src/styles/global.css"; then
+    fail "global.css has a color variable that overrides theme.css: $color"
+  fi
+done
+grep -q -- '--radius:' "$APP_DIR/src/styles/global.css" || fail "global.css has no radius"
+grep -q -- '--on-error:' "$APP_DIR/src/styles/theme.css" || fail "theme.css has no on-error role"
+echo "ok: Fulldev UI, exact pins, and theme colors"
 
 step "Run update.mjs --dry-run: nothing to change"
 UPDATE_OUTPUT="$(node "$REPO_ROOT/scripts/update.mjs" "$APP_DIR" --dry-run)"
@@ -176,6 +213,7 @@ step "Check that Oxlint runs each plugin"
 PROBE="$APP_DIR/src/oxlint-probe.tsx"
 cat > "$PROBE" <<'EOF'
 import { useEffect, useState } from "react";
+import { cva } from "class-variance-authority";
 
 export function Probe({ items }: { items: string[] }) {
   const [count, setCount] = useState(0);
@@ -185,6 +223,7 @@ export function Probe({ items }: { items: string[] }) {
   }, []);
   debugger;
   const last = items[items.length - 1];
+  void cva;
   return (
     <div>
       {count}
@@ -196,7 +235,7 @@ export function Probe({ items }: { items: string[] }) {
 EOF
 OXLINT_OUTPUT="$(cd "$APP_DIR" && npx oxlint --type-aware --format=unix src/oxlint-probe.tsx || true)"
 rm "$PROBE"
-for rule in "eslint(no-debugger)" "jsx-a11y(alt-text)" "e18e(prefer-array-at)" "react-doctor(effect-needs-cleanup)" "typescript(no-floating-promises)"; do
+for rule in "eslint(no-debugger)" "jsx-a11y(alt-text)" "e18e(prefer-array-at)" "react-doctor(effect-needs-cleanup)" "typescript(no-floating-promises)" "eslint(no-restricted-imports)"; do
   printf '%s\n' "$OXLINT_OUTPUT" | grep -qF "$rule" || fail "oxlint did not report $rule: $OXLINT_OUTPUT"
 done
 if printf '%s\n' "$OXLINT_OUTPUT" | grep -qF "react(react-in-jsx-scope)"; then
@@ -209,14 +248,30 @@ step "Run the checks and npm audit at the same time"
 grep -qF '"check": "npm run format:check && npm run typecheck && npm run lint && npm run knip && npm run test"' "$APP_DIR/package.json" || fail "the check script changed: update this step"
 # astro check writes .astro/types.d.ts, and the type-aware lint reads it, so lint
 # starts after typecheck.
-run_parallel "npm run format:check" "npm run typecheck" "npm run knip" "npm audit --omit=dev --audit-level=high" "npm audit signatures"
+FIRST=("npm run format:check" "npm run typecheck" "npm run knip")
+[ "$QUICK" -eq 1 ] || FIRST+=("npm audit --omit=dev --audit-level=high" "npm audit signatures")
+run_parallel "${FIRST[@]}"
 run_parallel "npm run lint" "npm run test"
+if [ "$QUICK" -eq 1 ]; then
+  echo
+  echo "PASS: the template passes the checks ($STEP steps, --quick)"
+  exit 0
+fi
+
+if [ "$FRESH" -eq 1 ]; then
+  step "Run npm run check"
+  (cd "$APP_DIR" && npm run check)
+fi
 
 step "Run npm run build"
 (cd "$APP_DIR" && npm run build)
 
 step "Run npm run size"
 (cd "$APP_DIR" && npm run size)
+
+step "Check the button in the built CSS"
+grep -lqE 'opacity:(8%|\.08)' "$APP_DIR"/dist/client/_astro/*.css || fail "the built CSS has no hover state layer"
+echo "ok: the built CSS has the state layer"
 
 step "Start npm run preview"
 PORT="$(free_port)"
@@ -239,6 +294,13 @@ expect_status 403 "cross-origin POST /" -X POST \
   -H 'Origin: https://evil.example' -H 'Content-Type: text/plain' \
   --data 'x' "$BASE_URL/"
 expect_status 200 "same-origin GET /" -H "Origin: $BASE_URL" "$BASE_URL/"
+
+step "Check the button on the home page"
+HOME_HTML="$(curl -s --max-time 30 "$BASE_URL/")"
+printf '%s\n' "$HOME_HTML" | grep -q 'data-slot="button"' || fail "the home page has no Fulldev button"
+printf '%s\n' "$HOME_HTML" | grep -q 'href="/posts"' || fail "the button does not link to /posts"
+printf '%s\n' "$HOME_HTML" | grep -q 'before:bg-current' || fail "the button has no state layer"
+echo "ok: the home page has the Material 3 button"
 
 step "Check the security.txt file and the privacy page"
 expect_status 200 "GET /.well-known/security.txt" "$BASE_URL/.well-known/security.txt"

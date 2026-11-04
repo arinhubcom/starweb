@@ -7,7 +7,7 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 ### [npm](STACK.md#npm)
 
 - npm only ([SETUP](SETUP.md)); no pnpm/Yarn/Bun; only `package-lock.json` in the repository. Commit it with each `package.json` change.
-- Package that every project needs: exact version in `template/package.json`. Project package: let npm write the version; never edit it by hand.
+- Package that every project needs: exact version in `template/package.json`, with `template/package-lock.json`. `create-emdash` only in the root `package.json`: a project does not use it. Project package: let npm write the version; never edit it by hand.
 - CI: `npm ci`, not `npm install`.
 - No `--legacy-peer-deps`; fix the conflict. `emdash-better-auth` needs React ≥ 19.2.6: template pins 19.3.1.
 - No `pnpm-workspace.yaml` (else `shadcn init` uses pnpm, writes `pnpm-lock.yaml`).

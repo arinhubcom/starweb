@@ -1,0 +1,7 @@
+{
+  "name": "starweb",
+  "private": true,
+  "devDependencies": {
+    "create-emdash": "1.4.0"
+  }
+}

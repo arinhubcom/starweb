@@ -20,13 +20,11 @@ export const REPO_DOCS = [
   "WHY.md",
   "rules",
 ];
-// A new project takes over this folder. setup.mjs and update.mjs merge
-// its package.json, and copy all other files.
+// A new project takes over this folder. setup.mjs and update.mjs handle its
+// package.json and lockfile on their own, and copy all other files.
 export const TEMPLATE_DIR = "template";
 export const TEMPLATE_PACKAGE = "package.json";
-// Tools that template/package.json pins but the project does not install:
-// a project devDependency that no code uses would fail Knip.
-export const PIN_ONLY_TOOLS = ["create-emdash", "shadcn"];
+export const TEMPLATE_LOCK = "package-lock.json";
 const EMDASH_RULE =
   "- Follow the rules in [EMDASH.md](EMDASH.md) for the EmDash template.";
 

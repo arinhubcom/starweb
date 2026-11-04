@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Create a Starweb project from the template/ folder.
-// Usage: node <starweb>/scripts/setup.mjs <project-dir> --name <name> [--site <url>]
+// Usage: node <starweb>/scripts/setup.mjs <project-dir> --name <name> [--site <url>] [--fresh-lock]
+// --fresh-lock resolves the dependencies again and skips the template lockfile:
+// the weekly CI run uses it to find a change in a transitive dependency.
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import {
@@ -15,11 +17,11 @@ import {
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
-  PIN_ONLY_TOOLS,
   REPO_DOCS,
   assertNpm,
   STATE_FILE,
   TEMPLATE_DIR,
+  TEMPLATE_LOCK,
   TEMPLATE_PACKAGE,
   fail,
   gitOut,
@@ -37,15 +39,22 @@ const templateDir = join(repoRoot, TEMPLATE_DIR);
 const DEFAULT_SITE = "https://example.com";
 
 function parseArgs(argv) {
-  const options = { dir: undefined, name: undefined, site: DEFAULT_SITE };
+  const options = {
+    dir: undefined,
+    name: undefined,
+    site: DEFAULT_SITE,
+    freshLock: false,
+  };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === "--name") options.name = argv[(i += 1)];
     else if (arg === "--site") options.site = argv[(i += 1)];
+    else if (arg === "--fresh-lock") options.freshLock = true;
     else if (arg.startsWith("--")) fail(`Unknown option ${arg}.`);
     else options.dir = arg;
   }
-  const usage = "Usage: setup.mjs <project-dir> --name <name> [--site <url>]";
+  const usage =
+    "Usage: setup.mjs <project-dir> --name <name> [--site <url>] [--fresh-lock]";
   if (!options.dir || !options.name) fail(usage);
   if (!/^[a-z][a-z0-9-]{0,62}$/.test(options.name)) {
     fail(
@@ -76,7 +85,8 @@ function templateFiles() {
   if (names === null) fail(`Cannot list the files of ${templateDir}.`);
   return names
     .split("\0")
-    .filter((name) => name !== "" && name !== TEMPLATE_PACKAGE)
+    .filter((name) => name !== "")
+    .filter((name) => ![TEMPLATE_PACKAGE, TEMPLATE_LOCK].includes(name))
     .filter((name) => existsSync(join(templateDir, name)));
 }
 
@@ -101,17 +111,16 @@ function copyRepoDocs(dir) {
   writeFileSync(agentsPath, withEmdashRule(readText(agentsPath)));
 }
 
-function writePackageJson(dir, name) {
+// The template differs from a project only in the name.
+function writePackageFiles(dir, { name, freshLock }) {
   const template = readJson(join(templateDir, TEMPLATE_PACKAGE));
-  const devDependencies = Object.fromEntries(
-    Object.entries(template.devDependencies).filter(
-      ([tool]) => !PIN_ONLY_TOOLS.includes(tool),
-    ),
-  );
-  writeJson(join(dir, TEMPLATE_PACKAGE), {
-    ...template,
+  writeJson(join(dir, TEMPLATE_PACKAGE), { ...template, name });
+  if (freshLock) return;
+  const lock = readJson(join(templateDir, TEMPLATE_LOCK));
+  writeJson(join(dir, TEMPLATE_LOCK), {
+    ...lock,
     name,
-    devDependencies,
+    packages: { ...lock.packages, "": { ...lock.packages[""], name } },
   });
 }
 
@@ -132,8 +141,8 @@ function run(dir, command, args) {
   }
 }
 
-function installAndFormat(dir) {
-  run(dir, "npm", ["install"]);
+function installAndFormat(dir, freshLock) {
+  run(dir, "npm", [freshLock ? "install" : "ci", "--no-audit", "--no-fund"]);
   run(dir, "npx", ["wrangler", "types"]);
   run(dir, "npx", ["tsx", "scripts/theme.ts"]);
   run(dir, "npx", ["prettier", ".", "--write", "--log-level", "warn"]);
@@ -154,7 +163,7 @@ Setup done. Next steps (see rules/SETUP.md):
   1. Run "npm run check" and "npm run build". Both must pass.
   2. Set SITE, CONTROLLER, and the contact addresses in src/lib/site.ts, and replace each [Add marker in src/pages/privacy.astro.
   3. Create the D1 database with a location hint, set its database_id, and log in with "npx wrangler login".
-  4. Add the optional parts that SETUP.md lists: Fulldev UI, i18n, auth, apps, Sentry, Storybook, Playwright, and the deploy workflows.
+  4. Add the optional parts that SETUP.md lists: i18n, auth, apps, Sentry, Storybook, Playwright, and the deploy workflows.
   5. Start "npm run dev", open /_emdash/admin/, and complete the setup wizard.
   6. Commit the project.`);
 }
@@ -168,11 +177,11 @@ function main() {
     ["Copy the template", () => copyTemplate(options.dir, options)],
     ["Copy the Starweb rules", () => copyRepoDocs(options.dir)],
     ["Write .starweb.json", () => writeState(options.dir, options, commit)],
-    ["Write package.json", () => writePackageJson(options.dir, options.name)],
+    ["Write package.json", () => writePackageFiles(options.dir, options)],
     ["Write the encryption key", () => writeEncryptionKey(options.dir)],
     [
       "Install, generate types, and format",
-      () => installAndFormat(options.dir),
+      () => installAndFormat(options.dir, options.freshLock),
     ],
   ];
   for (const [label, action] of steps) {

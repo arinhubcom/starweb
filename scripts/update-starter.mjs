@@ -39,8 +39,12 @@ const templateDir = join(repoRoot, TEMPLATE_DIR);
 const STARTER_DIR = "starter";
 const starterDir = join(repoRoot, STARTER_DIR);
 const TEMPLATE_NAME = "cloudflare:starter";
-// Pinned together with create-emdash.
-const EMDASH_PACKAGES = ["create-emdash", "emdash", "@emdash-cms/cloudflare"];
+// create-emdash is pinned in the root package.json, because a project does not
+// use it. The others are pinned with it in template/package.json.
+const CREATE_PACKAGE = "create-emdash";
+const TEMPLATE_PINNED = ["emdash", "@emdash-cms/cloudflare"];
+const EMDASH_PACKAGES = [CREATE_PACKAGE, ...TEMPLATE_PINNED];
+const rootPackagePath = join(repoRoot, TEMPLATE_PACKAGE);
 const FORMAT_PACKAGES = [
   "prettier",
   "prettier-plugin-astro",
@@ -90,12 +94,13 @@ function assertCleanTemplate() {
     "status",
     "--porcelain",
     "--",
+    TEMPLATE_PACKAGE,
     TEMPLATE_DIR,
     STARTER_DIR,
   ]);
   if (status === null || status !== "") {
     fail(
-      "template/ or starter/ has uncommitted changes. Commit them first: this script changes both folders.",
+      "package.json, template/, or starter/ has uncommitted changes. Commit them first: this script changes them.",
     );
   }
 }
@@ -203,7 +208,8 @@ function diffMap(label, before = {}, after = {}) {
 }
 
 // The template pins other versions than the starter, so package.json is not in
-// the merge: pin the EmDash packages, and list the starter changes to review.
+// the merge: pin the EmDash packages, refresh the lockfile, and list the starter
+// changes to review.
 function updatePackageJson(version, oldPackage, newPackage) {
   const path = join(templateDir, TEMPLATE_PACKAGE);
   const pkg = readJson(path);
@@ -211,7 +217,7 @@ function updatePackageJson(version, oldPackage, newPackage) {
     Object.fromEntries(
       Object.entries(section).map(([name, pinned]) => [
         name,
-        EMDASH_PACKAGES.includes(name) ? version : pinned,
+        TEMPLATE_PINNED.includes(name) ? version : pinned,
       ]),
     );
   writeJson(path, {
@@ -219,6 +225,18 @@ function updatePackageJson(version, oldPackage, newPackage) {
     dependencies: pin(pkg.dependencies),
     devDependencies: pin(pkg.devDependencies),
   });
+  const root = readJson(rootPackagePath);
+  writeJson(rootPackagePath, {
+    ...root,
+    devDependencies: { ...root.devDependencies, [CREATE_PACKAGE]: version },
+  });
+  run(templateDir, "npm", [
+    "install",
+    "--package-lock-only",
+    "--ignore-scripts",
+    "--no-audit",
+    "--no-fund",
+  ]);
   return ["scripts", "dependencies", "devDependencies"].flatMap((section) =>
     diffMap(section, oldPackage[section], newPackage[section]),
   );
@@ -271,9 +289,7 @@ function changedFiles(oldDir, newDir) {
 }
 
 function check() {
-  const pinned = readJson(join(templateDir, TEMPLATE_PACKAGE)).devDependencies[
-    "create-emdash"
-  ];
+  const pinned = readJson(rootPackagePath).devDependencies[CREATE_PACKAGE];
   const newest = newestAllowedVersion();
   const workDir = mkdtempSync(join(tmpdir(), "starweb-starter-"));
   try {
