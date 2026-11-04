@@ -10,12 +10,14 @@ const LIMIT_OVERRIDES = {};
 
 const patterns = ["src/components/islands/*.tsx", "src/apps/*/islands/*.tsx"];
 
+const NOT_AN_ISLAND = /\.(stories|test)$/;
+
 const names = globSync(patterns)
   .map((file) => basename(file, ".tsx"))
-  .filter((name) => !/\.(stories|test)$/.test(name))
-  .sort();
+  .filter((name) => !NOT_AN_ISLAND.test(name))
+  .toSorted();
 
-export default [...new Set(names)].map((name) => ({
+export default Array.from(new Set(names), (name) => ({
   name,
   path: `dist/client/_astro/${name}.*.js`,
   limit: LIMIT_OVERRIDES[name] ?? DEFAULT_LIMIT,

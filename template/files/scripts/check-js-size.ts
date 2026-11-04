@@ -33,8 +33,10 @@ function sleep(ms: number): Promise<void> {
   return new Promise((done) => setTimeout(done, ms));
 }
 
+const TRAILING_SLASH = /\/$/;
+
 function normalize(pathname: string): string {
-  return pathname.length > 1 ? pathname.replace(/\/$/, "") : pathname;
+  return pathname.length > 1 ? pathname.replace(TRAILING_SLASH, "") : pathname;
 }
 
 async function islandEntryCount(): Promise<number> {

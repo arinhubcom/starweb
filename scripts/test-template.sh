@@ -130,6 +130,37 @@ grep -q '"binding": "SESSION"' "$APP_DIR/wrangler.jsonc" || fail "wrangler.jsonc
 grep -q '"astro"' "$APP_DIR/.vscode/settings.json" || fail ".vscode/settings.json does not validate astro"
 echo "ok: theme, session binding, and editor settings"
 
+step "Check that Oxlint runs each plugin"
+PROBE="$APP_DIR/src/oxlint-probe.tsx"
+cat > "$PROBE" <<'EOF'
+import { useEffect, useState } from "react";
+
+export function Probe({ items }: { items: string[] }) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    window.addEventListener("resize", () => setCount(2));
+  }, []);
+  debugger;
+  const last = items[items.length - 1];
+  return (
+    <div>
+      {count}
+      {last}
+      <img src="/x.png" />
+    </div>
+  );
+}
+EOF
+OXLINT_OUTPUT="$(cd "$APP_DIR" && npx oxlint --format=unix src/oxlint-probe.tsx || true)"
+rm "$PROBE"
+for rule in "eslint(no-debugger)" "jsx-a11y(alt-text)" "e18e(prefer-array-at)" "react-doctor(effect-needs-cleanup)"; do
+  printf '%s\n' "$OXLINT_OUTPUT" | grep -qF "$rule" || fail "oxlint did not report $rule: $OXLINT_OUTPUT"
+done
+if printf '%s\n' "$OXLINT_OUTPUT" | grep -qF "react(react-in-jsx-scope)"; then
+  fail "oxlint reports react-in-jsx-scope, but the template uses the automatic JSX runtime"
+fi
+echo "ok: oxlint runs the eslint, jsx-a11y, e18e, and react-doctor rules"
+
 step "Run npm run check"
 (cd "$APP_DIR" && npm run check)
 

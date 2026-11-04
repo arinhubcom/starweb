@@ -196,7 +196,7 @@ describe("measurePageJs", () => {
     const html = `<script src="/a.js"></script><link rel="modulepreload" href="/b.js"><script src="/a.js"></script>`;
     const result = await measurePageJs(html, PAGE, load, size);
     expect(calls.filter((url) => url.endsWith("/shared.js"))).toHaveLength(1);
-    expect(result.files.map((f) => f.name).sort()).toEqual([
+    expect(result.files.map((f) => f.name).toSorted()).toEqual([
       "/a.js",
       "/b.js",
       "/shared.js",

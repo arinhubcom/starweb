@@ -540,6 +540,14 @@ React Email blocks via the shadcn `@emailcn` registry. → [EMAIL](EMAIL.md)
 
 ## Quality
 
+### Oxlint
+
+First lint pass, with `oxlint-plugin-react-doctor` and `@e18e/eslint-plugin`. → [QUALITY](QUALITY.md)
+
+- llms: https://oxc.rs/llms.txt · https://oxc.rs/llms-full.txt
+- context7: https://context7.com/websites/oxc_rs_guide_usage/llms.txt?tokens=10000
+- github: https://github.com/oxc-project/oxc · https://github.com/millionco/react-doctor · https://github.com/e18e/eslint-plugin
+
 ### ESLint
 
 Flat config, `eslint-plugin-astro`, scoped `typescript-eslint`. → [QUALITY](QUALITY.md)
