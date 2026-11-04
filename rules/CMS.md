@@ -30,6 +30,60 @@
 - Measure before each new plugin or plugin update: DevTools CPU profile under `wrangler dev`; in production, `$workers.cpuTimeMs` in Workers Logs. No `Date.now()` or `performance.now()`: timers advance only on I/O.
 - Third-party plugin over budget → do not install it.
 - Heavy work in a plugin → build time or a queue, not a hook on the request path.
+- Sandboxed plugins: at most 4 distinct Dynamic Workers in flight per request; keep few plugins on one hook. Behavior of EmDash over this limit: not verified.
+- Dynamic Workers also bill startup CPU (isolate start, code parsing): keep the plugin bundle small.
+- The 50 ms comes from EmDash `DEFAULT_LIMITS`, not from Worker Loader (default: Workers plan limits). `emdash()` has no option to change it.
+
+### Plugins on Workers Free and Paid
+
+Own plugins work on Free, as native plugins or in the site process.
+
+| Plugin setup | Free | Paid |
+| --- | --- | --- |
+| Own native plugin in `plugins: []` | Yes | Yes |
+| Own sandboxed-format plugin in `plugins: []` (site process, no isolation or runner limits) | Yes | Yes |
+| `sandboxed: []` with `sandboxRunner: sandbox()` (Dynamic Worker per plugin) | No: not loaded, startup warning | Yes, with `worker_loaders` binding `LOADER` |
+| Registry install from the admin UI | No: needs a sandbox runner | Yes |
+| CPU per HTTP request | 10 ms | 5 min, default 30 s |
+| CPU per sandboxed call | No sandbox | 50 ms, 10 subrequests, 30 s wall time |
+
+- Third-party plugin that needs isolation → Paid + `sandbox()`. No `sandbox: false` in production.
+- Free limits → [SAAS](SAAS.md#workers-free-plan).
+
+### Cloudflare cost
+
+Prices checked 2026-11-04, in USD, without tax. Paid minimum: $5 per month per account.
+
+| Service | Free | Paid included per month | Paid extra |
+| --- | --- | --- | --- |
+| Worker requests | 100,000 per day | 10 million | $0.30 per million |
+| Worker CPU | 10 ms per invocation | 30 million ms | $0.02 per million ms |
+| Static asset requests | Free, unlimited | Free, unlimited | None |
+| D1 rows read | 5 million per day | 25 billion | $0.001 per million |
+| D1 rows written | 100,000 per day | 50 million | $1.00 per million |
+| D1 storage | 5 GB total, 500 MB per database | 5 GB, 10 GB per database | $0.75 per GB-month |
+| R2 Standard storage | 10 GB-month | 10 GB-month | $0.015 per GB-month |
+| R2 Class A operations | 1 million | 1 million | $4.50 per million |
+| R2 Class B operations | 10 million | 10 million | $0.36 per million |
+| R2 egress | Free | Free | None |
+| Workers KV reads | 100,000 per day | 10 million | $0.50 per million |
+| Workers KV writes | 1,000 per day | 1 million | $5.00 per million |
+| Queues operations | 10,000 per day | 1 million | $0.40 per million |
+| Images transformations | 5,000 unique per month, then error `9422` | See Images pricing | See Images pricing |
+| Workers Logs events | 200,000 per day | 20 million | $0.60 per million; new pricing from 2026-12-01 |
+| Dynamic Workers created | None | 1,000 unique | $0.002 per Dynamic Worker per day |
+
+Worker cost per month, with every request at the full 10 ms and no cache hits. D1, R2, and other services are extra.
+
+| Requests per month | Requests | CPU | Total |
+| --- | --- | --- | --- |
+| Up to 100,000 per day | Free plan | Free plan | $0 |
+| 10 million | Included | $1.40 | $6.40 |
+| 30 million | $6.00 | $5.40 | $16.40 |
+| 100 million | $27.00 | $19.40 | $51.40 |
+
+- Total = $5 + requests + CPU.
+- Check before a plan decision: [Workers](https://developers.cloudflare.com/workers/platform/pricing/), [Dynamic Workers](https://developers.cloudflare.com/dynamic-workers/pricing/), [D1](https://developers.cloudflare.com/d1/platform/pricing/), [R2](https://developers.cloudflare.com/r2/pricing/), [Workers KV](https://developers.cloudflare.com/kv/platform/pricing/), [Queues](https://developers.cloudflare.com/queues/platform/pricing/), [Images](https://developers.cloudflare.com/images/pricing/).
 
 ## Drafts and preview
 
