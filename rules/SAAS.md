@@ -68,7 +68,7 @@ Small SaaS: few tenants, little data per tenant, no real-time collaboration. Sit
 
 - Native plugin for admin pages and dashboard widgets that manage the app.
 - No plugin API routes for customer traffic → `src/apps/<app>/api/`, under `/<app>/api/`.
-- Sandboxed plugins only on Paid; each call < 50 ms CPU, ≤ 10 subrequests.
+- Sandboxed plugins only on Paid; each call < 50 ms CPU (hard stop; target ≤ 10 ms → [CMS](CMS.md#plugins)), ≤ 10 subrequests.
 
 ## Building blocks
 

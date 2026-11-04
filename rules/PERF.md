@@ -33,6 +33,7 @@
 ### [Workers](STACK.md#workers)
 
 - CPU ≤ 10 ms per request; heavy work at build time.
+- EmDash plugins share this budget. → [CMS](CMS.md#plugins)
 - `Cache-Control` only on non-Astro responses (custom Worker entrypoint); Astro pages use route caching (Cache).
 
 ## Placement

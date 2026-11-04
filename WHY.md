@@ -46,6 +46,8 @@ Cloudflare gives three cache layers:
 
 The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fetch, KV, D1) does not count. We use this limit as a target for high performance: if a page renders in less than 10 ms of CPU time, it is fast and cheap on any plan.
 
+EmDash plugins keep the same target. EmDash says that a native plugin runs in the same process as the site and that a bug in it can "burn its CPU budget", so a slow hook slows every page it runs on. The sandbox runner stops a plugin only at 50 ms of CPU per invocation by default, which is five times the target, so that limit does not protect the budget.
+
 ### Limits
 
 - D1 has a size limit per database (10 GB). Large apps must split data across many databases.
