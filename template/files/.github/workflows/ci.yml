@@ -22,3 +22,5 @@ jobs:
       - run: npm run check
       - run: npm run build
       - run: npm run size
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm audit signatures

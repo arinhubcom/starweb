@@ -675,6 +675,12 @@ trendaro-fe (qset v4) has four test tiers for each widget: unit tests, DOM snaps
 
 ## Dependencies
 
+### Why Zod has an npm override
+
+- `emdash`, `@emdash-cms/auth`, and `@emdash-cms/plugin-types` 1.4.0 pin `zod` 4.5.4. It has a high severity advisory ([GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5)), fixed in 4.6.6, so `npm audit --omit=dev --audit-level=high` fails on every new project.
+- `npm audit fix --force` offers `emdash` 0.36.0, a downgrade across a major version. An audit exception would keep the vulnerable copy in the Worker. The override removes it.
+- `$zod` follows the version in `dependencies`. A fixed version in `overrides` fails with `EOVERRIDE` as soon as Dependabot updates the direct dependency.
+
 ### Why Dependabot and not Renovate
 
 Dependabot is part of GitHub, so there is no third-party app to install and trust. The Renovate GitHub App needs read and write access to code, pull requests, issues, checks, commit statuses, and workflows, per the [Renovate permissions docs](https://docs.renovatebot.com/security-and-permissions/).

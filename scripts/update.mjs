@@ -33,7 +33,7 @@ import {
 } from "./lib.mjs";
 
 const MAX_CONFLICTS = 127;
-const DEP_SECTIONS = ["dependencies", "devDependencies"];
+const DEP_SECTIONS = ["dependencies", "devDependencies", "overrides"];
 
 function parseArgs(argv) {
   const options = { dir: undefined, dryRun: false };

@@ -57,6 +57,7 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 ### npm audit
 
 - CI: `npm audit --omit=dev --audit-level=high`; `npm audit signatures`.
+- `"overrides": { "zod": "$zod" }` in `template/package.json`: `emdash` 1.4.0 pins `zod` 4.5.4 ([GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5), fixed in 4.6.6). `$zod` follows the direct dependency, so a `zod` update cannot fail with `EOVERRIDE`. Remove it once `emdash` pins `zod` ≥ 4.6.6. → [WHY](../WHY.md#why-zod-has-an-npm-override)
 - Full review: `npm audit` without `--omit=dev`; fix by update or `npm audit fix`. No `npm audit fix --force` without review (allows major bumps).
 
 ## Add a package

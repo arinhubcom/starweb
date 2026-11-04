@@ -147,6 +147,10 @@ function mergePackageJson(dir, name) {
       ...project.devDependencies,
       ...templateDevDeps,
     }),
+    overrides: sortKeys({
+      ...project.overrides,
+      ...template.overrides,
+    }),
   });
 }
 

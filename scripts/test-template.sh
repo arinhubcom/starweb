@@ -127,6 +127,10 @@ step "Run npm run build"
 step "Run npm run size"
 (cd "$APP_DIR" && npm run size)
 
+step "Run npm audit"
+(cd "$APP_DIR" && npm audit --omit=dev --audit-level=high)
+(cd "$APP_DIR" && npm audit signatures)
+
 step "Start npm run preview"
 PORT="$(free_port)"
 [ "$PORT" != "0" ] || fail "no free port between 4501 and 4599"
