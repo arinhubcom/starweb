@@ -276,7 +276,7 @@ echo "ok: MaterialIcon exists, and oxlint fails on Lucide in .astro and .tsx fil
 
 step "Run the checks and pnpm audit at the same time"
 # The test runs the parts of pnpm run check, so check the script text.
-grep -qF '"check": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run fonts && pnpm run test"' "$APP_DIR/package.json" || fail "the check script changed: update this step"
+grep -qF '"check": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run test"' "$APP_DIR/package.json" || fail "the check script changed: update this step"
 # astro check writes .astro/types.d.ts, and the type-aware lint reads it, so lint
 # starts after typecheck.
 FIRST=("pnpm run format:check" "pnpm run typecheck" "pnpm run knip" "pnpm run fonts")
@@ -349,6 +349,8 @@ ICON_SIZE="$(curl -s -o /dev/null -w '%{size_download}' --max-time 30 "$BASE_URL
 ICON_CACHE="$(curl -s -D - -o /dev/null --max-time 30 "$BASE_URL$ICON_FILE" | grep -i '^cache-control:' || true)"
 printf '%s\n' "$ICON_CACHE" | grep -q 'immutable' || fail "the icon font is not immutable: $ICON_CACHE"
 grep -q 'path: node_modules/.astro/fonts' "$APP_DIR/.github/workflows/ci.yml" || fail "ci.yml does not cache the fonts"
+grep -q 'run: pnpm run fonts' "$APP_DIR/.github/workflows/fonts.yml" || fail "fonts.yml does not run the font check"
+grep -q 'src/lib/fonts.ts' "$APP_DIR/.github/workflows/fonts.yml" || fail "fonts.yml does not watch src/lib/fonts.ts"
 echo "ok: self-hosted, immutable fonts, cached in CI, and an icon font subset of $ICON_SIZE bytes"
 
 step "Check the security.txt file and the privacy page"

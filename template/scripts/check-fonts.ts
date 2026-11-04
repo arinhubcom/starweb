@@ -71,4 +71,11 @@ const main = async () => {
   console.info(`Fonts: ${fonts.length} families, ${ICON_NAMES.length} icons`);
 };
 
-await main();
+try {
+  await main();
+} catch (error) {
+  console.error(
+    `The font check could not ask the font providers, so it did not check src/lib/fonts.ts. Check the network and try again.\n${String(error)}`,
+  );
+  process.exit(1);
+}

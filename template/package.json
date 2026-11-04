@@ -18,7 +18,7 @@
     "knip": "knip",
     "fonts": "tsx scripts/check-fonts.ts",
     "test": "vitest run --coverage",
-    "check": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run fonts && pnpm run test",
+    "check": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run test",
     "size": "tsx scripts/check-js-size.ts"
   },
   "dependencies": {

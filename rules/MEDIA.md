@@ -78,7 +78,7 @@ Images, video, fonts, icons, uploads. Layout shift → [UI-UX](UI-UX.md) (Cumula
 - Families in `src/lib/fonts.ts`, imported by `astro.config.mjs`.
 - Default: Roboto Flex, `fontProviders.google()`, `subsets: ["latin", "latin-ext"]`, `styles: ["normal"]`. Another family → change `src/lib/fonts.ts` and the `--font-sans` line in `global.css`.
 - Per font: `name`, `provider`, `cssVariable`; `weights`, `styles`, `subsets` only as used. Fix each build warning about a value the provider cannot serve.
-- `pnpm run fonts` (`scripts/check-fonts.ts`, part of `pnpm run check`) fails on a value the provider cannot serve: family, weight, style, subset (from `getFontProperties`), variable axis, or icon name.
+- `pnpm run fonts` (`scripts/check-fonts.ts`; run it after each change to `src/lib/fonts.ts`; not in `pnpm run check`; `.github/workflows/fonts.yml` runs it when that file or `pnpm-lock.yaml` changes) fails on a value the provider cannot serve: family, weight, style, subset (from `getFontProperties`), variable axis, or icon name.
 - Variable font: `options.experimental.variableAxis` for axes other than `wght` and `ital` (`opsz: [["8", "144"]]`). `opsz` needs no `font-variation-settings`; `font-optical-sizing: auto` sets it.
 - No `options.experimental.glyphs` on a font that renders CMS or user text; only on fixed text or icons.
 - `fallbacks: ["sans-serif"]`-style generic; keep `optimizedFallbacks: true`. Keep `display: swap`, except for the icon font → Icons.
