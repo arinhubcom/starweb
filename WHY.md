@@ -850,8 +850,11 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 - `astro check` does not support TypeScript 7, and Astro plans to deprecate it. It stops with an error, because TypeScript 7 no longer exports the API that `@astrojs/language-server` uses ([astro#17268](https://github.com/withastro/astro/issues/17268)). So a newer `@astrojs/check` is not the way forward.
 - The replacement is `tsc --noEmit --runExternalCode` with `@astrojs/ts-content-mapper`, which needs TypeScript 7.1 or later. On 2026-11-04, only a beta of that TypeScript version existed.
-- A test on 2026-11-04 with that beta and `@astrojs/ts-content-mapper` 0.2.0 found type errors in `.astro` files, and reported none in the template code. But it reported 769 errors in `node_modules/emdash/src`: the `emdash` package ships `.ts` source, so the strict flags of the project apply to it, and `skipLibCheck` covers only `.d.ts` files.
-- The speed gain is small: 6-13 s against 9-19 s for `astro check` in the same test. So the move waits for a stable TypeScript release and for a fix of those errors. `--runExternalCode` also runs code from `node_modules` during the type check.
+- A test on 2026-11-04 with that beta and `@astrojs/ts-content-mapper` 0.2.0 reported no errors in the template code, and 769 errors in `node_modules/emdash/src`. The cause is two imports: `emdash/ui` and `emdash/ui/search` have no `types` entry and point to source files, so `tsc` loads 534 source files of that package and applies the strict flags of the project. `skipLibCheck` covers only `.d.ts` files, and `exclude` does not stop an imported file.
+- Two ways passed in that test. Both report no project errors, so the errors in the package do not block the move:
+  - Drop the `node_modules/` lines from the `tsc` output, and fail on what is left. It took 6-9 s, and found the same 3 errors as `astro check` in a test page, including a wrong `Image` prop.
+  - Map the two imports to a local `.d.ts` file with `paths`. It took under 1 s, and loaded no source files of the package. With loose component types it missed the wrong `Image` prop, so this way needs real prop types.
+- The move waits for a stable TypeScript release. `--runExternalCode` also runs code from `node_modules` during the type check.
 
 ### Why `exactOptionalPropertyTypes` stays on
 
