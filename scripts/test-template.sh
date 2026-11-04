@@ -118,6 +118,18 @@ if printf '%s\n' "$UPDATE_OUTPUT" | grep -E '^[A-Za-z].*: [1-9][0-9]*$'; then
 fi
 echo "ok: update.mjs reports nothing to change"
 
+step "Check the theme, the session binding, and the editor settings"
+grep -q '^@import "./theme.css";' "$APP_DIR/src/styles/global.css" || fail "global.css does not import theme.css"
+grep -q -- '--surface-container-high: #' "$APP_DIR/src/styles/theme.css" || fail "theme.css has no MD3 roles"
+grep -q -- '--color-surface-container-high: var(--surface-container-high);' "$APP_DIR/src/styles/theme.css" || fail "theme.css does not expose the MD3 roles"
+grep -q '^\.dark {' "$APP_DIR/src/styles/theme.css" || fail "theme.css has no dark scheme"
+cp "$APP_DIR/src/styles/theme.css" "$WORKDIR/theme.before.css"
+(cd "$APP_DIR" && npx tsx scripts/theme.ts)
+cmp "$WORKDIR/theme.before.css" "$APP_DIR/src/styles/theme.css" || fail "scripts/theme.ts output differs from the formatted file"
+grep -q '"binding": "SESSION"' "$APP_DIR/wrangler.jsonc" || fail "wrangler.jsonc has no SESSION binding"
+grep -q '"astro"' "$APP_DIR/.vscode/settings.json" || fail ".vscode/settings.json does not validate astro"
+echo "ok: theme, session binding, and editor settings"
+
 step "Run npm run check"
 (cd "$APP_DIR" && npm run check)
 
@@ -152,6 +164,20 @@ expect_status 403 "cross-origin POST /" -X POST \
   -H 'Origin: https://evil.example' -H 'Content-Type: text/plain' \
   --data 'x' "$BASE_URL/"
 expect_status 200 "same-origin GET /" -H "Origin: $BASE_URL" "$BASE_URL/"
+
+step "Check the security.txt file and the privacy page"
+expect_status 200 "GET /.well-known/security.txt" "$BASE_URL/.well-known/security.txt"
+SECURITY_TYPE="$(curl -s -o /dev/null -w '%{content_type}' --max-time 30 "$BASE_URL/.well-known/security.txt")"
+[ "$SECURITY_TYPE" = "text/plain; charset=utf-8" ] || fail "security.txt content type: $SECURITY_TYPE"
+SECURITY_TXT="$(curl -s --max-time 30 "$BASE_URL/.well-known/security.txt")"
+for field in "Contact: mailto:security@example.com" "Expires: " "Canonical: https://example.com/.well-known/security.txt"; do
+  printf '%s\n' "$SECURITY_TXT" | grep -qF "$field" || fail "security.txt has no \"$field\""
+done
+echo "ok: security.txt has the type and the fields"
+expect_status 200 "GET /privacy" "$BASE_URL/privacy"
+curl -s --max-time 30 "$BASE_URL/privacy" | grep -q 'Privacy policy' || fail "/privacy has no title"
+curl -s --max-time 30 "$BASE_URL/" | grep -q 'href="/privacy"' || fail "the footer has no link to /privacy"
+echo "ok: the privacy page exists, and the footer links to it"
 
 echo
 echo "PASS: the template works end to end ($STEP steps)"

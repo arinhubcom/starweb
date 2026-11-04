@@ -32,6 +32,8 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project
 
 - A rule and the file in `template/files/` or `scripts/setup.mjs` that implements it change in the same commit.
 - No edit to `template/files/` without the rule that describes it; change the rule first.
+- Keep the template current with `rules/`: each rule that applies to every project and that a file, config value, package, script, or CI step can implement has that implementation in `template/` or `scripts/setup.mjs`, or a step in [SETUP](SETUP.md) that a real project can run. Conditional rules ("uses X →") need a [SETUP](SETUP.md) step. A step never names a file that neither the template nor the step creates.
+- A new template file or behavior gets a check in `scripts/test-template.sh`.
 - Exact versions in `template/package.json`, no `^` or `~`.
 - Before a commit that touches `template/`, `scripts/`, or a rule they implement: `bash scripts/test-template.sh <tmp-dir>` (new folder outside the repository).
 - Before each template test, check every package in `template/package.json` for a newer version (`npm view <package> time`); pin the newest that is older than 3 days and within peer ranges and the [DEPS](DEPS.md) ignore list, then test with it.

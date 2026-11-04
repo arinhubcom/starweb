@@ -29,6 +29,7 @@ First split, to verify (owner only, not checked for quality):
 
 Check these upstream issues and discussions. When one closes or changes, update the rule or decision that links to it, and then remove it from this list.
 
+- [ ] `emdash` 1.4.0 pins the vulnerable `zod` 4.5.4 ([GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5)). When a new `emdash` pins `zod` 4.6.6 or later, remove the `overrides` from `template/package.json` and the rule in [rules/DEPS.md](rules/DEPS.md).
 - [ ] [cloudflare/polystella#66](https://github.com/cloudflare/polystella/issues/66): support Paraglide JS message files (inlang message format) in the catalog CLI. Open. Linked from [WHY.md](WHY.md).
 - [ ] [heroui-inc/tailwind-variants#321](https://github.com/heroui-inc/tailwind-variants/discussions/321): share one class merge engine with shadcn/ui `cn` (discussion). Open. Linked from [WHY.md](WHY.md).
 - [ ] [theweekendprojects/emdash-better-auth#22](https://github.com/theweekendprojects/emdash-better-auth/issues/22): extension point for server-side Better Auth plugins (payment providers like Polar, Creem). Open. Linked from [rules/API.md](rules/API.md).

@@ -7,9 +7,10 @@ import { defineConfig } from "astro/config";
 import emdash from "emdash/astro";
 import zodCompiler from "zod-compiler/vite";
 import { directives, scriptDirective } from "./src/lib/security/csp.ts";
+import { SITE } from "./src/lib/site.ts";
 
 export default defineConfig({
-  site: "__SITE__",
+  site: SITE,
   trailingSlash: "never",
   output: "server",
   security: { csp: { scriptDirective, directives } },

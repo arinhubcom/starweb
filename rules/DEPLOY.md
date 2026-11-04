@@ -24,7 +24,7 @@
 - No separate stage Worker: stage is a no-traffic version of the prod Worker. → [WHY](../WHY.md#why-three-environments)
 - Separate D1, KV, R2 per environment, same binding names. Dev and PR previews never use prod data.
 - Repeat in `env.production` (not inherited): `d1_databases`, `r2_buckets`, `kv_namespaces`, `version_metadata`, `images`, `ratelimits`, `ai`, `queues`, `workflows`, `durable_objects`, `services`, `vars`, `secrets`, `define`. Do not repeat (inherited): `compatibility_date`, `compatibility_flags`, `observability`, `placement`, `triggers`, `assets`.
-- `SESSION` KV namespace in `kv_namespaces` in `env.production` and at top level ([Astro](STACK.md#astro) `sessionKVBindingName` default). No sessions → `session: false` in the Astro config.
+- `SESSION` KV namespace in `kv_namespaces` in `env.production` and at top level ([Astro](STACK.md#astro) `sessionKVBindingName` default); the template sets the top-level one. No `session: false`: [EmDash](STACK.md#emdash) stores admin logins in Astro sessions.
 - Prod gets its own `routes` (custom domain). Dev stays on `workers.dev` with one Worker; more Workers → Separate Workers.
 - `"preview_urls": true` in `env.production` (with `routes`, `workers_dev` defaults to `false`, so stage has no URL). Protect the stage URL with Cloudflare Access (Version URLs).
 - Stage uses prod bindings: apply prod migrations before the stage upload (Migrations).

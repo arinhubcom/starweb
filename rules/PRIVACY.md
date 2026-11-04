@@ -33,7 +33,7 @@ Technical rules, not legal advice. → [SAAS](SAAS.md), [AUTH](AUTH.md) (users, 
 
 ### [GDPR Article 13](https://gdpr-info.eu/art-13-gdpr/)
 
-- Page at `/privacy`, linked in the base layout footer and on each sign-up form.
+- Page at `/privacy`, linked in the base layout footer and on each sign-up form. The template ships `src/pages/privacy.astro` and the footer link; replace each `[Add` marker before the first production deploy.
 - Content per Article 13: controller contact, purposes, recipients, retention, user rights incl. complaint to a supervisory authority.
 - List each processor by name (Article 13(1)(e)): Cloudflare (hosting, D1, R2, logs, Turnstile on pages with a protected form), plus Stripe, the email provider, Sentry as used.
 - US transfer per processor with safeguard (Article 13(1)(f)). Cloudflare: [EU-U.S. Data Privacy Framework](https://www.cloudflare.com/privacypolicy/) certification and EU Standard Contractual Clauses in the [Cloudflare DPA](https://www.cloudflare.com/cloudflare-customer-dpa/); link both. In the policy page, no separate page.

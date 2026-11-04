@@ -208,8 +208,10 @@ function planPackageJson(dir, state, head) {
       project[section] ?? {},
       PIN_ONLY_TOOLS,
     );
-    result.next[section] =
-      section === "scripts" ? plan.next : sortKeys(plan.next);
+    if (section in project || Object.keys(plan.next).length > 0) {
+      result.next[section] =
+        section === "scripts" ? plan.next : sortKeys(plan.next);
+    }
     for (const key of ["changes", "kept", "gone"])
       result[key].push(...plan[key]);
   }

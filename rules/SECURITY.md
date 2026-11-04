@@ -114,5 +114,5 @@
 
 ### [security.txt](STACK.md#securitytxt)
 
-- `public/.well-known/security.txt`, served as `text/plain; charset=utf-8` over HTTPS.
+- `public/.well-known/security.txt`, served as `text/plain; charset=utf-8` over HTTPS. `scripts/write-security-txt.ts` writes it at each build from `src/lib/site.ts`, with `Expires` 364 days ahead; do not commit it. Deploy at least once in that time, or the file expires.
 - `Contact` (`mailto:` or `https:`), one `Expires` less than one year ahead (renew in time), `Canonical` with the full file URL, `Policy` when a disclosure policy exists.

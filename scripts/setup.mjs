@@ -37,6 +37,7 @@ const GITIGNORE_LINES = [
   "coverage/",
   "backups/",
   "public/_headers",
+  "public/.well-known/security.txt",
 ];
 
 function parseArgs(argv) {
@@ -182,6 +183,7 @@ function installAndFormat(dir) {
   rmSync(join(dir, "package-lock.json"), { force: true });
   run(dir, "npm", ["install"]);
   run(dir, "npx", ["wrangler", "types"]);
+  run(dir, "npx", ["tsx", "scripts/theme.ts"]);
   run(dir, "npx", ["prettier", ".", "--write", "--log-level", "warn"]);
   if (!existsSync(join(dir, ".git"))) run(dir, "git", ["init", "--quiet"]);
 }
@@ -198,7 +200,7 @@ function printNextSteps() {
   console.log(`
 Setup done. Next steps (see rules/SETUP.md):
   1. Run "npm run check" and "npm run build". Both must pass.
-  2. Set "site" in astro.config.mjs to the final public URL, if you used the default.
+  2. Set SITE, CONTROLLER, and the contact addresses in src/lib/site.ts, and replace each [Add marker in src/pages/privacy.astro.
   3. Create the D1 database with a location hint, set its database_id, and log in with "npx wrangler login".
   4. Add the optional parts that SETUP.md lists: Fulldev UI, i18n, auth, apps, Sentry, Storybook, Playwright, and the deploy workflows.
   5. Start "npm run dev", open /_emdash/admin/, and complete the setup wizard.

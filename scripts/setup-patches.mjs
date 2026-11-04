@@ -32,6 +32,10 @@ export const starterPatches = [
         '\t<body class="@container">\n\t\t<a href="#main" class="sr-only focus:not-sr-only">Skip to main content</a>\n',
       ],
       ["\t\t<main>", '\t\t<main id="main">'],
+      [
+        "\t\t</main>\n",
+        '\t\t</main>\n\n\t\t<footer>\n\t\t\t<a href="/privacy">Privacy</a>\n\t\t</footer>\n',
+      ],
     ],
   },
   {
