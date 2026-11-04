@@ -5,6 +5,9 @@
 // from the main branch of emdash-cms/templates, so an older version gives the
 // same output as a new one: only the snapshot in starter/ can be the base.
 // Usage: node scripts/update-starter.mjs <version>
+//        node scripts/update-starter.mjs --check
+// --check changes nothing. It exits with 3 when create-emdash gives other
+// files than starter/, or when a newer EmDash version is ready to pin.
 import { spawnSync } from "node:child_process";
 import {
   cpSync,
@@ -56,6 +59,8 @@ const NOT_KEPT = [
   "worker-configuration.d.ts",
 ];
 const NOT_WALKED = new Set([".git", "node_modules"]);
+const CHECK_FOUND_CHANGES = 3;
+const MIN_RELEASE_AGE_MS = 3 * 24 * 60 * 60 * 1000;
 // The rules of Starweb use AGENTS.md, so the template keeps the EmDash text here.
 const RENAMED = new Map([["AGENTS.md", "EMDASH.md"]]);
 
@@ -69,12 +74,15 @@ function run(cwd, command, args) {
   return result.stdout;
 }
 
-function parseVersion(argv) {
-  const [version] = argv;
-  if (argv.length !== 1 || !/^\d+\.\d+\.\d+$/.test(version)) {
-    fail("Usage: update-starter.mjs <version>, for example 1.5.0.");
+function parseArgs(argv) {
+  const [arg] = argv;
+  if (argv.length === 1 && arg === "--check") return { check: true };
+  if (argv.length !== 1 || !/^\d+\.\d+\.\d+$/.test(arg)) {
+    fail(
+      "Usage: update-starter.mjs <version>, for example 1.5.0, or update-starter.mjs --check.",
+    );
   }
-  return version;
+  return { check: false, version: arg };
 }
 
 function assertCleanTemplate() {
@@ -232,8 +240,64 @@ function printReport(report, packageChanges) {
   }
 }
 
+// Stable versions that are old enough to pin, for one package.
+function allowedVersions(name) {
+  const times = JSON.parse(run(repoRoot, "npm", ["view", name, "time", "--json"]));
+  const newestDate = Date.now() - MIN_RELEASE_AGE_MS;
+  return Object.entries(times)
+    .filter(
+      ([version, time]) =>
+        /^\d+\.\d+\.\d+$/.test(version) && Date.parse(time) < newestDate,
+    )
+    .map(([version]) => version);
+}
+
+// The newest version that all EmDash packages have, old enough to pin.
+function newestAllowedVersion() {
+  const [first, ...others] = EMDASH_PACKAGES.map(allowedVersions);
+  return first
+    .filter((version) => others.every((list) => list.includes(version)))
+    .toSorted((a, b) => b.localeCompare(a, undefined, { numeric: true }))[0];
+}
+
+function changedFiles(oldDir, newDir) {
+  return [...new Set([...walk(oldDir), ...walk(newDir)])]
+    .filter(
+      (relative) =>
+        readIfExists(join(oldDir, relative)) !==
+        readIfExists(join(newDir, relative)),
+    )
+    .toSorted((a, b) => a.localeCompare(b));
+}
+
+function check() {
+  const pinned = readJson(join(templateDir, TEMPLATE_PACKAGE)).devDependencies[
+    "create-emdash"
+  ];
+  const newest = newestAllowedVersion();
+  const workDir = mkdtempSync(join(tmpdir(), "starweb-starter-"));
+  try {
+    step("Install Prettier with the template's versions");
+    installFormatter(workDir);
+    step(`Run create-emdash ${pinned}`);
+    const changed = changedFiles(starterDir, createStarter(workDir, pinned));
+    const hasNewer = newest !== undefined && newest !== pinned;
+    console.log(`\nPinned EmDash version: ${pinned}`);
+    console.log(`Newest version ready to pin: ${newest ?? "(none)"}`);
+    console.log(`Starter files that differ from starter/: ${changed.length}`);
+    for (const file of changed) console.log(`  ${file}`);
+    if (hasNewer || changed.length > 0) process.exitCode = CHECK_FOUND_CHANGES;
+  } finally {
+    rmSync(workDir, { recursive: true, force: true });
+  }
+}
+
 function main() {
-  const version = parseVersion(process.argv.slice(2));
+  const { check: checkOnly, version } = parseArgs(process.argv.slice(2));
+  if (checkOnly) {
+    check();
+    return;
+  }
   assertCleanTemplate();
   const workDir = mkdtempSync(join(tmpdir(), "starweb-starter-"));
   try {

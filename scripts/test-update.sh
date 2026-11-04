@@ -185,6 +185,14 @@ for file in src/pages/404.astro src/layouts/Base.astro; do
   done
 done
 rm "$STARWEB/starter/seed/seed.json"
+commit_in_clone "test: fake an older starter snapshot"
+CHECK_STATUS=0
+CHECK_OUTPUT="$(node "$STARWEB/scripts/update-starter.mjs" --check)" || CHECK_STATUS=$?
+printf '%s\n' "$CHECK_OUTPUT"
+assert_equal "$CHECK_STATUS" "3" "update-starter.mjs --check exit code with changes"
+printf '%s\n' "$CHECK_OUTPUT" | grep -q 'src/layouts/Base.astro' || fail "--check does not list Base.astro"
+printf '%s\n' "$CHECK_OUTPUT" | grep -q 'seed/seed.json' || fail "--check does not list seed.json"
+[ -z "$(clone_git status --porcelain)" ] || fail "--check changed files"
 node -e '
   const fs = require("node:fs");
   const file = process.argv[1];
@@ -192,7 +200,7 @@ node -e '
   pkg.devDependencies["create-emdash"] = "0.0.1";
   fs.writeFileSync(file, JSON.stringify(pkg, null, 2) + "\n");
 ' "$STARWEB/template/package.json"
-commit_in_clone "test: fake an older starter snapshot"
+commit_in_clone "test: fake an older create-emdash pin"
 STARTER_OUTPUT="$(node "$STARWEB/scripts/update-starter.mjs" "$PINNED")"
 printf '%s\n' "$STARTER_OUTPUT"
 assert_contains "$STARWEB/template/package.json" "\"create-emdash\": \"$PINNED\""

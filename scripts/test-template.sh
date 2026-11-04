@@ -118,7 +118,10 @@ fi
 if node "$REPO_ROOT/scripts/setup.mjs" "$APP_DIR" --name tpl-test >/dev/null 2>&1; then
   fail "setup.mjs ran on a folder that is not empty"
 fi
-echo "ok: starter files, encryption key, and empty folder check"
+for package in emdash @emdash-cms/cloudflare; do
+  grep -qF "dependency-name: \"$package\"" "$APP_DIR/.github/dependabot.yml" || fail "dependabot.yml does not ignore $package"
+done
+echo "ok: starter files, encryption key, Dependabot exception, and empty folder check"
 
 step "Run update.mjs --dry-run: nothing to change"
 UPDATE_OUTPUT="$(node "$REPO_ROOT/scripts/update.mjs" "$APP_DIR" --dry-run)"
