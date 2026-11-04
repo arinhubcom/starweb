@@ -118,7 +118,7 @@ if printf '%s\n' "$UPDATE_OUTPUT" | grep -E '^[A-Za-z].*: [1-9][0-9]*$'; then
 fi
 echo "ok: update.mjs reports nothing to change"
 
-step "Check the theme, the session binding, and the editor settings"
+step "Check the theme and the session binding"
 grep -q '^@import "./theme.css";' "$APP_DIR/src/styles/global.css" || fail "global.css does not import theme.css"
 grep -q -- '--surface-container-high: #' "$APP_DIR/src/styles/theme.css" || fail "theme.css has no MD3 roles"
 grep -q -- '--color-surface-container-high: var(--surface-container-high);' "$APP_DIR/src/styles/theme.css" || fail "theme.css does not expose the MD3 roles"
@@ -127,8 +127,7 @@ cp "$APP_DIR/src/styles/theme.css" "$WORKDIR/theme.before.css"
 (cd "$APP_DIR" && npx tsx scripts/theme.ts)
 cmp "$WORKDIR/theme.before.css" "$APP_DIR/src/styles/theme.css" || fail "scripts/theme.ts output differs from the formatted file"
 grep -q '"binding": "SESSION"' "$APP_DIR/wrangler.jsonc" || fail "wrangler.jsonc has no SESSION binding"
-grep -q '"astro"' "$APP_DIR/.vscode/settings.json" || fail ".vscode/settings.json does not validate astro"
-echo "ok: theme, session binding, and editor settings"
+echo "ok: theme and session binding"
 
 step "Check that Oxlint runs each plugin"
 PROBE="$APP_DIR/src/oxlint-probe.tsx"
@@ -139,6 +138,7 @@ export function Probe({ items }: { items: string[] }) {
   const [count, setCount] = useState(0);
   useEffect(() => {
     window.addEventListener("resize", () => setCount(2));
+    Promise.resolve(1);
   }, []);
   debugger;
   const last = items[items.length - 1];
@@ -151,15 +151,15 @@ export function Probe({ items }: { items: string[] }) {
   );
 }
 EOF
-OXLINT_OUTPUT="$(cd "$APP_DIR" && npx oxlint --format=unix src/oxlint-probe.tsx || true)"
+OXLINT_OUTPUT="$(cd "$APP_DIR" && npx oxlint --type-aware --format=unix src/oxlint-probe.tsx || true)"
 rm "$PROBE"
-for rule in "eslint(no-debugger)" "jsx-a11y(alt-text)" "e18e(prefer-array-at)" "react-doctor(effect-needs-cleanup)"; do
+for rule in "eslint(no-debugger)" "jsx-a11y(alt-text)" "e18e(prefer-array-at)" "react-doctor(effect-needs-cleanup)" "typescript(no-floating-promises)"; do
   printf '%s\n' "$OXLINT_OUTPUT" | grep -qF "$rule" || fail "oxlint did not report $rule: $OXLINT_OUTPUT"
 done
 if printf '%s\n' "$OXLINT_OUTPUT" | grep -qF "react(react-in-jsx-scope)"; then
   fail "oxlint reports react-in-jsx-scope, but the template uses the automatic JSX runtime"
 fi
-echo "ok: oxlint runs the eslint, jsx-a11y, e18e, and react-doctor rules"
+echo "ok: oxlint runs the eslint, jsx-a11y, e18e, react-doctor, and type-aware rules"
 
 step "Run npm run check"
 (cd "$APP_DIR" && npm run check)

@@ -4,7 +4,6 @@
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "types": ["node", "@cloudflare/vitest-plugin/types"],
-    "baseUrl": ".",
     "paths": { "@/*": ["./src/*"] },
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,

@@ -24,16 +24,19 @@
 
 ### [Oxlint](STACK.md#oxlint)
 
-- First lint pass, next to ESLint. Do not remove ESLint: Oxlint lints only the `<script>` blocks of `.astro` files, and typed rules stay in `typescript-eslint`.
-- `npm i -D --save-exact oxlint oxlint-plugin-react-doctor @e18e/eslint-plugin`. JS plugins are alpha and outside semver.
-- Config `.oxlintrc.json`. Lint with `oxlint --max-warnings 0`; fix or disable the rule.
+- The only linter. No ESLint, no `typescript-eslint`, no Biome. Oxlint lints only the `<script>` blocks of `.astro` files; `astro check` covers the rest.
+- Exact versions of `oxlint`, `oxlint-tsgolint`, `oxlint-plugin-react-doctor`, `@e18e/eslint-plugin`. JS plugins are alpha and outside semver.
+- Config `.oxlintrc.json`. Lint with `oxlint --type-aware --max-warnings 0` (no path: covers `scripts/`, root config files); fix or disable the rule.
 - `plugins` replaces the default set: `typescript`, `unicorn`, `oxc`, `import`, `promise`, `vitest`, `react`, `jsx-a11y`. No `react-perf`.
 - `categories`: `correctness` = error; `suspicious`, `perf` = warn.
-- No `--type-aware`, no `oxlint-tsgolint`.
-- `ignorePatterns` = the ESLint `globalIgnores` list plus `emdash-env.d.ts`.
-- Off: `no-await-in-loop`, `import/no-named-as-default`, `import/no-named-as-default-member`, `oxc/no-map-spread`, `react/react-in-jsx-scope`, `unicorn/require-module-specifiers`.
+- `rules` also turns on, as `error`, each rule of the `typescript-eslint` `strictTypeChecked` preset that no category above turns on (36 rules).
+- `tsconfig.json`: no `baseUrl` (`oxlint-tsgolint` rejects it; TypeScript 7 removed it). `paths` stay. `include`: `src`, `scripts`, `test`, `e2e`, `.storybook/**/*`, `*.config.ts`, `sentry.*.config.ts`.
+- `ignorePatterns`: `.agents/`, `.claude/`, `.cursor/`, `dist/`, `coverage/`, `.astro/`, `.wrangler/`, `worker-configuration.d.ts`, `emdash-env.d.ts`.
+- Off: `no-await-in-loop`, `oxc/no-map-spread`, `react/react-in-jsx-scope`, `typescript/no-unsafe-type-assertion`, `unicorn/require-module-specifiers`.
 - `import/no-unassigned-import`: `allow: ["**/*.css"]`.
 - Tests (`test/**`, `**/*.test.ts`, `**/*.test.tsx`): `e18e/prefer-static-regex` off.
+- JavaScript (`**/*.js`, `**/*.mjs`, `**/*.cjs`): `typescript/no-unsafe-argument`, `-assignment`, `-call`, `-member-access`, `-return` off.
+- Type-aware rules need `.astro/types.d.ts`: run `npm run typecheck` once before `npm run lint` in a new clone (else false `no-unsafe-*` errors on `astro:*` imports). `check` already runs them in this order.
 
 ### React Doctor rules
 
@@ -49,28 +52,11 @@
 - `jsPlugins`: `{ "name": "e18e", "specifier": "@e18e/eslint-plugin" }`. No preset in `.oxlintrc.json`: list each rule in `rules` as `error`.
 - Template list: `ban-dependencies`, `prefer-array-at`, `prefer-array-fill`, `prefer-array-from-map`, `prefer-array-some`, `prefer-array-to-reversed`, `prefer-array-to-sorted`, `prefer-array-to-spliced`, `prefer-date-now`, `prefer-includes`, `prefer-nullish-coalescing`, `prefer-object-has-own`, `prefer-regex-test`, `prefer-spread-syntax`, `prefer-static-regex`, `prefer-timer-args`, `prefer-url-canparse`.
 
-### [ESLint](STACK.md#eslint)
-
-- Flat config `eslint.config.mjs`. No `.eslintrc`, no Biome (`.astro` support experimental).
-- `npm i -D eslint @eslint/js typescript-eslint eslint-plugin-astro eslint-config-prettier`.
-- Config array: `eslintPluginAstro.configs.recommended` (sets Astro parser), `js.configs.recommended`, last `eslintConfigPrettier` (from `eslint-config-prettier/flat`). No `eslint-plugin-prettier`.
-- Lint with `eslint .` (no `src/**` glob: skips `scripts/`, root `sentry.*.config.ts`).
-- `globalIgnores(['dist/', '.astro/', '.wrangler/', 'worker-configuration.d.ts', '.agents/', '.claude/', '.cursor/'])` from `eslint/config`.
-- `tsconfig.json` `include`: `src`, `scripts`, `e2e`, `.storybook/**/*`, `*.config.ts`, `sentry.*.config.ts` (else typed lint parsing error).
-- CI: `eslint --max-warnings 0`; fix or disable the rule.
-- `.vscode/settings.json`: `"astro"` in `eslint.validate`.
-
-### typescript-eslint
-
-- Scoped: `...tseslint.configs.strictTypeChecked.map((config) => ({ ...config, files: ['**/*.ts', '**/*.tsx'] }))`. Unscoped fails on `.astro` (`Parsing error: Expression expected`). No `tseslint.configs.strict` alongside.
-- After it: `{ files: ['**/*.ts', '**/*.tsx'], languageOptions: { parserOptions: { projectService: true } } }`.
-- No typed linting for `.astro` unless `parserOptions.project` is set. [eslint-plugin-astro user guide](https://ota-meshi.github.io/eslint-plugin-astro/user-guide/)
-
 ## Format
 
 ### [Prettier](STACK.md#prettier)
 
-- `prettier-plugin-astro` for all formatting; no formatting rules in ESLint.
+- `prettier-plugin-astro` for all formatting; no formatting rules in Oxlint.
 - `.prettierrc`: `plugins` has `prettier-plugin-astro`, `prettier-plugin-tailwindcss` last (→ [DESIGN](DESIGN.md)); `overrides`: `files: "*.astro"`, `options: { parser: "astro" }`.
 - No `useTabs`. Run `prettier . --write` once after setup, commit.
 - `.prettierignore`: `rules/`, `WHY.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `EMDASH.md`, `worker-configuration.d.ts`, `emdash-env.d.ts`, `.agents/`.
@@ -96,7 +82,7 @@
 ### [npm](STACK.md#npm) scripts
 
 - Keep template `dev`, `build`, `preview`; add `typecheck`.
-- Add `lint` (`oxlint --max-warnings 0 && eslint . --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
+- Add `lint` (`oxlint --type-aware --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
 - `check` = `npm run format:check && npm run typecheck && npm run lint && npm run knip && npm run test`.
 - Not in `test` or `check`: `build`, `size` (needs `dist/`; → [PERF](PERF.md#client-javascript)), API checks, dependency checks, screenshot and e2e tests (CI only).
 

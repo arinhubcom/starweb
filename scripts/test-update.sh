@@ -101,13 +101,13 @@ step "Change Starweb: a rule line, a template file, and two scripts"
 sed -i '7s/$/ (upstream)/' "$STARWEB/rules/DEV.md"
 printf '// upstream change\n' >>"$STARWEB/template/files/test/setup.ts"
 edit_package_json "$STARWEB/template/package.json" starweb-test "echo starweb-test"
-edit_package_json "$STARWEB/template/package.json" lint "eslint . --max-warnings 0 --cache"
+edit_package_json "$STARWEB/template/package.json" lint "oxlint --type-aware --max-warnings 0 --quiet"
 commit_in_clone "test: change a rule, a template file, and scripts"
 NEW_COMMIT="$(clone_git rev-parse HEAD)"
 
 step "Change the project: another line of the same rule file, and the lint script"
 sed -i '13s/$/ (project)/' "$APP/rules/DEV.md"
-edit_package_json "$APP/package.json" lint "eslint . --max-warnings 5"
+edit_package_json "$APP/package.json" lint "oxlint --type-aware --max-warnings 5"
 
 step "Run update.mjs --dry-run: it changes nothing"
 DRY_OUTPUT="$(node "$STARWEB/scripts/update.mjs" "$APP" --dry-run)"
@@ -125,7 +125,7 @@ assert_contains "$APP/rules/DEV.md" "(upstream)"
 assert_contains "$APP/rules/DEV.md" "(project)"
 assert_not_contains "$APP/rules/DEV.md" "<<<<<<<"
 assert_contains "$APP/package.json" '"starweb-test": "echo starweb-test"'
-assert_contains "$APP/package.json" '"lint": "eslint . --max-warnings 5"'
+assert_contains "$APP/package.json" '"lint": "oxlint --type-aware --max-warnings 5"'
 assert_equal "$(state_commit)" "$NEW_COMMIT" ".starweb.json commit"
 
 step "Run update.mjs again: nothing to change"

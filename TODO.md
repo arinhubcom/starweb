@@ -48,7 +48,7 @@ Possible template additions:
 
 Dependency updates:
 
-- [ ] Move to TypeScript 7 when `typescript-eslint` allows it. `typescript-eslint` 8.72.1 needs `typescript` `<6.1.0`, so the template stays on 6.0.3, and the Dependabot pull request for 7.0.2 fails in CI.
+- [ ] Move to TypeScript 7 when `@astrojs/check` allows it. `@astrojs/check` 0.9.12 needs `typescript` `^5.0.0 || ^6.0.0`, so the template stays on 6.0.3.
 
 ## Follow the issues opened in other repositories
 
