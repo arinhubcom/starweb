@@ -53,13 +53,13 @@
 
 ## Format
 
-### [Prettier](STACK.md#prettier)
+### [Oxfmt](STACK.md#oxfmt)
 
-- `prettier-plugin-astro` for all formatting; no formatting rules in Oxlint.
-- `.prettierrc`: `plugins` has `prettier-plugin-astro`, `prettier-plugin-tailwindcss` last (→ [DESIGN](DESIGN.md)); `overrides`: `files: "*.astro"`, `options: { parser: "astro" }`.
-- No `useTabs`. Run `prettier . --write` once after setup, commit.
-- `.prettierignore`: `rules/`, `WHY.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `EMDASH.md`, `worker-configuration.d.ts`, `emdash-env.d.ts`, `.agents/`.
-- CI `prettier . --check`; local `prettier . --write`.
+- No formatting rules in Oxlint.
+- `.oxfmtrc.json`: `astro` (bundled `prettier-plugin-astro`; needs the `@astrojs/compiler-rs` package), `sortTailwindcss` (→ [DESIGN](DESIGN.md)), `printWidth: 80`, `sortPackageJson: false`. No Prettier plugins, no `prettier` package.
+- No `useTabs`. Run `oxfmt` once after setup, commit.
+- `ignorePatterns`: `rules/`, `WHY.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `EMDASH.md`, `README.md`, `worker-configuration.d.ts`, `emdash-env.d.ts`, `pnpm-lock.yaml`, `.agents/`, `.claude/`, `.cursor/`, `.emdash/`, `coverage/`, `dist/`, `.astro/`, `.wrangler/`. No `.prettierignore`.
+- CI `oxfmt --check`; local `oxfmt`.
 
 ## Unused code
 
@@ -80,7 +80,7 @@
 
 ### [pnpm](STACK.md#pnpm) scripts
 
-- Template `package.json`: `dev`, `build`, `preview`, `typecheck`, `lint` (`oxlint --type-aware --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
+- Template `package.json`: `dev`, `build`, `preview`, `typecheck`, `lint` (`oxlint --type-aware --max-warnings 0`), `format` (`oxfmt`), `format:check` (`oxfmt --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
 - `check` = `pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run test`.
 - Not in `test` or `check`: `fonts` (needs the network; → [MEDIA](MEDIA.md) (Fonts)), `build`, `size` (needs `dist/`; → [PERF](PERF.md#client-javascript)), API checks, dependency checks, screenshot and e2e tests (CI only).
 

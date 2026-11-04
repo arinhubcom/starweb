@@ -47,13 +47,8 @@ const CREATE_PACKAGE = "create-emdash";
 const TEMPLATE_PINNED = ["emdash", "@emdash-cms/cloudflare"];
 const EMDASH_PACKAGES = [CREATE_PACKAGE, ...TEMPLATE_PINNED];
 const rootPackagePath = join(repoRoot, TEMPLATE_PACKAGE);
-const FORMAT_PACKAGES = [
-  "prettier",
-  "prettier-plugin-astro",
-  "prettier-plugin-tailwindcss",
-  "tailwindcss",
-];
-const FORMAT_FILES = [".prettierrc", ".prettierignore"];
+const FORMAT_PACKAGES = ["oxfmt", "@astrojs/compiler-rs"];
+const FORMAT_FILES = [".oxfmtrc.json"];
 // Starter output that does not belong in the repository: secrets and lockfiles,
 // generated types, pnpm settings (the template has its own), and a symbolic link
 // that the template already has.
@@ -133,7 +128,7 @@ function installFormatter(workDir) {
 }
 
 // Run create-emdash, and shape the output as the template holds it: renamed,
-// without the excluded files, and formatted with the template's Prettier config.
+// without the excluded files, and formatted with the template's Oxfmt config.
 function createStarter(workDir, version) {
   const parent = join(workDir, `v${version}`);
   const project = join(parent, "app");
@@ -158,12 +153,7 @@ function createStarter(workDir, version) {
   for (const name of FORMAT_FILES) {
     cpSync(join(templateDir, name), join(project, name));
   }
-  run(project, join(workDir, "node_modules/.bin/prettier"), [
-    ".",
-    "--write",
-    "--log-level",
-    "warn",
-  ]);
+  run(project, join(workDir, "node_modules/.bin/oxfmt"), []);
   for (const name of FORMAT_FILES) rmSync(join(project, name));
   return project;
 }
@@ -292,7 +282,7 @@ function check() {
   const newest = newestAllowedVersion();
   const workDir = mkdtempSync(join(tmpdir(), "starweb-starter-"));
   try {
-    step("Install Prettier with the template's versions");
+    step("Install Oxfmt with the template's versions");
     installFormatter(workDir);
     step(`Run create-emdash ${pinned}`);
     const changed = changedFiles(starterDir, createStarter(workDir, pinned));
@@ -316,7 +306,7 @@ function main() {
   assertCleanTemplate();
   const workDir = mkdtempSync(join(tmpdir(), "starweb-starter-"));
   try {
-    step("Install Prettier with the template's versions");
+    step("Install Oxfmt with the template's versions");
     installFormatter(workDir);
     step(`Run create-emdash ${version}`);
     const newDir = createStarter(workDir, version);

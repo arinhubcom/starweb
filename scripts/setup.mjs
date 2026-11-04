@@ -143,7 +143,7 @@ function installAndFormat(dir, freshLock) {
   ]);
   run(dir, "pnpm", ["exec", "wrangler", "types"]);
   run(dir, "pnpm", ["exec", "tsx", "scripts/theme.ts"]);
-  run(dir, "pnpm", ["exec", "prettier", ".", "--write", "--log-level", "warn"]);
+  run(dir, "pnpm", ["exec", "oxfmt"]);
   run(dir, "git", ["init", "--quiet"]);
 }
 

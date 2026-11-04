@@ -556,13 +556,14 @@ The only linter, with `oxlint-tsgolint`, `oxlint-plugin-react-doctor`, and `@e18
 - context7: https://context7.com/websites/oxc_rs_guide_usage/llms.txt?tokens=10000
 - github: https://github.com/oxc-project/oxc · https://github.com/millionco/react-doctor · https://github.com/e18e/eslint-plugin
 
-### Prettier
+### Oxfmt
 
-→ [QUALITY](QUALITY.md)
+Formatter. → [QUALITY](QUALITY.md)
 
-- llms: https://prettier.io/llms.txt · https://prettier.io/llms-full.txt
-- context7: https://context7.com/websites/prettier_io/llms.txt?tokens=10000
-- github: https://github.com/prettier/prettier
+- docs: https://oxc.rs/docs/guide/usage/formatter
+- llms: https://oxc.rs/llms.txt · https://oxc.rs/llms-full.txt
+- context7: https://context7.com/websites/oxc_rs_guide_usage/llms.txt?tokens=10000
+- github: https://github.com/oxc-project/oxc
 
 ### Knip
 

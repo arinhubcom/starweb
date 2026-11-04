@@ -24,5 +24,5 @@
 - Keep `@custom-variant dark (&:is(.dark *));` from `shadcn init`; `.dark` on `<html>` via the theme script in `<head>` of the base layout. → [UI-UX](UI-UX.md) (Theme)
 - Merge classes with `cn()` from the [`cn`](https://github.com/shadcn-ui/cn) package (re-exported in `src/lib/utils.ts` by `shadcn init`). No manual string joins, no `clsx`/`tailwind-merge`.
 - Variants with [Tailwind Variants](STACK.md#tailwind-variants) `tv()` (`base`, `variants`, `defaultVariants`, `compoundVariants`, `slots` for multi-part components), types with its `VariantProps`. No `class-variance-authority` (`cva()`) → convert to `tv()`. No `if` variant logic in markup.
-- Sort classes with `prettier-plugin-tailwindcss`.
+- Sort classes with the Oxfmt `sortTailwindcss` option.
 - Scoped `<style>` and `@apply` only for CSS Tailwind cannot express.

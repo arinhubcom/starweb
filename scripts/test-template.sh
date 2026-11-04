@@ -256,6 +256,15 @@ if printf '%s\n' "$OXLINT_OUTPUT" | grep -qF "react(react-in-jsx-scope)"; then
 fi
 echo "ok: oxlint runs the eslint, jsx-a11y, e18e, react-doctor, and type-aware rules"
 
+step "Check that Oxfmt formats Astro files and sorts Tailwind classes"
+FORMAT_PROBE="$APP_DIR/src/format-probe.astro"
+printf '<div class="p-4 flex"></div>\n' > "$FORMAT_PROBE"
+(cd "$APP_DIR" && pnpm exec oxfmt src/format-probe.astro) || { rm -f "$FORMAT_PROBE"; fail "oxfmt failed on an Astro file"; }
+FORMAT_RESULT="$(cat "$FORMAT_PROBE")"
+rm "$FORMAT_PROBE"
+[ "$FORMAT_RESULT" = '<div class="flex p-4"></div>' ] || fail "oxfmt did not sort the Tailwind classes: $FORMAT_RESULT"
+echo "ok: oxfmt formats .astro files and sorts Tailwind classes"
+
 step "Check that Material Symbols is the only icon source"
 [ -f "$APP_DIR/src/components/ui/material-icon/material-icon.astro" ] || fail "the project has no MaterialIcon"
 [ -f "$APP_DIR/src/components/ui/react/material-icon.tsx" ] || fail "the project has no React MaterialIcon"

@@ -898,9 +898,17 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 - The flag catches real mismatches with the EmDash types: `cursor` and `currentLocale` must be absent, not `undefined`. So fix the starter code and keep the flag.
 
-### Why Prettier has no `useTabs`
+### Why Oxfmt has no `useTabs`
 
-- The starter is not formatted with Prettier (line width and other rules), so `useTabs` alone leaves 9 of 11 starter files failing (tested). One `prettier . --write` after setup is simpler.
+- The starter does not follow the formatter's rules (line width and other rules), so `useTabs` alone leaves 9 of 11 starter files failing (tested with Prettier). One `oxfmt` run after setup is simpler.
+
+### Why Oxfmt replaces Prettier
+
+- Oxfmt bundles `prettier-plugin-astro` and a Tailwind class sort, so the template needs no Prettier plugins.
+- A second formatter over the same files only adds a chance of conflict.
+- Oxfmt does not load external Prettier plugins (see its migration docs), so a project that needs another Prettier plugin stays on Prettier.
+- `@astrojs/compiler-rs` is a direct dev dependency because Oxfmt does not bundle it.
+- Tested on 2026-11-05 with `oxfmt` 0.75.0: output is the same as Prettier 3.9.10 on all 64 template files.
 
 ### Why Knip has named exceptions
 
@@ -963,7 +971,7 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - The home page uses the button, so `cn`, `tailwind-variants`, and `src/lib/utils.ts` are used code and need no Knip exception. Only components that a project adds and does not use yet need `ignoreIssues`.
 - `no-restricted-imports` in `.oxlintrc.json` makes a registry item with `class-variance-authority` fail `pnpm run lint`, so the conversion to `tv()` cannot be forgotten.
 - `scripts/setup.mjs` does the mechanical part: it copies `template/`, writes a new encryption key, and installs. The manual steps in [SETUP.md](rules/SETUP.md) keep only the work that needs a decision or an account: Cloudflare, optional features, and deploy.
-- `template/` holds the `create-emdash` output with the Starweb changes in place, so a project does not depend on the registry and a reader sees the real files. An EmDash update runs `create-emdash` again: `scripts/update-starter.mjs` formats the output with the template's Prettier config and merges the difference to `starter/` into `template/`. A starter change in a file that Starweb changed appears as a conflict, not as a silent overwrite.
+- `template/` holds the `create-emdash` output with the Starweb changes in place, so a project does not depend on the registry and a reader sees the real files. An EmDash update runs `create-emdash` again: `scripts/update-starter.mjs` formats the output with the template's Oxfmt config and merges the difference to `starter/` into `template/`. A starter change in a file that Starweb changed appears as a conflict, not as a silent overwrite.
 - `starter/` is the merge base, because `create-emdash` cannot give the old output again: it downloads its template from the main branch of `emdash-cms/templates`, with no version, so `create-emdash` 1.3.1 and 1.4.0 give the same files. For the same reason, the pinned `create-emdash` version does not pin the starter files: only the commit that replaced `starter/` does. `diff -r starter template` shows all Starweb changes to the starter.
 - `.env` stays out of the template: `create-emdash` writes a random `EMDASH_ENCRYPTION_KEY` to it, and a shared key would decrypt the plugin secrets of other projects.
 - The template uses the newest Node.js LTS version (24 on 2026-10-15). The first CI run used Node.js 22.23.3, which ships npm 10.9, and `npm install` failed with `Cannot read properties of null (reading 'edgesOut')`. The same install failed locally with npm 10.9.4, also without `.npmrc`, and passed with npm 11.11.0. Node.js 26 is newer but not LTS yet. The project now uses pnpm, and `setup.mjs` and `update.mjs` stop early when pnpm is older than 12.
