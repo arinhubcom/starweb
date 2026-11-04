@@ -116,6 +116,10 @@ Content and UI strings use two tools: [PolyStella](https://github.com/cloudflare
 - `polystella translate-ui` protects only `{{name}}` placeholders. Paraglide uses `{name}`, which the model can change, and the CLI translates the `$schema` key. [cloudflare/polystella#66](https://github.com/cloudflare/polystella/issues/66) proposes support for Paraglide message files.
 - `polystellaEmdashAstro()` would add a second runtime (`Astro.locals.t`) next to Paraglide.
 
+### Why not Lingui for UI strings
+
+- Lingui has no official Astro integration ([lingui/js-lingui#1640](https://github.com/lingui/js-lingui/issues/1640)), so macros in `.astro` files need the 0.x community package `lingui-for-astro`, while Paraglide messages are plain functions that need no macro.
+
 ### How they work together
 
 - Each text has one owner: editors own EmDash text, developers own `messages/`. A text in both places drifts apart.
