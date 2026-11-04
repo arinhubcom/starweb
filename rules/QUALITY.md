@@ -22,6 +22,33 @@
 
 ## Lint
 
+### [Oxlint](STACK.md#oxlint)
+
+- First lint pass, next to ESLint. Do not remove ESLint: Oxlint lints only the `<script>` blocks of `.astro` files, and typed rules stay in `typescript-eslint`.
+- `npm i -D --save-exact oxlint oxlint-plugin-react-doctor @e18e/eslint-plugin`. JS plugins are alpha and outside semver.
+- Config `.oxlintrc.json`. Lint with `oxlint --max-warnings 0`; fix or disable the rule.
+- `plugins` replaces the default set: `typescript`, `unicorn`, `oxc`, `import`, `promise`, `vitest`, `react`, `jsx-a11y`. No `react-perf`.
+- `categories`: `correctness` = error; `suspicious`, `perf` = warn.
+- No `--type-aware`, no `oxlint-tsgolint`.
+- `ignorePatterns` = the ESLint `globalIgnores` list plus `emdash-env.d.ts`.
+- Off: `no-await-in-loop`, `import/no-named-as-default`, `import/no-named-as-default-member`, `oxc/no-map-spread`, `react/react-in-jsx-scope`, `unicorn/require-module-specifiers`.
+- `import/no-unassigned-import`: `allow: ["**/*.css"]`.
+- Tests (`test/**`, `**/*.test.ts`, `**/*.test.tsx`): `e18e/prefer-static-regex` off.
+
+### React Doctor rules
+
+- `jsPlugins`: `{ "name": "react-doctor", "specifier": "oxlint-plugin-react-doctor" }`. No preset: list each rule in `rules`, with its default severity.
+- `settings["react-doctor"].capabilities` is required: without it, rules run for every library they name. Template list: `base-ui`, `react`, `react:19`, `react:19.2`, `shadcn`, `ssr`, `tailwind`, `tailwind:3.4`, `tailwind:4`, `zod:4`.
+- Listed: active rules with `framework: "global"` whose `requires` fits the capabilities (`REACT_DOCTOR_RULES` from the package).
+- Not listed: `defaultEnabled: false`, `scan` and `project` rules (no effect in Oxlint), ports of built-in rules (`originallyExternal`; use `react/*`, `jsx-a11y/*`), `no-array-index-as-key` (= `react/no-array-index-key`), and the `ink-`, `jotai-`, `motion-`, `redux-`, `react-markdown-`, `server-`, `webgl-` families.
+- Project adds a library from one of those families (for example: Motion) → add its rules, and its capability if the rules need one.
+- Plugin update → compare `REACT_DOCTOR_RULES` with `rules`; an update does not turn on new rules.
+
+### e18e rules
+
+- `jsPlugins`: `{ "name": "e18e", "specifier": "@e18e/eslint-plugin" }`. No preset in `.oxlintrc.json`: list each rule in `rules` as `error`.
+- Template list: `ban-dependencies`, `prefer-array-at`, `prefer-array-fill`, `prefer-array-from-map`, `prefer-array-some`, `prefer-array-to-reversed`, `prefer-array-to-sorted`, `prefer-array-to-spliced`, `prefer-date-now`, `prefer-includes`, `prefer-nullish-coalescing`, `prefer-object-has-own`, `prefer-regex-test`, `prefer-spread-syntax`, `prefer-static-regex`, `prefer-timer-args`, `prefer-url-canparse`.
+
 ### [ESLint](STACK.md#eslint)
 
 - Flat config `eslint.config.mjs`. No `.eslintrc`, no Biome (`.astro` support experimental).
@@ -69,7 +96,7 @@
 ### [npm](STACK.md#npm) scripts
 
 - Keep template `dev`, `build`, `preview`; add `typecheck`.
-- Add `lint` (`eslint . --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
+- Add `lint` (`oxlint --max-warnings 0 && eslint . --max-warnings 0`), `format` (`prettier . --write`), `format:check` (`prettier . --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
 - `check` = `npm run format:check && npm run typecheck && npm run lint && npm run knip && npm run test`.
 - Not in `test` or `check`: `build`, `size` (needs `dist/`; → [PERF](PERF.md#client-javascript)), API checks, dependency checks, screenshot and e2e tests (CI only).
 
