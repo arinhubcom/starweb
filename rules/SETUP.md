@@ -105,3 +105,23 @@ Ordered procedure for a new Starweb project; steps 1-3 create it from the [templ
 5. `update.mjs` does not change generated files; a project with a `.starweb.json` commit from before `template/` held the starter keeps its starter files. If they are missing, add the footer link to `/privacy` in `src/layouts/Base.astro`, add `public/.well-known/security.txt` to `.gitignore`, and run `npx tsx scripts/theme.ts`.
 6. `npm run check` and `npm run build` pass.
 7. Commit.
+
+## EmDash update
+
+`emdash`, `@emdash-cms/cloudflare`, and the starter files move only through Starweb. No bump by hand or by Dependabot (`ignore` in `dependabot.yml` also stops its security updates). No `upgrade-emdash` and no `upgrading-emdash` skill: it takes an npm tag, not a version, so it skips the pin and `min-release-age`. A security alert for these packages → these steps.
+
+### Starweb repository
+
+1. Pick the newest version older than 3 days that `create-emdash`, `emdash`, and `@emdash-cms/cloudflare` all have: `node scripts/update-starter.mjs --check` prints it. → [DEPS](DEPS.md) (npm min-release-age)
+2. `node scripts/update-starter.mjs <version>`, with `template/` and `starter/` committed. It runs `create-emdash`, merges the difference to `starter/` into `template/`, replaces `starter/`, and pins the three packages.
+3. Resolve the conflicts in `template/` (markers `<<<<<<< project`, `||||||| base`, `>>>>>>> starweb`). Handle each line under `Review by hand` and `Starter package.json changes to review`; the script changes no other `package.json` line.
+4. Read each version since the old pin in the [EmDash changelog](https://github.com/emdash-cms/emdash/blob/main/packages/core/CHANGELOG.md). Update `template/`, `rules/`, and `WHY.md` for each change that affects them. → [AGENTS](AGENTS.md) (Template)
+5. `bash scripts/test-template.sh <tmp-dir>` and `bash scripts/test-update.sh <tmp-dir>` pass.
+6. Commit `template/`, `starter/`, and the rule changes together.
+
+### Project
+
+1. Read each version since the project's pin in the [EmDash changelog](https://github.com/emdash-cms/emdash/blob/main/packages/core/CHANGELOG.md).
+2. The steps in Update. `update.mjs` moves the pins and merges the starter files.
+3. Apply the changelog entries that affect project code.
+4. New core migrations in the changelog → back up first; they run in the release pipeline. → [DEPLOY](DEPLOY.md) (EmDash core migrations)

@@ -1,0 +1,45 @@
+name: Starter check
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: template/.nvmrc
+      - name: Check the starter, and open or update an issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_TITLE: "EmDash update: a new version or new starter files"
+        run: |
+          set +e
+          node scripts/update-starter.mjs --check > "$RUNNER_TEMP/report.txt"
+          status=$?
+          set -e
+          cat "$RUNNER_TEMP/report.txt"
+          if [ "$status" -eq 0 ]; then exit 0; fi
+          if [ "$status" -ne 3 ]; then exit "$status"; fi
+          {
+            echo 'Follow the steps in `rules/SETUP.md` (EmDash update).'
+            echo
+            echo '```text'
+            sed -n '/^Pinned EmDash version/,$p' "$RUNNER_TEMP/report.txt"
+            echo '```'
+          } > "$RUNNER_TEMP/body.md"
+          number="$(gh issue list --state open --search "\"$ISSUE_TITLE\" in:title" --json number --jq '.[0].number // empty')"
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh issue create --title "$ISSUE_TITLE" --body-file "$RUNNER_TEMP/body.md"
+          fi
