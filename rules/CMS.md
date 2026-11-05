@@ -27,7 +27,7 @@
 - Plugins share the page's CPU budget: ≤ 10 ms per request in total. → [PERF](PERF.md#workers)
 - Native plugin: runs in the Worker process, so its hooks, routes, and page rendering count toward the 10 ms of the request.
 - Sandboxed plugin: target ≤ 10 ms per invocation. The Cloudflare runner's `cpuMs` default of 50 ms is the hard stop, not the target. → [SAAS](SAAS.md#emdash-plugins)
-- Measure before each new plugin or plugin update: DevTools CPU profile under `wrangler dev`; in production, `$workers.cpuTimeMs` in Workers Logs. No `Date.now()` or `performance.now()`: timers advance only on I/O.
+- Measure before each new plugin or plugin update: DevTools CPU profile under `wrangler dev`; in production, `pnpm run worker-cpu <worker>` or `$workers.cpuTimeMs` in Workers Logs. No `Date.now()` or `performance.now()`: timers advance only on I/O.
 - Third-party plugin over budget → do not install it.
 - Heavy work in a plugin → build time or a queue, not a hook on the request path.
 - Sandboxed plugins: at most 4 distinct Dynamic Workers in flight per request; keep few plugins on one hook. Behavior of EmDash over this limit: not verified.

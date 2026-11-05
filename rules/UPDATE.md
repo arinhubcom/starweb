@@ -29,7 +29,7 @@ The `starweb-update` skill in `.agents/skills/` points here. Keep the steps in t
 11. Read the printed `git log` and `git diff`: `rules/` for decisions, `template/` for code, `WHY.md` for reasons.
 12. Each changed rule: find the project code it covers, and change the code that breaks it. Conditional rules ("uses X →") only if the project uses X. A rule the project does not follow on purpose → write the reason in the project `AGENTS.md`.
 13. Each `template/` change in a file that the project moved, split, or replaced: make the same change there. The merge cannot see it.
-14. New or changed [SETUP](SETUP.md) steps: run the ones that fit the project (bindings, secrets, repository settings, workflows). New binding or variable in `wrangler.jsonc` → `env.production` too. → [DEPLOY](DEPLOY.md)
+14. New or changed [SETUP](SETUP.md) steps: run the ones that fit the project (bindings, secrets, repository settings, workflows). New binding or variable in `wrangler.jsonc` → `env.production` too. → [DEPLOY](DEPLOY.md) `.github/workflows/perf.yml` is new → SETUP step 34: the secrets `PAGESPEED_API_KEY` and `CLOUDFLARE_OBSERVABILITY_TOKEN`, and the variables `CLOUDFLARE_ACCOUNT_ID` and `PRODUCTION_WORKER`, at repository level. Without `PRODUCTION_WORKER`, the jobs are skipped.
 15. New skill in [STACK](STACK.md) for a part the project uses → install it. → [SETUP](SETUP.md) (Agent skills)
 
 ### Finish

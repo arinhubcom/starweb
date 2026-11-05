@@ -17,6 +17,8 @@
     "format:check": "oxfmt --check",
     "knip": "knip",
     "fonts": "tsx scripts/check-fonts.ts",
+    "pagespeed": "tsx scripts/check-pagespeed.ts",
+    "worker-cpu": "tsx scripts/check-worker-cpu.ts",
     "test": "vitest run --coverage",
     "check": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run test",
     "size": "tsx scripts/check-js-size.ts"

@@ -7,7 +7,7 @@
 - Targets at P75 of page loads, mobile and desktop separately: LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1.
 - Field: [Web Analytics](STACK.md#web-analytics) dashboard → site → **Core Web Vitals** (CLS from Chromium only); setup → [PRIVACY](PRIVACY.md). CrUX via PageSpeed Insights and the Search Console Core Web Vitals report.
 - Lab: Lighthouse or Chrome DevTools before each release; INP not measurable in lab → Total Blocking Time proxy, INP in the field. Field data decides.
-- Lab score target: performance 100, mobile and desktop. Lighthouse before each release; PageSpeed Insights on the production URL after each release (it cannot reach a stage URL behind Cloudflare Access). Below 100 → run again (scores vary), then fix the cause. → [WHY](../WHY.md#why-a-lab-score-target-of-100)
+- Lab score target: performance 100, mobile and desktop. Lighthouse before each release; PageSpeed Insights on the production URL: `pnpm run pagespeed [url...]` (median of 3 runs per strategy, needs `PAGESPEED_API_KEY`), daily in `.github/workflows/perf.yml` and after each release (it cannot reach a stage URL behind Cloudflare Access). Below 100 → run again (scores vary), then fix the cause. → [WHY](../WHY.md#why-a-lab-score-target-of-100)
 
 ## Client JavaScript
 
@@ -35,6 +35,9 @@
 
 - CPU ≤ 10 ms per request; heavy work at build time.
 - EmDash plugins share this budget. → [CMS](CMS.md#plugins)
+- Measure: `pnpm run worker-cpu <worker>` (for example `<worker>-production`; needs `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_OBSERVABILITY_TOKEN`), daily in `.github/workflows/perf.yml`. Over 24 hours: P95 CPU ≤ 10 ms, no `exceededCpu` outcome. Below 20 requests the check reports P95 and does not fail.
+- Only requests that ran the Worker count; a cache hit does not run it.
+- No grouping by `$workers.event.request.path` (no rows for several Workers); group by `$workers.event.request.url` for diagnosis only. → [WHY](../WHY.md#why-the-worker-cpu-check-uses-the-whole-worker)
 - `Cache-Control` only on non-Astro responses (custom Worker entrypoint); Astro pages use route caching (Cache).
 
 ## Placement

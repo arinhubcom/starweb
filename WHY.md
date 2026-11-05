@@ -1046,7 +1046,15 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - The score is a quick check before and after a release. It does not replace field data: Google says that "having good lab data does not necessarily mean real-user experiences will also be good."
 - PageSpeed Insights reports mobile and desktop separately, so the target applies to both.
 - Scores change between runs, so one low run is a reason to run again, not proof of a regression.
-- CI does not check the score: scores change between runs, so a failed check would not always mean a regression.
+- Pull request CI does not check the score: scores change between runs, so a failed check would not always mean a regression. A daily production job does (`pnpm run pagespeed`) and takes the median of 3 runs per strategy. Lighthouse says: "The median Lighthouse score of 5 runs is twice as stable as 1 run." Three runs limit quota and time.
+- No Lighthouse CI dependency: the PageSpeed Insights API needs only `fetch`, and `lighthouse` adds about 19 MB.
+
+### Why the Worker CPU check uses the whole Worker
+
+- The path field `$workers.event.request.path` returned no rows for several Workers. Tested on 2026-11-05 with the Workers Observability Telemetry API. The check groups by URL for diagnosis only and prints the pathname without host or query string.
+- The check uses P95, not the maximum, so one outlier request does not fail it.
+- Below 20 requests (`MIN_REQUESTS`), P95 is noise, so the check reports it and does not fail.
+- No check before a deploy: the Cloudflare docs describe only an interactive DevTools profile for CPU time.
 
 ### Why two client JavaScript limits
 

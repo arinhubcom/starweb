@@ -66,7 +66,7 @@ Runtime for site and apps. → [ARCH](ARCH.md), [PERF](PERF.md), [CLOUDFLARE](CL
 
 Cron Triggers, Rate Limiting binding, Cache API, Workers Logs, Analytics Engine. → [SAAS](SAAS.md), [ARCH](ARCH.md), [API](API.md), [SECURITY](SECURITY.md), [PERF](PERF.md), [OBSERVABILITY](OBSERVABILITY.md)
 
-- docs: https://developers.cloudflare.com/workers/configuration/cron-triggers/ · https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/ · https://developers.cloudflare.com/workers/runtime-apis/cache/ · https://developers.cloudflare.com/workers/observability/logs/workers-logs/ · https://developers.cloudflare.com/analytics/analytics-engine/
+- docs: https://developers.cloudflare.com/workers/configuration/cron-triggers/ · https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/ · https://developers.cloudflare.com/workers/runtime-apis/cache/ · https://developers.cloudflare.com/workers/observability/logs/workers-logs/ · https://developers.cloudflare.com/analytics/analytics-engine/ · https://developers.cloudflare.com/api/resources/workers/subresources/observability/subresources/telemetry/methods/query
 - llms: https://developers.cloudflare.com/workers/llms-full.txt
 
 ### Workers KV
@@ -184,7 +184,7 @@ Feature flags. → [SAAS](SAAS.md)
 
 Core Web Vitals, field data. → [PERF](PERF.md)
 
-- docs: https://web.dev/articles/vitals
+- docs: https://web.dev/articles/vitals · https://developers.google.com/speed/docs/insights/v5/get-started
 - context7: https://context7.com/googlechrome/web-vitals/llms.txt?tokens=10000
 - github: https://github.com/GoogleChrome/web-vitals
 - skills: https://skills.sh/cloudflare/skills/web-perf · https://skills.sh/addyosmani/web-quality-skills/core-web-vitals
