@@ -304,3 +304,7 @@ Read the Cloudflare platform limits in [WHY.md](WHY.md#limits).
 - **One backer:** Cloudflare funds the development of Astro and EmDash, so all three parts are built to work together.
 
 Read the full reasons and alternatives in [WHY.md](WHY.md).
+
+## 📄 License
+
+Starweb is available under the [MIT License](LICENSE).
