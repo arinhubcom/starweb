@@ -183,6 +183,44 @@ The CMS gives auth, i18n, custom content types, sandboxed plugins, agent integra
 
 ### SaaS
 
+The diagram shows how the site, the admin panel, and many apps share one Worker and one login, while each app keeps its own folder, routes, and database. The template has no apps yet: you add them with the steps in [rules/SAAS.md](rules/SAAS.md) and [rules/ARCH.md](rules/ARCH.md#apps). Solid lines show the default setup, and dashed lines show what you add when you need it.
+
+```mermaid
+%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%
+flowchart TD
+    accTitle: Starweb SaaS and multi-app architecture
+    accDescr: People reach one domain, and one Worker serves all paths. The site, login, and admin panel share one part of the Worker and use the EmDash D1 database, which holds content, users, and organizations. Login connects to Stripe for billing. Each app has its own prefix, folder, and D1 database with a tenant_id column, and it checks login, plan, and tenant on each route. Admin pages for an app are native EmDash plugins that read the app database through the app repositories. You can add more services, and you can move an app to its own Worker on the same domain.
+
+    People["Visitors, customers, and staff"] --> Domain["One domain: example.com"]
+    Domain -->|"/, /auth, and<br/>/_emdash/admin"| Core
+    Domain -->|"/app1"| App1
+    Domain -->|"/app2"| App2
+
+    subgraph Worker["One Worker, one Astro project"]
+        Core["Site, login, and admin<br/>Site pages in src/pages<br/>emdash-better-auth: one login,<br/>2FA, and organizations for all apps<br/>EmDash admin panel"]
+        App1["App 1: src/apps/app1<br/>Pages, API routes, and islands<br/>Added as an Astro integration<br/>Checks login, plan, and tenant"]
+        App2["App 2: src/apps/app2<br/>Pages, API routes, and islands<br/>Added as an Astro integration<br/>Checks login, plan, and tenant"]
+    end
+
+    subgraph Data["D1 databases"]
+        CoreDb["EmDash database<br/>Content, users,<br/>and organizations"]
+        App1Db["APP1_DB<br/>One database for all tenants<br/>tenant_id on each tenant table"]
+        App2Db["APP2_DB<br/>One database for all tenants<br/>tenant_id on each tenant table"]
+    end
+
+    Core --> CoreDb
+    App1 --> App1Db
+    App2 --> App2Db
+    Core -.->|"App admin: native<br/>EmDash plugin"| App1Db
+    Core <-.->|"Plan per organization"| Stripe["Stripe"]
+    App1 -.-> Blocks["Add when an app needs them<br/>R2: files per tenant<br/>Queues: email and webhooks<br/>Workflows: long cleanup<br/>Durable Objects: real time<br/>Rate Limiting and Analytics Engine: plans<br/>Flagship: feature flags"]
+    App2 -.->|"Independent deploy"| Split["Separate Worker on the same domain<br/>Route: example.com/app2/*<br/>The login cookie still works"]
+```
+
+Apps share code only from `src/lib/`, `src/layouts/`, and `src/components/ui/`. An app does not import from another app or read its database: it calls the other app's API route or sends a Queue message.
+
+Each D1 database counts toward the account limit. The Free plan has 10 databases per account, and EmDash uses 1, so you can run up to 9 apps. Move to the Paid plan before you launch to paying customers.
+
 #### Advantages
 
 - One Worker serves the marketing site, the admin panel, the app, and the API routes.
