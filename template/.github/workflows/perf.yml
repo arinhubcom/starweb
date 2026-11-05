@@ -1,8 +1,9 @@
 name: Performance
 
-# Repository-level variables and secrets, not the production environment:
-# these checks do not deploy.
-# A project stays silent until it sets the variable PRODUCTION_WORKER.
+# The tokens are secrets of the production environment; `deployment: false`
+# keeps these checks out of the deployment history.
+# A project stays silent until it sets the repository variable PRODUCTION_WORKER:
+# a job `if` runs before the job has its environment.
 on:
   schedule:
     - cron: "0 4 * * *"
@@ -14,6 +15,9 @@ permissions:
 jobs:
   pagespeed:
     if: vars.PRODUCTION_WORKER != ''
+    environment:
+      name: production
+      deployment: false
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -32,6 +36,9 @@ jobs:
 
   worker-cpu:
     if: vars.PRODUCTION_WORKER != ''
+    environment:
+      name: production
+      deployment: false
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

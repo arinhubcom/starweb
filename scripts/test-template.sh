@@ -438,6 +438,7 @@ grep -q 'src/lib/fonts.ts' "$APP_DIR/.github/workflows/fonts.yml" || fail "fonts
 echo "ok: self-hosted, immutable fonts, cached in CI, and an icon font subset of $ICON_SIZE bytes"
 grep -q 'run: pnpm run pagespeed' "$APP_DIR/.github/workflows/perf.yml" || fail "perf.yml does not run the PageSpeed check"
 grep -q 'pnpm run worker-cpu "\$PRODUCTION_WORKER"' "$APP_DIR/.github/workflows/perf.yml" || fail "perf.yml does not run the Worker CPU check"
+[ "$(grep -c '^ *deployment: false' "$APP_DIR/.github/workflows/perf.yml")" -eq 2 ] || fail "perf.yml does not read both jobs' tokens from the environment without a deployment"
 grep -q "cron: \"0 4 \* \* \*\"" "$APP_DIR/.github/workflows/perf.yml" || fail "perf.yml does not run daily at 04:00 UTC"
 PAGESPEED_OUT="$(cd "$APP_DIR" && env -u PAGESPEED_API_KEY pnpm run pagespeed 2>&1 || true)"
 printf '%s\n' "$PAGESPEED_OUT" | grep -q 'PAGESPEED_API_KEY is not set' || fail "pnpm run pagespeed without a key did not name PAGESPEED_API_KEY: $PAGESPEED_OUT"

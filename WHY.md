@@ -614,6 +614,8 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 - There are two Cloudflare tokens, and only jobs from `main` or a release tag can read the production token. Cloudflare tokens cannot be scoped to one Worker, so the separation is by branch and tag, not by resource.
 - Both deploy tokens are environment secrets. GitHub says that secrets in an environment "are only available to workflow jobs that reference the environment", so a job without `environment:` gets no deploy token.
 - The `dev` environment allows `refs/pull/*/merge`, because a `pull_request` run has that `GITHUB_REF`, and a preview would fail without the rule.
+- Production check tokens are also secrets of the `production` environment, so all CI tokens live in one kind of place. GitHub says: "Set `deployment` to `false` to use an environment's secrets and variables without creating a deployment object." The daily checks use it, so they do not add to the deployment history.
+- `PRODUCTION_WORKER` stays a repository variable. A job `if` "is processed by GitHub Actions, and the job is only sent to the runner if the result is `true`", and GitHub says environment variables are available on the runner, so a job `if` may not see one.
 - A private repository needs GitHub Pro or Team, because GitHub Free has environments only for public repositories.
 - No required reviewers: they are out of scope for Starweb. A release tag and the promotion workflow are already manual steps.
 - `wrangler versions secret put` changes the latest uploaded version. A secret change after the stage upload creates a version that the release tag does not point to.

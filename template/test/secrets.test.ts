@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   SECRETS,
+  assertTargetFits,
   describeEntries,
   failureHint,
   parseSecrets,
@@ -36,8 +37,8 @@ describe("SECRETS", () => {
     expect(SECRETS.SENTRY_DSN).toBe("worker");
     expect(SECRETS.CLOUDFLARE_API_TOKEN).toBe("environment");
     expect(SECRETS.SENTRY_AUTH_TOKEN).toBe("environment");
-    expect(SECRETS.PAGESPEED_API_KEY).toBe("repository");
-    expect(SECRETS.CLOUDFLARE_OBSERVABILITY_TOKEN).toBe("repository");
+    expect(SECRETS.PAGESPEED_API_KEY).toBe("production");
+    expect(SECRETS.CLOUDFLARE_OBSERVABILITY_TOKEN).toBe("production");
   });
 });
 
@@ -167,16 +168,35 @@ describe("planCommands", () => {
     ]);
   });
 
-  it.each(["dev", "production"] as const)(
-    "sends a scheduled check token to the repository for %s",
-    (target) => {
-      const [github] = planCommands(
-        [{ name: "PAGESPEED_API_KEY", value: "key" }],
-        target,
-      );
-      expect(github?.args).toEqual(["secret", "set", "PAGESPEED_API_KEY"]);
-    },
-  );
+  it("sends a production check token to the production environment", () => {
+    const [github] = planCommands(
+      [{ name: "PAGESPEED_API_KEY", value: "key" }],
+      "production",
+    );
+    expect(github?.args).toEqual([
+      "secret",
+      "set",
+      "PAGESPEED_API_KEY",
+      "--env",
+      "production",
+    ]);
+  });
+
+  it("refuses a production check token for dev, and does not print its value", () => {
+    const tokens = [{ name: "PAGESPEED_API_KEY", value: "hunter2" }];
+    const check = (target: "dev" | "production") => () => {
+      assertTargetFits(tokens, target);
+    };
+    expect(check("dev")).toThrow(/PAGESPEED_API_KEY/);
+    expect(check("dev")).not.toThrow(/hunter2/);
+    expect(check("production")).not.toThrow();
+  });
+
+  it("accepts a deploy token for dev", () => {
+    expect(() => {
+      assertTargetFits([{ name: "CLOUDFLARE_API_TOKEN", value: "t" }], "dev");
+    }).not.toThrow();
+  });
 
   it("keeps hostile values byte for byte in the JSON input", () => {
     const hostile = HOSTILE.map((value) => ({

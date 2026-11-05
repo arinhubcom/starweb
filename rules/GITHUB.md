@@ -25,7 +25,7 @@ Rules for GitHub Actions, plans, and cost. CI steps → [DEPLOY](DEPLOY.md#ci). 
 - Public repository: GitHub disables a scheduled workflow after 60 days without repository activity. After a pause, check that it is still enabled in **Actions**.
 - A forked public repository starts with scheduled workflows disabled.
 - A scheduled run can start late, and GitHub can drop it under high load. No job may depend on an exact time.
-- Use repository-level variables and secrets for a scheduled check, not `environment: production`. It does not deploy.
+- Scheduled check: secrets of the environment `production`, with `environment: { name: production, deployment: false }` (no deployment object). A variable that a job `if` reads stays at repository level. → [WHY](../WHY.md#why-github-actions-and-not-workers-builds)
 
 ## Plans
 

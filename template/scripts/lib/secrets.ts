@@ -1,7 +1,7 @@
 // Parse secrets from stdin and plan the commands that send them. Pure: no I/O.
 // See rules/TOKENS.md.
 
-type Destination = "worker" | "environment" | "repository";
+type Destination = "worker" | "environment" | "production";
 export type Target = "dev" | "production";
 
 // A project adds its own names here and to rules/TOKENS.md.
@@ -13,8 +13,8 @@ export const SECRETS: Readonly<Record<string, Destination>> = {
   SENTRY_DSN: "worker",
   CLOUDFLARE_API_TOKEN: "environment",
   SENTRY_AUTH_TOKEN: "environment",
-  PAGESPEED_API_KEY: "repository",
-  CLOUDFLARE_OBSERVABILITY_TOKEN: "repository",
+  PAGESPEED_API_KEY: "production",
+  CLOUDFLARE_OBSERVABILITY_TOKEN: "production",
 };
 
 export interface SecretEntry {
@@ -88,12 +88,27 @@ export const parseSecrets = (text: string): readonly SecretEntry[] => {
 
 const destinationOf = (name: string): Destination => SECRETS[name] ?? "worker";
 
+const environmentOf = (name: string, target: Target): Target =>
+  destinationOf(name) === "production" ? "production" : target;
+
 const describeDestination = (name: string, target: Target): string => {
-  const destination = destinationOf(name);
-  if (destination === "worker") return `Worker secret (${target})`;
-  return destination === "environment"
-    ? `GitHub secret of the environment ${target}`
-    : "GitHub repository secret";
+  if (destinationOf(name) === "worker") return `Worker secret (${target})`;
+  return `GitHub secret of the environment ${environmentOf(name, target)}`;
+};
+
+// A production-only token in the dev environment is one that nothing reads.
+export const assertTargetFits = (
+  entries: readonly SecretEntry[],
+  target: Target,
+): void => {
+  const misplaced = entries.find(
+    ({ name }) => destinationOf(name) === "production" && target !== "production",
+  );
+  if (misplaced) {
+    throw new Error(
+      `Secret ${misplaced.name} belongs to the environment production. Run set-secrets production.`,
+    );
+  }
 };
 
 export const describeEntries = (
@@ -123,12 +138,7 @@ const workerCommand = (
 
 const githubCommand = (entry: SecretEntry, target: Target): Command => ({
   command: "gh",
-  args: [
-    "secret",
-    "set",
-    entry.name,
-    ...(destinationOf(entry.name) === "environment" ? ["--env", target] : []),
-  ],
+  args: ["secret", "set", entry.name, "--env", environmentOf(entry.name, target)],
   input: entry.value,
   label: `${entry.name}: ${describeDestination(entry.name, target)}`,
 });

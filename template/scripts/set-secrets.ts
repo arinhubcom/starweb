@@ -3,6 +3,7 @@
 // The password manager stays your choice. See rules/TOKENS.md.
 import { spawn } from "node:child_process";
 import {
+  assertTargetFits,
   describeEntries,
   failureHint,
   parseSecrets,
@@ -105,6 +106,7 @@ const main = async (): Promise<number> => {
     return 1;
   }
   const entries: readonly SecretEntry[] = parseSecrets(await readStdin());
+  assertTargetFits(entries, target);
   if (isDryRun) {
     console.info(describeEntries(entries, target).join("\n"));
     console.info("Dry run: nothing was sent.");
