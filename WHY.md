@@ -938,6 +938,13 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - The cost: Oxfmt fails when `theme.css` is missing, so `theme.ts` runs first, and the starter config drops `stylesheet`.
 - Tested on 2026-11-05 with `oxfmt` 0.75.0.
 
+### Why `theme.css` is not in the template
+
+- `scripts/theme.ts` generates `src/styles/theme.css` from `SEED`. `setup.mjs` runs it for each new project, and the project commits the output.
+- Each project has its own seed, so its `theme.css` differs from any copy in the template. With a copy there, `update.mjs` could merge the file, and a change to the generator could end in a conflict in each project with its own seed.
+- A generator and its output in one folder are two sources of truth that can drift apart.
+- The cost: `oxfmt` fails directly in `template/` until `theme.ts` runs. Run `pnpm exec tsx scripts/theme.ts` first and delete the output afterward. CI is not affected: it checks the generated project.
+
 ### Why Knip has named exceptions
 
 - Installed components export their full API, and the rules install some packages before any code uses them. Named `ignoreIssues`, `ignore`, and `ignoreDependencies` entries keep real unused code visible.
