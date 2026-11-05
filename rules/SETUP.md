@@ -32,7 +32,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 
 ### setup.mjs
 
-4. `node <starweb>/scripts/setup.mjs my-site --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, [UPDATE](UPDATE.md)); `my-site` = new or empty folder. Writes `.starweb.json` (clone commit, name, site); commit it. The script: copies `template/` to the project root: starter files, configs, security, tests, CI, Dependabot ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), copies agent files and `rules/`, writes `package.json` with the project name, copies `pnpm-lock.yaml`, writes a new `EMDASH_ENCRYPTION_KEY` to `.env`, `pnpm install --frozen-lockfile`, `pnpm exec wrangler types`, `pnpm exec tsx scripts/theme.ts`, `git init`, `oxfmt`.
+4. `node <starweb>/scripts/setup.mjs <project-dir> --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, [UPDATE](UPDATE.md)); `<project-dir>` = path of a new or empty folder; `<name>` = lowercase letters, digits, and hyphens, starting with a letter. Writes `.starweb.json` (clone commit, name, site); step 26 commits it. The script: copies `template/` to the project root: starter files, configs, security, tests, CI, Dependabot ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), copies agent files and `rules/`, writes `package.json` with the project name, copies `pnpm-lock.yaml`, writes a new `EMDASH_ENCRYPTION_KEY` to `.env`, `pnpm install --frozen-lockfile`, `pnpm exec wrangler types`, `pnpm exec tsx scripts/theme.ts`, `git init`, `oxfmt`.
 
 ## Cloudflare
 
@@ -93,13 +93,13 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 
 ### [skills CLI](STACK.md#skills-cli)
 
-22. Install the skills listed in [CMS](CMS.md) and [COMPONENTS](COMPONENTS.md).
+22. Run each command on the `Skills:` line of [CMS](CMS.md) and [COMPONENTS](COMPONENTS.md). Only these; the `skills` sources in [STACK](STACK.md) are not part of setup.
 
 ## Checks
 
 23. `pnpm run dev`; open `http://localhost:4321/_emdash/admin/`; complete the setup wizard. User login without the email part → turn off **Require email verification** on the Better Auth settings page, because sign-up cannot finish without an email. To test a form, set the [Turnstile test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) in the Forms plugin settings. → [DEV](DEV.md), [CMS](CMS.md#emdash-forms)
-24. `pnpm run check`, `pnpm run build`, `pnpm run size`, `pnpm run preview` all pass before the first commit. → [QUALITY](QUALITY.md) (Order), [PERF](PERF.md#client-javascript), [DEV](DEV.md)
-25. `pnpm exec emdash doctor`; read only the scheduler line (its database check looks for local SQLite, not D1). → [CMS](CMS.md) (Drafts and preview)
+24. `pnpm run check`, `pnpm run build`, and `pnpm run size` exit with 0 before the first commit. `pnpm run preview --port <port> --background`: `/` returns 200; then `pnpm exec astro preview stop`. → [QUALITY](QUALITY.md) (Order), [PERF](PERF.md#client-javascript), [DEV](DEV.md)
+25. `pnpm exec emdash doctor`; pass = the scheduler line has `✔`. Exit code 1 and `database: not found` are expected, not a failure: its database check looks for local SQLite, not D1. Scheduled publishing removed in step 7 → skip this step. → [CMS](CMS.md) (Drafts and preview)
 26. Commit.
 
 ## Deploy
