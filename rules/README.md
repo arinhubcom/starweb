@@ -11,3 +11,5 @@ Start with [STACK.md](STACK.md): every lib, tool, and spec with its `llms.txt`, 
 | Frontend and design | [DESIGN](DESIGN.md), [COMPONENTS](COMPONENTS.md), [MATERIAL](MATERIAL.md), [MEDIA](MEDIA.md), [SEO](SEO.md), [I18N](I18N.md), [UI-UX](UI-UX.md) |
 | Quality and operations | [QUALITY](QUALITY.md), [TESTING](TESTING.md), [PERF](PERF.md), [SECURITY](SECURITY.md), [PRIVACY](PRIVACY.md), [OBSERVABILITY](OBSERVABILITY.md), [DEPS](DEPS.md), [DEV](DEV.md), [DEPLOY](DEPLOY.md) |
 | Writing | [AGENTS](AGENTS.md), [WRITING](WRITING.md) |
+
+[LICENSE](LICENSE): the Starweb MIT notice. Keep it here; a project's own license goes in the project root.

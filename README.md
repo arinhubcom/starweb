@@ -315,4 +315,4 @@ Read the full reasons and alternatives in [WHY.md](WHY.md).
 
 ## 📄 License
 
-Starweb is available under the [MIT License](LICENSE).
+Starweb is available under the [MIT License](LICENSE). A new project keeps this notice in `rules/LICENSE`. You choose the license for your own project.
