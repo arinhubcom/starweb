@@ -144,6 +144,10 @@ wait_for_ok() {
 
 step "Run setup.mjs"
 rm -rf "$APP_DIR"
+# A parent repository that ignores all files, as a home folder with dotfiles
+# can be. Oxfmt reads its ignore rules until the project has its own repository.
+git -C "$WORKDIR" init --quiet
+printf '*\n' > "$WORKDIR/.gitignore"
 SETUP_ARGS=(--name tpl-test --site https://example.com)
 [ "$FRESH" -eq 0 ] || SETUP_ARGS+=(--fresh-lock)
 node "$REPO_ROOT/scripts/setup.mjs" "$APP_DIR" "${SETUP_ARGS[@]}"

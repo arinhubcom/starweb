@@ -1003,6 +1003,13 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 ## Setup
 
+### Why an agent tests setup
+
+- `scripts/test-template.sh` runs `setup.mjs` directly and does not read [SETUP.md](rules/SETUP.md). It proves that the files work, not that an agent can follow the text.
+- People start setup with the Quick start prompt, so the test uses the same prompt. A sub-agent with no context finds a step that only makes sense to the person who wrote it.
+- The test costs tokens and time, so it runs only when the setup text, `setup.mjs`, or the prompt changes, and it does not run in CI.
+- The first run on 2026-11-05 found a bug that the script tests missed: `setup.mjs` ran Oxfmt before `git init`. In a home folder that is a Git repository with `*` in `.gitignore`, Oxfmt 0.75.0 read those rules, found no files, and stopped the setup. `setup.mjs` now runs `git init` first, and `scripts/test-template.sh` runs inside such a parent repository.
+
 ### Why setup asks about optional parts first
 
 - Each optional part adds packages, bindings, secrets, or CI steps that a project then has to keep up to date. A site that needs no login should not carry emdash-better-auth or `BETTER_AUTH_SECRET`.

@@ -143,8 +143,9 @@ function installAndFormat(dir, freshLock) {
   ]);
   run(dir, "pnpm", ["exec", "wrangler", "types"]);
   run(dir, "pnpm", ["exec", "tsx", "scripts/theme.ts"]);
-  run(dir, "pnpm", ["exec", "oxfmt"]);
+  // Before Oxfmt: in a parent repository, it reads the ignore rules of that repository.
   run(dir, "git", ["init", "--quiet"]);
+  run(dir, "pnpm", ["exec", "oxfmt"]);
 }
 
 function writeState(dir, values, commit) {
