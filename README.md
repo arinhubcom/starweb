@@ -1,5 +1,7 @@
 # ✨ Starweb
 
+**[Star it](https://github.com/arinhubcom/starweb). [Fork it](https://github.com/arinhubcom/starweb/fork). Change it.**
+
 Starweb is a template for AI agents. Use it to build websites and web apps.
 It is built on [Astro](https://astro.build) and
 [Cloudflare Workers](https://workers.cloudflare.com), with [EmDash](https://docs.emdashcms.com/) as the CMS. Read [why we chose this stack](WHY.md).
