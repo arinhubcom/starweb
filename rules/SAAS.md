@@ -27,7 +27,7 @@ Small SaaS: few tenants, little data per tenant, no real-time collaboration. Sit
 ### [D1](STACK.md#d1)
 
 - One D1 database and binding per app (`APP1_DB`, `APP2_DB`); no shared app tables.
-- Count databases first: Free 10 per account, EmDash uses 1 → max 9 apps; Paid 50,000.
+- Count databases first against the D1 limit per account of your plan; EmDash uses 1.
 - `migrations_dir` per `d1_databases` entry (`migrations/app1`, `migrations/app2`).
 - Apply per database by name, not binding: `wrangler d1 migrations apply app1-db --remote` (`--local` for dev).
 
