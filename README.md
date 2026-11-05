@@ -206,6 +206,16 @@ CI blocks a pull request only for the JavaScript and font checks. The other chec
 - Prebuilt themed UI and an admin settings page.
 - No database migrations needed.
 
+## 🛡️ Security
+
+- **New packages wait 3 days:** pnpm installs only package versions older than 3 days (`minimumReleaseAge: 4320`), and Dependabot waits 3 days before a version update. Dependabot security updates do not wait.
+- **Package checks in CI:** `pnpm audit --prod --audit-level high` and `pnpm audit signatures` run on each pull request.
+- **Pinned versions:** exact versions in `package.json`, and GitHub Actions pinned to a commit SHA.
+- **Browser protection:** a Content Security Policy and security headers on each response, and `security.txt` for vulnerability reports.
+- **Request protection:** an `Origin` check for mutating requests, rate limits on forms, and Zod validation of input.
+
+Read the details in [rules/SECURITY.md](rules/SECURITY.md) and [rules/DEPS.md](rules/DEPS.md#supply-chain).
+
 ## 💳 Payments
 
 - Stripe subscriptions through emdash-better-auth.
