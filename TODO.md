@@ -34,9 +34,20 @@ Gaps in the rules and the steps:
 - [ ] Add a step to [rules/SETUP.md](rules/SETUP.md) for the repository settings in [rules/DEPS.md](rules/DEPS.md): Dependabot alerts, security updates, and **Allow auto-merge**. No step covers them yet.
 - [ ] Check every rule in `rules/` against the new Template rule. One review found the gaps that are now fixed, but it did not check each rule line by line.
 
+Demo deploy of the template:
+
+The repository gets a demo deploy of the template. It runs the steps that need a Cloudflare or GitHub account, because no test or agent run has done them yet.
+
+- [ ] Create the demo deploy of the template, and link it from `README.md`.
+- [ ] Run the Cloudflare login and the D1 database (steps 5 and 6).
+- [ ] Run email: `send_email` binding, verified sender domain, and `cloudflareEmail()` (step 13).
+- [ ] Run the production setup: `env.production`, `EMDASH_SITE_URL`, GitHub environments, prod secrets, and CI workflows (steps 29-33).
+- [ ] Run a real deploy on Cloudflare (steps 34 and 35). Confirm that the deploy creates the `SESSION` KV namespace from the binding without an ID, and that `env.production` works with it.
+- [ ] Confirm that the dev-bypass routes return `403` on prod (step 36).
+- [ ] Run the production checks: PageSpeed Insights and Worker CPU time (step 37).
+
 Steps that no test has run:
 
-- [ ] Run a real deploy on Cloudflare (steps 34 and 35). Confirm that the deploy creates the `SESSION` KV namespace from the binding without an ID, and that `env.production` works with it.
 - [ ] Run `pnpm run dev` and the admin setup wizard (step 23), and `pnpm exec emdash doctor` (step 25) on a generated project.
 - [ ] Run the optional steps 8-21 on a generated project, and confirm that `pnpm run check` and `pnpm run build` still pass.
 
