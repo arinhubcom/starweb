@@ -24,7 +24,7 @@ The steps are in [rules/UPDATE.md](rules/UPDATE.md). The script [scripts/update.
 
 ## 🏗️ Architecture
 
-The diagram shows the main parts of a Starweb project and the main advantage of each part.
+The diagram shows the main parts of a Starweb project and the main advantage of each part. All diagrams in this README use the same colors: orange for Cloudflare, blue for data and caches, green for pages and apps, gray for people and tools, purple for services outside Cloudflare, and yellow for checks.
 
 ```mermaid
 %%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%
@@ -47,6 +47,19 @@ flowchart TD
 
     Worker -->|"Bindings"| Data["Built-in data services<br/>D1, R2, KV, Queues,<br/>Durable Objects,<br/>and Workers AI"]
     Worker -.->|"Fallback"| Node["Node.js<br/>Astro and EmDash<br/>also run here"]
+
+    classDef cloudflare fill:#fde8d0,stroke:#c2570c,color:#1f1f1f
+    classDef data fill:#dbeafe,stroke:#1d4ed8,color:#1f1f1f
+    classDef app fill:#dcfce7,stroke:#15803d,color:#1f1f1f
+    classDef neutral fill:#e5e7eb,stroke:#4b5563,color:#1f1f1f
+    classDef external fill:#ede9fe,stroke:#6d28d9,color:#1f1f1f
+    classDef check fill:#fef3c7,stroke:#b45309,color:#1f1f1f
+    class Agent,Template,People neutral
+    class CDN,Runtime cloudflare
+    class Astro,EmDash,Apps app
+    class Data data
+    class Node external
+    style Worker fill:transparent,stroke:#8b949e
 ```
 
 ### Platform services
@@ -75,6 +88,18 @@ flowchart TD
     GitHub["GitHub"] -->|"Wrangler: migrations,<br/>versions, and deployments"| Worker
     Worker -.->|"Errors and uptime"| Sentry["Sentry"]
     Worker <-.->|"Billing and webhooks"| Payments["Stripe or Creem"]
+
+    classDef cloudflare fill:#fde8d0,stroke:#c2570c,color:#1f1f1f
+    classDef data fill:#dbeafe,stroke:#1d4ed8,color:#1f1f1f
+    classDef app fill:#dcfce7,stroke:#15803d,color:#1f1f1f
+    classDef neutral fill:#e5e7eb,stroke:#4b5563,color:#1f1f1f
+    classDef external fill:#ede9fe,stroke:#6d28d9,color:#1f1f1f
+    classDef check fill:#fef3c7,stroke:#b45309,color:#1f1f1f
+    class People,GitHub neutral
+    class Network,Worker,Platform,Background,Extras cloudflare
+    class Storage data
+    class Sentry,Payments external
+    style Cloudflare fill:transparent,stroke:#8b949e
 ```
 
 ## 🚀 Features
@@ -126,6 +151,21 @@ flowchart TD
     end
 
     Page ~~~ Checks
+
+    classDef cloudflare fill:#fde8d0,stroke:#c2570c,color:#1f1f1f
+    classDef data fill:#dbeafe,stroke:#1d4ed8,color:#1f1f1f
+    classDef app fill:#dcfce7,stroke:#15803d,color:#1f1f1f
+    classDef neutral fill:#e5e7eb,stroke:#4b5563,color:#1f1f1f
+    classDef external fill:#ede9fe,stroke:#6d28d9,color:#1f1f1f
+    classDef check fill:#fef3c7,stroke:#b45309,color:#1f1f1f
+    class Browser neutral
+    class Static,Worker cloudflare
+    class Cache1,Cache2,Cache3,D1 data
+    class Html,Islands app
+    class PR,Release,Prod check
+    style Edge fill:transparent,stroke:#8b949e
+    style Page fill:transparent,stroke:#8b949e
+    style Checks fill:transparent,stroke:#8b949e
 ```
 
 CI blocks a pull request only for the JavaScript and font checks. The other checks do not fail a build, so you run them and read the results. Field data decides.
@@ -209,6 +249,20 @@ flowchart TD
     Core <-.->|"Plan per organization"| Stripe["Stripe"]
     App1 -.-> Blocks["Add when an app needs them<br/>R2: files per tenant<br/>Queues: email and webhooks<br/>Workflows: long cleanup<br/>Durable Objects: real time<br/>Rate Limiting and Analytics Engine: plans<br/>Flagship: feature flags"]
     App2 -.->|"Independent deploy"| Split["Separate Worker on the same domain<br/>Route: example.com/app2/*<br/>The login cookie still works"]
+
+    classDef cloudflare fill:#fde8d0,stroke:#c2570c,color:#1f1f1f
+    classDef data fill:#dbeafe,stroke:#1d4ed8,color:#1f1f1f
+    classDef app fill:#dcfce7,stroke:#15803d,color:#1f1f1f
+    classDef neutral fill:#e5e7eb,stroke:#4b5563,color:#1f1f1f
+    classDef external fill:#ede9fe,stroke:#6d28d9,color:#1f1f1f
+    classDef check fill:#fef3c7,stroke:#b45309,color:#1f1f1f
+    class People neutral
+    class Domain,Blocks,Split cloudflare
+    class Core,App1,App2 app
+    class CoreDb,App1Db,App2Db data
+    class Stripe external
+    style Worker fill:transparent,stroke:#8b949e
+    style Data fill:transparent,stroke:#8b949e
 ```
 
 Apps share code only from `src/lib/`, `src/layouts/`, and `src/components/ui/`. An app does not import from another app or read its database: it calls the other app's API route or sends a Queue message.
