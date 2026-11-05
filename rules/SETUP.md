@@ -2,6 +2,26 @@
 
 Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb project; steps 1-3 create it from the [template](https://github.com/arinhubcom/starweb/tree/main/template) and [setup.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/setup.mjs), the rest is manual.
 
+## Optional parts
+
+Ask first.
+
+- Before step 1, ask the user which optional parts to add. Show the whole list in one question. → [WHY](../WHY.md#why-setup-asks-about-optional-parts-first)
+- Nothing in the list is on by default. Add only what the user picks, and skip the steps of the other parts. A step that starts with a condition (`X →`) follows this answer.
+- List:
+  - Sandboxed plugins (Workers paid plan): step 2.
+  - No scheduled publishing: step 6.
+  - Queues: step 7.
+  - Many languages: step 8.
+  - User login, emdash-better-auth: step 11.
+  - Apps with their own D1 database: steps 12 and 13. A multi-tenant app also needs user login with organizations.
+  - OpenAPI contract for an app: step 14.
+  - Stripe billing, needs user login: step 11, then [PAYMENTS](PAYMENTS.md). Creem, needs user login with organizations: step 15.
+  - Sentry: step 16.
+  - Storybook: step 17.
+  - Playwright and axe: step 18.
+- User not sure about a part → leave it out, and say that the steps can run later.
+
 ## Project
 
 ### [EmDash](STACK.md#emdash)
@@ -88,7 +108,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 26. `env.production` block in `wrangler.jsonc`: own D1 database, R2 bucket, `routes`, `"preview_urls": true`, plus every used non-inheritable key (`d1_databases`, `r2_buckets`, `kv_namespaces` with `SESSION`, `version_metadata`, `images`, `ratelimits`, `ai`, `queues`, `workflows`, `durable_objects`, `services`, `vars`, `secrets`, `define`). → [DEPLOY](DEPLOY.md) (Environments)
 27. `EMDASH_SITE_URL` = production URL in `env.production.vars`, before the prod admin setup. Never top level (dev keeps the address setup runs on).
 28. GitHub environments `dev` and `production`: variables `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID`, `EMDASH_TARGET_FINGERPRINT`, plus the Cloudflare tokens. `production`: release tag pattern and `main` only. Private repository: GitHub Pro or Team → [GITHUB](GITHUB.md#plans). → [DEPLOY](DEPLOY.md) (CI, Migrations)
-29. Prod secrets `EMDASH_ENCRYPTION_KEY`, `BETTER_AUTH_SECRET` before the first stage upload. → [DEPLOY](DEPLOY.md) (Secrets)
+29. Prod secret `EMDASH_ENCRYPTION_KEY`, and `BETTER_AUTH_SECRET` with user login, before the first stage upload. → [DEPLOY](DEPLOY.md) (Secrets)
 30. Dependabot automerge workflow and the CI workflows the template lacks: PR preview, dev deploy, stage upload on release tag, promotion; scheduled D1 export if the site has app data. → [DEPS](DEPS.md) (Update), [DEPLOY](DEPLOY.md) (CI)
 31. First dev deploy: `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""` per app database, `wrangler deploy --env=""`. Then each push to `main` deploys dev. → [DEPLOY](DEPLOY.md) (Migrations, CI)
 32. First release: push tag `<worker>-YYYY-MM-DD-r1`, test the stage URL, run the promotion workflow (traffic in steps). Site uses forms → create a Turnstile widget and set its keys in the Forms plugin settings on production. → [DEPLOY](DEPLOY.md) (Releases, CI), [CMS](CMS.md#emdash-forms)

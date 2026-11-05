@@ -11,12 +11,12 @@ It is built on [Astro](https://astro.build) and
 To set up a new project, give this prompt to your AI agent (Claude Code, Codex, Gemini CLI, or another agent):
 
 ```text
-Set up a new Starweb project named my-site. Clone https://github.com/arinhubcom/starweb into a folder outside the project, for example ~/starweb, and keep it: setup.mjs reads it, and update.mjs needs it later. Do not use a temporary folder. Read AGENTS.md and rules/SETUP.md there. Run scripts/setup.mjs on the new project folder, then do the remaining steps in rules/SETUP.md in order. After each step, check the result. If a step fails, stop and report the error.
+Set up a new Starweb project named my-site. Clone https://github.com/arinhubcom/starweb into a folder outside the project, for example ~/starweb, and keep it: setup.mjs reads it, and update.mjs needs it later. Do not use a temporary folder. Read AGENTS.md and rules/SETUP.md there. Ask me which optional parts to add. Run scripts/setup.mjs on the new project folder, then do the remaining steps in rules/SETUP.md in order. After each step, check the result. If a step fails, stop and report the error.
 ```
 
 Replace `my-site` with your project name.
 
-The steps are in [rules/SETUP.md](rules/SETUP.md). The [template/](template/) folder holds the `create-emdash` output with the Starweb changes in place, Fulldev UI, `package.json`, the lockfile, and the tested configs. The new project takes it over: the script [scripts/setup.mjs](scripts/setup.mjs) copies the folder to the project root and writes a new encryption key. The rules hold decisions, not install commands. Each EmDash update runs `create-emdash` again: [scripts/update-starter.mjs](scripts/update-starter.mjs) merges the new output into `template/`, and [starter/](starter/) keeps the last output as the merge base. See the steps in [rules/UPDATE.md](rules/UPDATE.md#emdash-update). CI tests the template every week. Read [why](WHY.md#why-a-template-setupmjs-and-ci).
+The steps are in [rules/SETUP.md](rules/SETUP.md). The agent first asks which optional parts to add, for example login, payments, apps, or many languages. The [template/](template/) folder holds the `create-emdash` output with the Starweb changes in place, Fulldev UI, `package.json`, the lockfile, and the tested configs. The new project takes it over: the script [scripts/setup.mjs](scripts/setup.mjs) copies the folder to the project root and writes a new encryption key. The rules hold decisions, not install commands. Each EmDash update runs `create-emdash` again: [scripts/update-starter.mjs](scripts/update-starter.mjs) merges the new output into `template/`, and [starter/](starter/) keeps the last output as the merge base. See the steps in [rules/UPDATE.md](rules/UPDATE.md#emdash-update). CI tests the template every week. Read [why](WHY.md#why-a-template-setupmjs-and-ci).
 
 ## 🔄 Update a project
 
@@ -52,7 +52,7 @@ flowchart TD
         Runtime["Workers runtime<br/>No slow cold starts<br/>Free plan to start"]
         Astro["Astro<br/>Zero JavaScript by default<br/>Islands for interactive parts"]
         EmDash["EmDash CMS<br/>Admin panel, live content,<br/>sandboxed plugins,<br/>and MCP server"]
-        Apps["Your apps and API routes<br/>Login, 2FA, organizations,<br/>and Stripe billing"]
+        Apps["Your apps and API routes<br/>Optional login, 2FA,<br/>organizations, and Stripe billing"]
     end
 
     Worker -->|"Bindings"| Data["Built-in data services<br/>D1, R2, KV, Queues,<br/>Durable Objects,<br/>and Workers AI"]
@@ -297,7 +297,7 @@ flowchart TD
 
 ## 🔐 Auth
 
-- Auth uses the [emdash-better-auth](https://github.com/theweekendprojects/emdash-better-auth) plugin, powered by [Better Auth](https://www.better-auth.com/).
+- Optional customer login uses the [emdash-better-auth](https://github.com/theweekendprojects/emdash-better-auth) plugin, powered by [Better Auth](https://www.better-auth.com/).
 - Email and password, social login, passwordless login, and passkeys.
 - Two-factor authentication (2FA).
 - Organizations for teams and multi-tenant apps.
@@ -306,7 +306,7 @@ flowchart TD
 - Prebuilt themed UI and an admin settings page.
 - No database migrations needed.
 
-The template has no customer login. When a project needs it, setup adds emdash-better-auth, and the diagram shows the result. Solid lines show the login setup, and the dashed line shows the options that you turn on when you need them. Read [rules/AUTH.md](rules/AUTH.md).
+Customer login is optional, and the template does not include it. Setup asks if you want it, then adds emdash-better-auth, and the diagram shows the result. Solid lines show the login setup, and the dashed line shows the options that you turn on when you need them. Read [rules/AUTH.md](rules/AUTH.md).
 
 ```mermaid
 %%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%

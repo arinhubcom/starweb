@@ -1003,6 +1003,12 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 ## Setup
 
+### Why setup asks about optional parts first
+
+- Each optional part adds packages, bindings, secrets, or CI steps that a project then has to keep up to date. A site that needs no login should not carry emdash-better-auth or `BETTER_AUTH_SECRET`.
+- The answers decide which later steps run, and some parts depend on others: Stripe billing needs user login, so one question at the start finds this before the work begins.
+- The template stays small, because it holds only what every project uses. The list is in [SETUP.md](rules/SETUP.md), so an agent asks about the same parts each time.
+
 ### Why a template, setup.mjs, and CI
 
 - A list of 60 manual steps gave a different result each time: an agent could skip a step, change a version, or copy a config with a mistake. Files in `template/` are the same each time and carry the config that a test project proved.
