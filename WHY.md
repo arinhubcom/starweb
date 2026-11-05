@@ -1014,7 +1014,7 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 - Each optional part adds packages, bindings, secrets, or CI steps that a project then has to keep up to date. A site that needs no login should not carry emdash-better-auth or `BETTER_AUTH_SECRET`.
 - The answers decide which later steps run, and some parts depend on others: Stripe billing needs user login, so one question at the start finds this before the work begins.
-- Email is its own part, because it needs a verified sender domain, and a project can use login without it. The emdash-better-auth README says that without an email provider sign-up is a dead end until you turn off **Require email verification**, so the login step says to do that.
+- Email is its own part, because it needs a verified sender domain, and a project can use login without it. The emdash-better-auth README says that without an email provider sign-up is a dead end until you turn off **Require email verification**, so the setup wizard step says to do that. It is a setting on an admin page, so it needs a person at a browser.
 - The template stays small, because it holds only what every project uses. The list is in [SETUP.md](rules/SETUP.md), so an agent asks about the same parts each time.
 
 ### Why a template, setup.mjs, and CI

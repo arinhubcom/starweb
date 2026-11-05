@@ -60,7 +60,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 
 ### [emdash-better-auth](STACK.md#emdash-better-auth)
 
-12. User login → emdash-better-auth; `betterAuthProvider`, `betterAuthSettingsPlugin` from `emdash-better-auth`; `authProviders: [betterAuthProvider()]` and `betterAuthSettingsPlugin()` in `plugins` of `emdash()`; `BETTER_AUTH_SECRET` in `.env`. No email part → turn off **Require email verification** on the Better Auth settings page, because sign-up cannot finish without an email. → [AUTH](AUTH.md), [DEPS](DEPS.md) (Install)
+12. User login → emdash-better-auth; `betterAuthProvider`, `betterAuthSettingsPlugin` from `emdash-better-auth`; `authProviders: [betterAuthProvider()]` and `betterAuthSettingsPlugin()` in `plugins` of `emdash()`; `BETTER_AUTH_SECRET` from `openssl rand -base64 32` in `.env`. → [AUTH](AUTH.md), [DEPS](DEPS.md) (Install)
 13. Email → `send_email` binding `EMAIL` in `wrangler.jsonc`, verified sender domain, `cloudflareEmail()` in `plugins` of `emdash()`. → [AUTH](AUTH.md) (Email), [EMAIL](EMAIL.md)
 
 ## Apps and payments
@@ -97,7 +97,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 
 ## Checks
 
-23. `pnpm run dev`; open `http://localhost:4321/_emdash/admin/`; complete the setup wizard. To test a form, set the [Turnstile test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) in the Forms plugin settings. → [DEV](DEV.md), [CMS](CMS.md#emdash-forms)
+23. `pnpm run dev`; open `http://localhost:4321/_emdash/admin/`; complete the setup wizard. User login without the email part → turn off **Require email verification** on the Better Auth settings page, because sign-up cannot finish without an email. To test a form, set the [Turnstile test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) in the Forms plugin settings. → [DEV](DEV.md), [CMS](CMS.md#emdash-forms)
 24. `pnpm run check`, `pnpm run build`, `pnpm run size`, `pnpm run preview` all pass before the first commit. → [QUALITY](QUALITY.md) (Order), [PERF](PERF.md#client-javascript), [DEV](DEV.md)
 25. `pnpm exec emdash doctor`; read only the scheduler line (its database check looks for local SQLite, not D1). → [CMS](CMS.md) (Drafts and preview)
 26. Commit.
