@@ -93,7 +93,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 
 ### [skills CLI](STACK.md#skills-cli)
 
-22. Run each command on the `Skills:` line of [CMS](CMS.md) and [COMPONENTS](COMPONENTS.md). Only these; the `skills` sources in [STACK](STACK.md) are not part of setup.
+22. Run each command on the `Skills:` line of [CMS](CMS.md) and [COMPONENTS](COMPONENTS.md). Only these; the `skills` sources in [STACK](STACK.md) are not part of setup. A shell with no prompts → add `--yes`.
 
 ## Checks
 

@@ -71,9 +71,9 @@
 - Wrangler plugin adds `main` (`src/worker.ts`) as entry; do not list it.
 - `entry` in `knip.json` (replaces default `index`, `main`, `cli`; not an ignore list): at least `src/live.config.ts`, `src/apps/*/pages/**/*.astro!`, `src/apps/*/middleware.ts!`, `src/apps/*/admin/{plugin.ts,pages.tsx}!`, `scripts/*.ts`; add a glob per other file kind registered via `injectRoute()`, `addMiddleware()`, `adminEntry`. `!` = production code for `knip --production`.
 - Keep the template `knip.json`: `entry` and that `ignoreIssues`, no ignore list.
-- Template `knip.json`: `"ignoreIssues": { "src/components/ui/**": ["files", "exports", "types"] }` for installed components. No other folders.
+- Template `knip.json`: `"ignoreIssues": { "src/components/ui/**": ["files", "exports", "types"], ".agents/skills/**": ["files"] }` for installed components and agent skills. No other folders.
 - `ignoreDependencies`, only after installing and until code uses them: `@base-ui/react` (React components); `@storybook/builder-vite` (Storybook). No other packages.
-- No `.agents/**` in `ignore` (not reported).
+- No `.agents/**` in `ignore`: `ignoreIssues` covers it.
 - Storybook, Vitest, Playwright plugins find stories, `.storybook/`, tests, `playwright.config.ts`: not in `entry`.
 - `knip --production` finds code used only by tests and stories.
 

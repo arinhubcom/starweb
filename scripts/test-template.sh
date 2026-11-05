@@ -310,6 +310,9 @@ printf '%s\n' "$SECRETS_BAD" | grep -q 'NOT_A_SECRET' || fail "set-secrets does 
 echo "ok: set-secrets --dry-run lists names, prints no value, and rejects an unknown name"
 
 step "Run the checks and pnpm audit at the same time"
+# An installed agent skill can hold example files that no code imports.
+mkdir -p "$APP_DIR/.agents/skills/test-skill"
+printf 'export const example = 1;\n' > "$APP_DIR/.agents/skills/test-skill/example.tsx"
 # The test runs the parts of pnpm run check, so check the script text.
 grep -qF '"check": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run test"' "$APP_DIR/package.json" || fail "the check script changed: update this step"
 # astro check writes .astro/types.d.ts, and the type-aware lint reads it, so lint

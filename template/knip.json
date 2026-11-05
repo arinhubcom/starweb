@@ -8,6 +8,7 @@
     "scripts/*.ts"
   ],
   "ignoreIssues": {
-    "src/components/ui/**": ["files", "exports", "types"]
+    "src/components/ui/**": ["files", "exports", "types"],
+    ".agents/skills/**": ["files"]
   }
 }

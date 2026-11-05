@@ -967,6 +967,7 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 ### Why Knip has named exceptions
 
 - Installed components export their full API, and the rules install some packages before any code uses them. Named `ignoreIssues`, `ignore`, and `ignoreDependencies` entries keep real unused code visible.
+- An agent skill is not project code, and it can hold example files that no code imports. On 2026-11-05, the `shadcn/ui` skill added four such files to `.agents/skills/shadcn/`, and Knip 6.44.1 reported them, so `pnpm run check` failed after the skills step of setup.
 
 ### Why Oxlint is the only linter
 
