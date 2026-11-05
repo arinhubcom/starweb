@@ -158,13 +158,7 @@ function writeState(dir, values, commit) {
 
 function printNextSteps() {
   console.log(`
-Setup done. Next steps (see rules/SETUP.md):
-  1. Run "pnpm run check" and "pnpm run build". Both must pass.
-  2. Set SITE, CONTROLLER, and the contact addresses in src/lib/site.ts, and replace each [Add marker in src/pages/privacy.astro.
-  3. Create the D1 database with a location hint, set its database_id, and log in with "pnpm exec wrangler login".
-  4. Add the optional parts that the user picked in step 1 of SETUP.md, and the deploy workflows.
-  5. Start "pnpm run dev", open /_emdash/admin/, and complete the setup wizard.
-  6. Commit the project.`);
+Setup done. Continue with step 5 of rules/SETUP.md.`);
 }
 
 function main() {

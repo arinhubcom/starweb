@@ -26,6 +26,7 @@ The template holds what every project uses. The agent asks which of these parts 
 - Queues for background work.
 - Many languages: Astro i18n routing, Paraglide JS, and PolyStella.
 - Customer login with emdash-better-auth: 2FA, organizations, and more.
+- Email with Cloudflare Email Service: email verification, password reset, and app email.
 - Apps with their own D1 database.
 - An OpenAPI contract for an app.
 - Stripe billing, or Creem for EU consumer sales.
@@ -323,17 +324,17 @@ flowchart TD
 - Prebuilt themed UI and an admin settings page.
 - No database migrations needed.
 
-Customer login is optional, and the template does not include it. Setup asks if you want it, then adds emdash-better-auth, and the diagram shows the result. Solid lines show the login setup, and the dashed line shows the options that you turn on when you need them. Read [rules/AUTH.md](rules/AUTH.md).
+Customer login is optional, and the template does not include it. Setup asks if you want it, then adds emdash-better-auth, and the diagram shows the result. Solid lines show the login setup, and dashed lines show the options that you add when you need them. Without email, you turn off email verification, and password reset and email login do not work. Read [rules/AUTH.md](rules/AUTH.md).
 
 ```mermaid
 %%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%
 flowchart TD
     accTitle: Starweb login
-    accDescr: Customers sign in through emdash-better-auth with email and password, social login, passwordless login, or passkeys, and they can use 2FA. It sends email through Cloudflare Email Service and stores users and organizations in the EmDash D1 database. Each app route checks the user on the server, and app data is filtered by the active organization. You can add organizations, Stripe billing, and an OIDC provider. Editors and administrators sign in separately with EmDash passkey login.
+    accDescr: Customers sign in through emdash-better-auth with email and password, social login, passwordless login, or passkeys, and they can use 2FA. It can send email through Cloudflare Email Service, and it stores users and organizations in the EmDash D1 database. Each app route checks the user on the server, and app data is filtered by the active organization. You can add organizations, Stripe billing, and an OIDC provider. Editors and administrators sign in separately with EmDash passkey login.
 
     Customers["Customers"] --> Plugin["emdash-better-auth<br/>Email and password, social login,<br/>passwordless login, passkeys, and 2FA<br/>Prebuilt pages at /auth"]
     Staff["Editors and administrators"] --> Passkey["EmDash passkey login<br/>/_emdash/admin/login"]
-    Plugin --> Mail["Cloudflare Email Service<br/>Verification, reset, and invites"]
+    Plugin -.-> Mail["Cloudflare Email Service<br/>Verification, reset, and invites"]
     Plugin --> Guard["Server checks on each app route<br/>Pages: requireUser<br/>API routes: 401 or 403<br/>Roles: auth.api.hasPermission"]
     Plugin --> Users["EmDash database<br/>Users and organizations"]
     Passkey --> Users
