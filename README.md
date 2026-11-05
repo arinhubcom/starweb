@@ -118,6 +118,43 @@ flowchart TD
 - Built on Astro.
 - Runs on Cloudflare Workers.
 - Content managed with EmDash CMS.
+- One prompt sets up a new project, and `update.mjs` merges new rules and template files with your changes.
+- CI tests the template every week.
+- Editors build forms and read submissions with the Forms plugin, and Field Kit gives better inputs for `json` fields.
+- Security by default: CSP, security headers, `security.txt`, and Turnstile and rate limits on forms.
+- Privacy by default: a privacy page to complete, and cookieless Web Analytics.
+- Design rules: Fulldev UI, a Material Design 3 theme from one brand color, and WCAG 2.2 level AA.
+- JavaScript size limits for each island and each page fail the pull request when you go over them.
+- Add when you need it: login, payments, apps with their own D1 database, many languages, and an OpenAPI contract.
+
+The diagram groups the main features. Solid lines show what every project gets from the template. The dashed line shows what you add during setup when you need it: read [rules/SETUP.md](rules/SETUP.md).
+
+```mermaid
+%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%
+flowchart TD
+    accTitle: Starweb features
+    accDescr: One Starweb project gives five groups of features: tools for AI agents, a website with a CMS, the Cloudflare platform, security and privacy, and quality checks. A sixth group holds what you add when you need it: login, payments, apps, many languages, and an API contract.
+
+    Project["One Starweb project"]
+    Project --> Agents["For AI agents<br/>Rules in AGENTS.md and rules/<br/>Setup and update scripts<br/>EmDash skills, CLI, and MCP server"]
+    Project --> Site["Website and CMS<br/>Astro and EmDash admin panel<br/>Form builder and Field Kit<br/>Fulldev UI and a Material theme"]
+    Project --> Platform["Cloudflare platform<br/>Workers and Workers Cache<br/>D1, R2, and KV<br/>Gradual deployments and rollback"]
+    Agents ~~~ Trust
+    Site ~~~ Quality
+    Platform ~~~ Optional
+    Project --> Trust["Security and privacy<br/>CSP and security headers<br/>Turnstile and rate limits on forms<br/>security.txt and a privacy page"]
+    Project --> Quality["Quality checks<br/>Format, types, lint, and tests<br/>JavaScript size limits<br/>Template tested every week"]
+    Project -.-> Optional["Add when you need it<br/>Login, 2FA, and organizations<br/>Stripe or Creem<br/>Apps with their own D1 database<br/>Many languages and OpenAPI"]
+
+    classDef neutral fill:#e5e7eb,stroke:#4b5563,color:#1f1f1f
+    classDef app fill:#dcfce7,stroke:#15803d,color:#1f1f1f
+    classDef cloudflare fill:#fde8d0,stroke:#c2570c,color:#1f1f1f
+    classDef check fill:#fef3c7,stroke:#b45309,color:#1f1f1f
+    class Project,Agents neutral
+    class Site,Trust,Optional app
+    class Platform cloudflare
+    class Quality check
+```
 
 ## ⚡ Performance
 
@@ -188,12 +225,75 @@ CI blocks a pull request only for the JavaScript and font checks. Lighthouse CI 
 - `astro dev` and `astro preview` run the same runtime (workerd) on your machine.
 - Safe releases with gradual deployments and instant rollback.
 
+The diagram shows the path of a change from your machine to production. Solid lines show the default workflow, and the dashed line shows the tests that you add when you need them. Read [rules/DEPLOY.md](rules/DEPLOY.md), [rules/QUALITY.md](rules/QUALITY.md), and [rules/TESTING.md](rules/TESTING.md).
+
+```mermaid
+%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%
+flowchart TD
+    accTitle: Starweb developer workflow
+    accDescr: An AI agent or a developer works on the local machine with astro dev and astro preview, which run the same workerd runtime as production. pnpm run check runs the format, type, lint, unused code, and test checks. You can add Storybook and Playwright. GitHub Actions then builds the pull request, checks JavaScript size, audits dependencies, and uploads a preview. A push to main deploys dev. A release tag uploads a stage version without traffic. Prod gets the tested version in gradual steps, and you can roll it back.
+
+    subgraph Local["Your machine"]
+        Agent["AI agent or developer<br/>Rules, skills, CLI, and MCP server"] --> Run["astro dev and astro preview<br/>Same workerd runtime as production<br/>Generated types for bindings and content"]
+        Run --> Check["pnpm run check<br/>Oxfmt, astro check, Oxlint,<br/>Knip, and Vitest"]
+    end
+
+    subgraph Cloud["Cloudflare environments"]
+        direction LR
+        Preview["PR preview<br/>Each pull request"] --> Dev["Dev<br/>Each push to main"]
+        Dev --> Stage["Stage<br/>Release tag,<br/>no traffic"]
+        Stage --> Prod["Prod<br/>10, 50, and 100 %<br/>Instant rollback"]
+    end
+
+    Check --> Build["GitHub Actions on each pull request<br/>pnpm run check, build, and size<br/>pnpm audit"]
+    Build --> Cloud
+    Check -.-> Tests["Storybook and Playwright<br/>Component, end-to-end,<br/>and accessibility tests"]
+
+    classDef neutral fill:#e5e7eb,stroke:#4b5563,color:#1f1f1f
+    classDef app fill:#dcfce7,stroke:#15803d,color:#1f1f1f
+    classDef check fill:#fef3c7,stroke:#b45309,color:#1f1f1f
+    classDef cloudflare fill:#fde8d0,stroke:#c2570c,color:#1f1f1f
+    class Agent neutral
+    class Run app
+    class Check,Build,Tests check
+    class Preview,Dev,Stage,Prod cloudflare
+    style Local fill:transparent,stroke:#8b949e
+    style Cloud fill:transparent,stroke:#8b949e
+```
+
 ## 🎨 UX
 
 - Fast first load: HTML is rendered on the server and served from the CDN.
 - Good SEO: server-rendered HTML and built-in EmDash SEO features.
 - Editors get a full admin panel: visual schema builder, media library, menus, drafts, revisions, scheduled publishing, and preview.
 - Multilingual content with Astro i18n routing.
+
+The diagram shows what each group of people gets. Solid lines show the default rules and features, and the dashed line shows what you add when you need it. Read [rules/UI-UX.md](rules/UI-UX.md), [rules/MATERIAL.md](rules/MATERIAL.md), and [rules/I18N.md](rules/I18N.md).
+
+```mermaid
+%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%
+flowchart TD
+    accTitle: Starweb user experience
+    accDescr: Visitors and app users get a fast first load, pages that search engines can read, an accessible interface, a consistent look in light and dark themes, and forms that work without an island. Editors get a full admin panel. You can add many languages.
+
+    subgraph Public["Public pages and apps"]
+        Fast["Fast first load<br/>HTML rendered on the server<br/>and served from the CDN"]
+        Found["Easy to find<br/>Server-rendered HTML<br/>EmDash SEO features"]
+        Access["Usable by everyone<br/>WCAG 2.2 level AA<br/>Keyboard access and 320 px width"]
+        Fast ~~~ Look["Consistent look<br/>Material Design 3 tokens<br/>Light and dark themes"]
+        Found ~~~ Forms["Simple forms<br/>Native HTML form and Astro Actions<br/>No island only to submit"]
+    end
+
+    Visitors["Visitors and app users"] --> Public
+    Public -.-> Languages["Many languages<br/>Astro i18n routing and Paraglide JS<br/>PolyStella content translation"]
+    Editors["Editors"] --> Admin["Full admin panel<br/>Visual schema builder, media, and menus<br/>Drafts, revisions, and preview<br/>Scheduled publishing and a form builder"]
+
+    classDef neutral fill:#e5e7eb,stroke:#4b5563,color:#1f1f1f
+    classDef app fill:#dcfce7,stroke:#15803d,color:#1f1f1f
+    class Visitors,Editors neutral
+    class Fast,Found,Access,Look,Forms,Languages,Admin app
+    style Public fill:transparent,stroke:#8b949e
+```
 
 ## 🔐 Auth
 
@@ -205,6 +305,35 @@ CI blocks a pull request only for the JavaScript and font checks. Lighthouse CI 
 - Stripe billing and audit logging.
 - Prebuilt themed UI and an admin settings page.
 - No database migrations needed.
+
+The template has no customer login. When a project needs it, setup adds emdash-better-auth, and the diagram shows the result. Solid lines show the login setup, and the dashed line shows the options that you turn on when you need them. Read [rules/AUTH.md](rules/AUTH.md).
+
+```mermaid
+%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%
+flowchart TD
+    accTitle: Starweb login
+    accDescr: Customers sign in through emdash-better-auth with email and password, social login, passwordless login, or passkeys, and they can use 2FA. It sends email through Cloudflare Email Service and stores users and organizations in the EmDash D1 database. Each app route checks the user on the server, and app data is filtered by the active organization. You can add organizations, Stripe billing, and an OIDC provider. Editors and administrators sign in separately with EmDash passkey login.
+
+    Customers["Customers"] --> Plugin["emdash-better-auth<br/>Email and password, social login,<br/>passwordless login, passkeys, and 2FA<br/>Prebuilt pages at /auth"]
+    Staff["Editors and administrators"] --> Passkey["EmDash passkey login<br/>/_emdash/admin/login"]
+    Plugin --> Mail["Cloudflare Email Service<br/>Verification, reset, and invites"]
+    Plugin --> Guard["Server checks on each app route<br/>Pages: requireUser<br/>API routes: 401 or 403<br/>Roles: auth.api.hasPermission"]
+    Plugin --> Users["EmDash database<br/>Users and organizations"]
+    Passkey --> Users
+    Guard --> AppData["App database<br/>tenant_id from the session,<br/>never from the body or URL"]
+    Plugin -.-> Extras["Turn on in plugin settings<br/>Organizations and teams<br/>Stripe billing and audit logging<br/>OIDC provider"]
+
+    classDef neutral fill:#e5e7eb,stroke:#4b5563,color:#1f1f1f
+    classDef app fill:#dcfce7,stroke:#15803d,color:#1f1f1f
+    classDef cloudflare fill:#fde8d0,stroke:#c2570c,color:#1f1f1f
+    classDef check fill:#fef3c7,stroke:#b45309,color:#1f1f1f
+    classDef data fill:#dbeafe,stroke:#1d4ed8,color:#1f1f1f
+    class Customers,Staff neutral
+    class Plugin,Passkey,Extras app
+    class Mail cloudflare
+    class Guard check
+    class Users,AppData data
+```
 
 ## 🛡️ Security
 
@@ -223,6 +352,37 @@ Read the details in [rules/SECURITY.md](rules/SECURITY.md), [rules/DEPS.md](rule
 - Stripe subscriptions through emdash-better-auth.
 - Other Better Auth payment plugins (Polar, Creem, and more) wait for [emdash-better-auth#22](https://github.com/theweekendprojects/emdash-better-auth/issues/22).
 - Premium content and a paywall: members-only and premium entries.
+
+The diagram shows which provider fits your sales, and how a payment reaches content access. Solid lines show the two main paths, and dashed lines show the other options.
+
+```mermaid
+%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%
+flowchart TD
+    accTitle: Starweb payment options
+    accDescr: The choice depends on who you sell to. Without EU consumer sales, use Stripe billing through emdash-better-auth. For EU consumer sales, use Creem as the merchant of record, with its SDK and a webhook route that verifies the signature, stores the event ID, and sends the work to a Queue. Stripe Managed Payments is another merchant of record when you need Stripe features, and x402 is for experiments only. Stripe and Creem set a plan per organization. Billing code sets the premium flag for each member, and each content entry is public, for members, or premium.
+
+    Start["Who do you sell to?"]
+    Start -->|"No EU consumer sales"| Stripe["Stripe billing<br/>Through emdash-better-auth<br/>Not a merchant of record"]
+    Start -->|"EU consumer sales"| Creem["Creem<br/>Merchant of record: VAT, invoices,<br/>refunds, and chargebacks<br/>SDK in a server route"]
+    Start -.->|"EU sales with Stripe features"| Managed["Stripe Managed Payments<br/>Merchant of record, costs more"]
+    Start -.->|"Agents, experiments only"| X402["x402<br/>Test network, no mainnet"]
+    Creem --> Hook["Webhook route<br/>Verify the signature, store the event ID,<br/>and send the work to a Queue"]
+    Stripe --> Plan["Plan per organization<br/>Checked on the server before each create"]
+    Hook --> Plan
+    Plan --> Premium["premium flag per member<br/>Billing code sets and clears it"]
+    Premium --> Access["Access per content entry<br/>Public, members, or premium<br/>Paywall page for other readers"]
+
+    classDef neutral fill:#e5e7eb,stroke:#4b5563,color:#1f1f1f
+    classDef external fill:#ede9fe,stroke:#6d28d9,color:#1f1f1f
+    classDef cloudflare fill:#fde8d0,stroke:#c2570c,color:#1f1f1f
+    classDef data fill:#dbeafe,stroke:#1d4ed8,color:#1f1f1f
+    classDef app fill:#dcfce7,stroke:#15803d,color:#1f1f1f
+    class Start neutral
+    class Stripe,Creem,Managed,X402 external
+    class Hook cloudflare
+    class Plan data
+    class Premium,Access app
+```
 
 Read the details in [rules/PAYMENTS.md](rules/PAYMENTS.md).
 
