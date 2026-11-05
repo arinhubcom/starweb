@@ -612,6 +612,8 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 - PR previews and the dev deploy use `cancel-in-progress: false`. A cancelled `emdash migrate` leaves the D1 migration lock held. A newer pending run replaces an older pending run, which is safe because each run applies all pending migrations of its commit.
 - Stage runs in the `production` GitHub environment, because the tag push applies migrations to the production database before any promotion.
 - There are two Cloudflare tokens, and only jobs from `main` or a release tag can read the production token. Cloudflare tokens cannot be scoped to one Worker, so the separation is by branch and tag, not by resource.
+- Both deploy tokens are environment secrets. GitHub says that secrets in an environment "are only available to workflow jobs that reference the environment", so a job without `environment:` gets no deploy token.
+- The `dev` environment allows `refs/pull/*/merge`, because a `pull_request` run has that `GITHUB_REF`, and a preview would fail without the rule.
 - A private repository needs GitHub Pro or Team, because GitHub Free has environments only for public repositories.
 - No required reviewers: they are out of scope for Starweb. A release tag and the promotion workflow are already manual steps.
 - `wrangler versions secret put` changes the latest uploaded version. A secret change after the stage upload creates a version that the release tag does not point to.
@@ -633,7 +635,17 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 - `astro build` and `astro preview` run the built Worker in workerd. The Astro Cloudflare docs say that this closely mirrors production behavior.
 - The docs do not say that `wrangler dev` fails. The rule is a project choice: one command, `pnpm run preview`, so each check runs the same way.
 
-## Testing
+### Why a secrets script reads stdin
+
+- The password manager stays your choice: the script reads `KEY=VALUE` lines from any source that writes to a pipe.
+- A value never appears in argv, shell history, or a file. The script passes it to `gh` and `wrangler` on their stdin.
+- The script validates all input before it sends anything, so a typo in the last line does not leave a half-finished update.
+
+### Why no Secrets Store for setup tokens
+
+- Cloudflare Secrets Store is in open beta. Its docs say that once a secret is saved, the value is no longer available for viewing.
+- It is compatible only with Workers and AI Gateway, and a Worker reads a value with `await env.X.get()`.
+- The docs document no way for GitHub Actions or a local script to read a value, so it cannot hold `CLOUDFLARE_API_TOKEN` or `SENTRY_AUTH_TOKEN`. Source: https://developers.cloudflare.com/secrets-store/
 
 ### Why ARIA snapshots and not DOM snapshots
 

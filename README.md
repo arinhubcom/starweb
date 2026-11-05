@@ -361,7 +361,7 @@ flowchart TD
 - **Browser protection:** a Content Security Policy and security headers on each response, and `security.txt` for vulnerability reports.
 - **Request protection:** an `Origin` check for mutating requests, rate limits on forms, and Zod validation of input.
 - **`production` environment:** production deploys run in the GitHub environment `production`, only from `main` or a release tag. A private repository needs GitHub Pro or Team for this.
-- **Cloudflare tokens:** the production token is a secret of the `production` environment, and a second token in a repository secret handles PR previews and dev deploys. Each token has only the permissions it needs, for one account and one zone. Forks get no token.
+- **Cloudflare tokens:** the production token is a secret of the `production` environment, and a second token, a secret of the `dev` environment, handles PR previews and dev deploys. Each token has only the permissions it needs, for one account and one zone. Forks get no token.
 
 Read the details in [rules/SECURITY.md](rules/SECURITY.md), [rules/DEPS.md](rules/DEPS.md#supply-chain), and [rules/DEPLOY.md](rules/DEPLOY.md#ci).
 

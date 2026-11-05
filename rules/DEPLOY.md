@@ -95,6 +95,7 @@
 ### Secrets
 
 - Prod: `wrangler versions secret put` then `wrangler versions deploy`. Never `wrangler secret put` in prod.
+- Which token goes where, and `pnpm run set-secrets` (`scripts/set-secrets.ts`, sends via `wrangler versions secret bulk`) → [TOKENS](TOKENS.md).
 - New secret before the version that reads it deploys.
 - Set or change a prod secret before the stage upload, or `wrangler versions upload --secrets-file <file>`, so the tagged version has it. (`versions secret put` changes the latest uploaded version and creates a new one.)
 - Secret change after the stage upload → deploy the version `versions secret put` created (ID from `wrangler versions list --env production`), not the tagged one.
@@ -105,15 +106,16 @@
 
 - `cloudflare/wrangler-action@v4` pinned to a commit SHA; token in secret `CLOUDFLARE_API_TOKEN` as `apiToken`. Not also Workers Builds (double deploy). → [WHY](../WHY.md#why-github-actions-and-not-workers-builds)
 - Token from the **Edit Cloudflare Workers** template; **Account Resources** = the one account, **Zone Resources** = the one zone of the routes. Add D1 Edit (migrations, `emdash migrate`); Queues Edit only with Queues. Nothing else.
-- Two tokens: repository secret (PR previews, dev deploy); secret of GitHub environment `production` (stage, promotion).
-- PR preview: `pull_request` (default types), `wrangler versions upload --env="" --preview-alias pr-${{ github.event.pull_request.number }}`. No `pull_request_target`; forks get no preview.
+- Two tokens, each a secret of a GitHub environment: `dev` (PR previews, dev deploy); `production` (stage, promotion). No deploy token as a repository secret. → [TOKENS](TOKENS.md)
+- PR preview: `pull_request` (default types), `environment: dev`, `wrangler versions upload --env="" --preview-alias pr-${{ github.event.pull_request.number }}`. No `pull_request_target`; forks get no preview.
 - Before the upload: `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""`. Never edit a migration a preview applied → new migration.
 - One sticky PR comment with the preview URL (`marocchino/sticky-pull-request-comment`). Build the alias URL yourself: `deployment-url` is the versioned URL ([wrangler-action#384](https://github.com/cloudflare/wrangler-action/issues/384)).
 - Token job: `contents: read` only. Comment job: `pull-requests: write`. No job has both.
 - `concurrency` per PR, `cancel-in-progress: false`: `group: cf-preview-${{ github.event.pull_request.number }}`.
-- Dev deploy: `push` with `branches: [main]`, checkout `${{ github.sha }}`; `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""`, `wrangler deploy --env=""`. Not `pull_request` `closed`.
+- Dev deploy: `push` with `branches: [main]`, `environment: dev`, checkout `${{ github.sha }}`; `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""`, `wrangler deploy --env=""`. Not `pull_request` `closed`.
 - Dev deploy `concurrency` with `cancel-in-progress: false`.
 - Stage: `push` with `tags: ["<worker>-[0-9]*"]`, `environment: production`; `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env production`, `wrangler versions upload --env production --tag ${{ github.ref_name }} --preview-alias stage`.
+- Environment `dev`: deploy only from branch `main` and `refs/pull/*/merge` (`GITHUB_REF` of a `pull_request` run).
 - Environment `production`: deploy only from tag pattern `<worker>-[0-9]*` and branch `main` (`GITHUB_REF`: `refs/tags/<tag>` for stage, `refs/heads/main` for promotion).
 - Private repository: GitHub Pro or Team (GitHub Free has no environments). → [GITHUB](GITHUB.md#plans)
 - Promotion: `workflow_dispatch`, environment `production`; find the version by tag, `wrangler versions deploy <version-id>@10% <old-version-id>@90% --env production -y`, then Releases steps.

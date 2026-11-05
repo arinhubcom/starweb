@@ -643,6 +643,13 @@ CI, deploys, PR previews. → [DEPLOY](DEPLOY.md), [GITHUB](GITHUB.md), [QUALITY
 - context7: https://context7.com/websites/github_en_actions/llms.txt?tokens=10000
 - github: https://github.com/actions/toolkit
 
+### GitHub CLI
+
+Repository and environment secrets from a script. → [TOKENS](TOKENS.md), [DEPLOY](DEPLOY.md)
+
+- docs: https://cli.github.com/manual/gh_secret_set
+- github: https://github.com/cli/cli
+
 ### Dependabot
 
 Version updates, groups, cooldown, automerge. → [DEPS](DEPS.md), [GITHUB](GITHUB.md)

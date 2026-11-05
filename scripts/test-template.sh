@@ -296,6 +296,19 @@ for import in "@lucide/astro/icons/check" "lucide-react"; do
 done
 echo "ok: MaterialIcon exists, and oxlint fails on Lucide in .astro and .tsx files"
 
+step "Check set-secrets with --dry-run and no real gh or Wrangler call"
+SECRETS_MARKER="MARKER-$$-do-not-print"
+SECRETS_OUT="$(printf 'BETTER_AUTH_SECRET=%s\nSENTRY_AUTH_TOKEN=%s\n' "$SECRETS_MARKER" "$SECRETS_MARKER" | (cd "$APP_DIR" && pnpm run --silent set-secrets production --dry-run 2>&1))" || fail "set-secrets --dry-run failed: $SECRETS_OUT"
+printf '%s\n' "$SECRETS_OUT" | grep -q 'BETTER_AUTH_SECRET' || fail "set-secrets --dry-run does not list BETTER_AUTH_SECRET"
+printf '%s\n' "$SECRETS_OUT" | grep -q 'SENTRY_AUTH_TOKEN' || fail "set-secrets --dry-run does not list SENTRY_AUTH_TOKEN"
+if printf '%s\n' "$SECRETS_OUT" | grep -qF "$SECRETS_MARKER"; then fail "set-secrets --dry-run printed a value"; fi
+if SECRETS_BAD="$(printf 'NOT_A_SECRET=%s\n' "$SECRETS_MARKER" | (cd "$APP_DIR" && pnpm run --silent set-secrets dev --dry-run 2>&1))"; then
+  fail "set-secrets accepted an unknown name"
+fi
+if printf '%s\n' "$SECRETS_BAD" | grep -qF "$SECRETS_MARKER"; then fail "set-secrets printed the value of an unknown name"; fi
+printf '%s\n' "$SECRETS_BAD" | grep -q 'NOT_A_SECRET' || fail "set-secrets does not name the unknown secret"
+echo "ok: set-secrets --dry-run lists names, prints no value, and rejects an unknown name"
+
 step "Run the checks and pnpm audit at the same time"
 # The test runs the parts of pnpm run check, so check the script text.
 grep -qF '"check": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run test"' "$APP_DIR/package.json" || fail "the check script changed: update this step"

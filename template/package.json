@@ -20,6 +20,7 @@
     "lighthouse": "lhci collect && lhci upload && tsx scripts/report-lighthouse.ts",
     "pagespeed": "tsx scripts/check-pagespeed.ts",
     "worker-cpu": "tsx scripts/check-worker-cpu.ts",
+    "set-secrets": "tsx scripts/set-secrets.ts",
     "test": "vitest run --coverage",
     "check": "pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run test",
     "size": "tsx scripts/check-js-size.ts"
