@@ -60,6 +60,6 @@ Prices checked 2026-11-05, in USD, without tax.
 
 ### Price checks
 
-- Check the prices in this file and in [CLOUDFLARE](CLOUDFLARE.md#prices) every 3 months, before each plan decision, and when a provider announces a pricing change.
+- Check the prices in this file every 3 months, before each plan decision, and when GitHub or Google announces a pricing change. → [WHY](../WHY.md#why-prices-get-checked-every-3-months)
 - Update the `Prices checked` date in the same commit, also when no price changed.
 - Next check: 2027-02-05.

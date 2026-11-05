@@ -40,3 +40,10 @@ Worker cost per month, with every request at the full 10 ms and no cache hits. D
 
 - Total = $5 + requests + CPU.
 - Check before a plan decision: [Workers](https://developers.cloudflare.com/workers/platform/pricing/), [Dynamic Workers](https://developers.cloudflare.com/dynamic-workers/pricing/), [D1](https://developers.cloudflare.com/d1/platform/pricing/), [R2](https://developers.cloudflare.com/r2/pricing/), [Workers KV](https://developers.cloudflare.com/kv/platform/pricing/), [Queues](https://developers.cloudflare.com/queues/platform/pricing/), [Images](https://developers.cloudflare.com/images/pricing/).
+
+### Price checks
+
+- Check the prices in this file every 3 months, before each plan decision, and when Cloudflare announces a pricing change. → [WHY](../WHY.md#why-prices-get-checked-every-3-months)
+- Update the `Prices checked` date in the same commit, also when no price changed. Recalculate Worker cost examples when a Worker price changes.
+- Check Workers Logs on 2026-12-01 (new pricing).
+- Next check: 2027-02-04.
