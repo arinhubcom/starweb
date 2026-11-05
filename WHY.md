@@ -1039,6 +1039,14 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - web.dev says: "Only field measurement can accurately capture the complete picture."
 - Lighthouse cannot measure INP, because no real user interacts with the page.
 
+### Why a lab score target of 100
+
+- Starweb sets the target higher than Google's line: PageSpeed Insights says "A score of 90 or above is considered good."
+- The score is a quick check before and after a release. It does not replace field data: Google says that "having good lab data does not necessarily mean real-user experiences will also be good."
+- PageSpeed Insights reports mobile and desktop separately, so the target applies to both.
+- Scores change between runs, so one low run is a reason to run again, not proof of a regression.
+- CI does not check the score: scores change between runs, so a failed check would not always mean a regression.
+
 ### Why two client JavaScript limits
 
 - One island's own chunk was 156 B in a probe, but the page needs about 60 kB brotli, because every island loads the shared React renderer. A per-island limit alone misses that cost, and a per-page limit alone does not say which island grew.

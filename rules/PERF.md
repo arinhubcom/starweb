@@ -7,6 +7,7 @@
 - Targets at P75 of page loads, mobile and desktop separately: LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1.
 - Field: [Web Analytics](STACK.md#web-analytics) dashboard → site → **Core Web Vitals** (CLS from Chromium only); setup → [PRIVACY](PRIVACY.md). CrUX via PageSpeed Insights and the Search Console Core Web Vitals report.
 - Lab: Lighthouse or Chrome DevTools before each release; INP not measurable in lab → Total Blocking Time proxy, INP in the field. Field data decides.
+- Lab score target: performance 100, mobile and desktop. Lighthouse before each release; PageSpeed Insights on the production URL after each release (it cannot reach a stage URL behind Cloudflare Access). Below 100 → run again (scores vary), then fix the cause. → [WHY](../WHY.md#why-a-lab-score-target-of-100)
 
 ## Client JavaScript
 
