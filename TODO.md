@@ -65,6 +65,7 @@ Possible template additions:
 Dependency updates:
 
 - [ ] Move to TypeScript 7 when its 7.1 release is stable. Replace `astro check` then with `tsc` and `@astrojs/ts-content-mapper`, and keep `tsc` out of `node_modules/emdash/src`: `astro check` does not support TypeScript 7. See [WHY.md](WHY.md#why-astro-check-stays-on-typescript-6). The template stays on 6.0.3 until then.
+- [ ] Fix the unmet peer dependency that the user login step (step 12) adds: `emdash-better-auth` 0.16.0 installs `better-auth-audit-logs` 0.4.0, which wants TypeScript `^5`, and the template has 6.0.3. [rules/DEPS.md](rules/DEPS.md) says to fix a peer dependency conflict and not hide it. `pnpm run check` and `pnpm run build` pass with it.
 
 ## Follow the issues opened in other repositories
 
