@@ -43,6 +43,10 @@ Steps that no test has run:
 - [ ] Measure the CPU time of `@emdash-cms/plugin-forms` and `@emdash-cms/plugin-field-kit` as [rules/CMS.md](rules/CMS.md#emdash-plugin-cpu-budget) requires: `/`, and a page with a form. The Chrome DevTools Protocol `Profiler` hung through the `wrangler dev` inspector proxy, so use the DevTools UI or `$workers.cpuTimeMs` after a real deploy.
 - [ ] Wait for a real weekly run of the Forms `cleanup` task, and confirm that it deletes old submissions and their files. No test has run the cron task.
 
+Rules to add:
+
+- [ ] Add a rule that enforces two checks in this repository: clone the template into a clean branch, and test a demo deploy on Cloudflare from that branch. Decide when the rule applies and how a script or CI enforces it: `scripts/test-template.sh` covers only the local checks, build, and preview.
+
 Possible template additions:
 
 - [ ] Decide whether the template ships the workflows that step 33 lists (Dependabot automerge, PR preview, dev deploy, stage upload, promotion, and D1 export), in place of a manual step.
