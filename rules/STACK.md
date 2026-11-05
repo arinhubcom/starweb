@@ -594,6 +594,13 @@ Per-island client JavaScript limit (`.size-limit.mjs`, `@size-limit/file`). → 
 - github: https://github.com/ai/size-limit
 - docs: https://raw.githubusercontent.com/ai/size-limit/main/README.md
 
+### Lighthouse CI
+
+Lab performance score in each pull request (`@lhci/cli`, `lighthouserc.json`, `.github/workflows/lighthouse.yml`). → [PERF](PERF.md)
+
+- docs: https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/configuration.md
+- github: https://github.com/GoogleChrome/lighthouse-ci
+
 ### es-module-lexer
 
 Static import discovery in built chunks for the per-page limit (`es-module-lexer/js`). → [PERF](PERF.md)
@@ -630,7 +637,7 @@ Trace export from Workers. → [OBSERVABILITY](OBSERVABILITY.md)
 
 ### GitHub Actions
 
-CI, deploys, PR previews. → [DEPLOY](DEPLOY.md), [QUALITY](QUALITY.md), [TESTING](TESTING.md)
+CI, deploys, PR previews. → [DEPLOY](DEPLOY.md), [GITHUB](GITHUB.md), [QUALITY](QUALITY.md), [TESTING](TESTING.md)
 
 - llms: https://docs.github.com/llms.txt
 - context7: https://context7.com/websites/github_en_actions/llms.txt?tokens=10000
@@ -638,7 +645,7 @@ CI, deploys, PR previews. → [DEPLOY](DEPLOY.md), [QUALITY](QUALITY.md), [TESTI
 
 ### Dependabot
 
-Version updates, groups, cooldown, automerge. → [DEPS](DEPS.md)
+Version updates, groups, cooldown, automerge. → [DEPS](DEPS.md), [GITHUB](GITHUB.md)
 
 - llms: https://docs.github.com/llms.txt
 - context7: https://context7.com/github/docs/llms.txt?tokens=10000 · https://context7.com/dependabot/dependabot-core/llms.txt?tokens=10000

@@ -133,7 +133,7 @@ The diagram shows how a request gets through the page and cache layers, and whic
 %%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%
 flowchart TD
     accTitle: Starweb performance layers and checks
-    accDescr: A browser request first reaches static assets or Workers Cache, and neither runs the Worker. Other requests run the Worker, which has a target of 10 ms of CPU time. The Worker reads the Cache API, Workers KV, and D1. It returns Astro pages with zero JavaScript by default and islands only for interactive parts. Three groups of checks guard the targets. Pull requests check JavaScript size and fonts. Each release has a Lighthouse score target of 100, checked by hand. A daily workflow checks the PageSpeed Insights score and the Worker CPU time in production. Core Web Vitals field data stays something you read.
+    accDescr: A browser request first reaches static assets or Workers Cache, and neither runs the Worker. Other requests run the Worker, which has a target of 10 ms of CPU time. The Worker reads the Cache API, Workers KV, and D1. It returns Astro pages with zero JavaScript by default and islands only for interactive parts. Three groups of checks guard the targets. Pull requests check JavaScript size and fonts, and a separate Lighthouse CI workflow gives a warning only. Each release has a Lighthouse score target of 100, checked with pnpm run lighthouse. A daily workflow checks the PageSpeed Insights score and the Worker CPU time in production. Core Web Vitals field data stays something you read.
 
     Browser["Browser"] -->|"Prerendered pages<br/>and /_astro files"| Static
     Browser --> Cache1
@@ -155,8 +155,8 @@ flowchart TD
     end
 
     subgraph Checks["Checks that guard the targets"]
-        PR["Each pull request, in CI<br/>pnpm run size: 10 kB brotli per island,<br/>limit per page in page-js-limits.json<br/>Fonts in the build"]
-        PR --> Release["Before each release, by hand<br/>Lighthouse performance score 100,<br/>mobile and desktop"]
+        PR["Each pull request, in CI<br/>pnpm run size: 10 kB brotli per island,<br/>limit per page in page-js-limits.json<br/>Fonts in the build<br/>Lighthouse CI: warning only"]
+        PR --> Release["Before each release<br/>pnpm run lighthouse:<br/>mobile score 100"]
         Release --> Prod["In production, daily workflow<br/>pnpm run pagespeed: score 100<br/>pnpm run worker-cpu: P95 CPU ≤ 10 ms<br/>Field data at P75, read by hand:<br/>LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1"]
     end
 
@@ -178,7 +178,7 @@ flowchart TD
     style Checks fill:transparent,stroke:#8b949e
 ```
 
-CI blocks a pull request only for the JavaScript and font checks. A daily workflow runs `pnpm run pagespeed` and `pnpm run worker-cpu` against production and fails when a target is missed. It does not block a build. Lighthouse before a release stays by hand, and you read the field data. Field data decides.
+CI blocks a pull request only for the JavaScript and font checks. Lighthouse CI runs in its own workflow and only warns. A daily workflow runs `pnpm run pagespeed` and `pnpm run worker-cpu` against production and fails when a target is missed. It does not block a build. You run `pnpm run lighthouse` before a release, and you read the field data. Field data decides.
 
 ## 🛠️ DX
 

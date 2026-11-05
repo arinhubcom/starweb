@@ -70,6 +70,11 @@ The Workers Free plan allows 10 ms of CPU time per request. Waiting for I/O (fet
 
 EmDash plugins keep the same target. EmDash says that a native plugin runs in the same process as the site and that a bug in it can "burn its CPU budget", so a slow hook slows every page it runs on. The sandbox runner stops a plugin only at 50 ms of CPU per invocation by default, which is five times the target, so that limit does not protect the budget.
 
+### Why prices get checked every 3 months
+
+- Prices and plan limits change, and a stale table leads to a wrong plan decision. For example, [CLOUDFLARE.md](rules/CLOUDFLARE.md) lists new Workers Logs pricing from 2026-12-01.
+- Three months is a project choice: the check is short, and a plan decision or a provider announcement triggers one earlier.
+
 ### Limits
 
 - D1 has a size limit per database (10 GB). Large apps must split data across many databases.
@@ -1047,7 +1052,18 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - PageSpeed Insights reports mobile and desktop separately, so the target applies to both.
 - Scores change between runs, so one low run is a reason to run again, not proof of a regression.
 - Pull request CI does not check the score: scores change between runs, so a failed check would not always mean a regression. A daily production job does (`pnpm run pagespeed`) and takes the median of 3 runs per strategy. Lighthouse says: "The median Lighthouse score of 5 runs is twice as stable as 1 run." Three runs limit quota and time.
-- No Lighthouse CI dependency: the PageSpeed Insights API needs only `fetch`, and `lighthouse` adds about 19 MB.
+- Lighthouse CI is a dev dependency (`@lhci/cli`, about 120 MB in `node_modules`) for pull requests only, as a warning. See the next section.
+
+### Why Lighthouse CI and PageSpeed Insights both run
+
+- Lighthouse CI sees a regression before merge, against the build of the pull request.
+- PageSpeed Insights sees production, with the real network and Workers Cache. It needs no Chrome and needs only `fetch`.
+- Lighthouse CI is a warning and not a required check, because the Lighthouse docs call free CI environments volatile and scores vary between runs.
+- Reports stay private: the upload target is the filesystem, not temporary public storage, and there is no upload wait.
+- Tested on 2026-11-05 with `@lhci/cli` 0.15.1, 3 runs on `/`: all categories took 46 s, `performance` only took 33 s. Performance only saves 13 s of 46 s.
+- 3 runs and not 1: the workflow does not delay the pull request (own workflow, not required), and a median is more stable. One run took 11 s.
+- No `disableFullPageScreenshot`: it saved about 1 s (32 s against 33 s).
+- Mobile only, because PageSpeed Insights covers desktop daily.
 
 ### Why the Worker CPU check uses the whole Worker
 

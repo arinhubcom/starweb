@@ -6,8 +6,15 @@
 
 - Targets at P75 of page loads, mobile and desktop separately: LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1.
 - Field: [Web Analytics](STACK.md#web-analytics) dashboard → site → **Core Web Vitals** (CLS from Chromium only); setup → [PRIVACY](PRIVACY.md). CrUX via PageSpeed Insights and the Search Console Core Web Vitals report.
-- Lab: Lighthouse or Chrome DevTools before each release; INP not measurable in lab → Total Blocking Time proxy, INP in the field. Field data decides.
-- Lab score target: performance 100, mobile and desktop. Lighthouse before each release; PageSpeed Insights on the production URL: `pnpm run pagespeed [url...]` (median of 3 runs per strategy, needs `PAGESPEED_API_KEY`), daily in `.github/workflows/perf.yml` and after each release (it cannot reach a stage URL behind Cloudflare Access). Below 100 → run again (scores vary), then fix the cause. → [WHY](../WHY.md#why-a-lab-score-target-of-100)
+- Lab: `pnpm run lighthouse` before each release (or Chrome DevTools); INP not measurable in lab → Total Blocking Time proxy, INP in the field. Field data decides.
+- Lab score target: performance 100, mobile and desktop. PageSpeed Insights on the production URL: `pnpm run pagespeed [url...]` (median of 3 runs per strategy, needs `PAGESPEED_API_KEY`), daily in `.github/workflows/perf.yml` and after each release (it cannot reach a stage URL behind Cloudflare Access). Below 100 → run again (scores vary), then fix the cause. → [WHY](../WHY.md#why-a-lab-score-target-of-100)
+
+### [Lighthouse CI](STACK.md#lighthouse-ci)
+
+- `pnpm run lighthouse` (after `pnpm run build`): `lighthouserc.json`, mobile, `performance` only, median of 3 runs on `/`; a project adds its key pages to `collect.url`. Starts `astro preview --port 4322` itself; stop any other server on that port first. Needs Chrome (preinstalled on GitHub-hosted runners; locally `CHROME_PATH`). Not in `check`.
+- Reports stay private: `upload.target` is `filesystem` (`.lighthouseci/out`, in `.gitignore`); no temporary public storage.
+- `.github/workflows/lighthouse.yml` in each pull request, its own workflow: a score below 100 is a warning annotation and a step summary, never a failed job. Never a required check. Outside Actions, `scripts/report-lighthouse.ts` exits 1.
+- PageSpeed Insights stays for production: real network and Workers Cache, free, daily and after each release; it covers desktop. → [WHY](../WHY.md#why-lighthouse-ci-and-pagespeed-insights-both-run)
 
 ## Client JavaScript
 

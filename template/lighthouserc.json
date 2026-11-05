@@ -1,0 +1,18 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["http://localhost:4322/"],
+      "numberOfRuns": 3,
+      "startServerCommand": "node_modules/.bin/astro preview --port 4322 --ignore-lock",
+      "startServerReadyPattern": "localhost",
+      "settings": {
+        "onlyCategories": ["performance"],
+        "chromeFlags": "--headless=new --no-sandbox"
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": ".lighthouseci/out"
+    }
+  }
+}

@@ -97,4 +97,5 @@
   3. API: regenerate `openapi.json` + `git diff --exit-code`, `redocly lint`, `oasdiff breaking`. → [API](API.md)
   4. Dependencies: `pnpm audit --prod --audit-level high`, `pnpm audit signatures`. → [DEPS](DEPS.md)
   5. e2e, then screenshot tests. → [TESTING](TESTING.md#ci)
+- Lighthouse runs in its own workflow, `.github/workflows/lighthouse.yml`, next to the PR workflow; warning only. → [PERF](PERF.md#lighthouse-ci)
 - `pnpm run typecheck` before each release. → [DEPLOY](DEPLOY.md)

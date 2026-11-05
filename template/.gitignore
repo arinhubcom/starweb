@@ -17,6 +17,7 @@ data.db-*
 # Starweb
 test-results/
 coverage/
+.lighthouseci/
 backups/
 public/_headers
 public/.well-known/security.txt

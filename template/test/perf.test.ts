@@ -9,6 +9,7 @@ import {
   findCpuProblems,
   median,
   parseOutcomes,
+  parseLighthouseManifest,
   parsePageSpeed,
   parseSlowestUrls,
   parseTotals,
@@ -108,6 +109,76 @@ describe("parsePageSpeed", () => {
   );
   it("throws on a score outside 0 to 1", () => {
     expect(() => parsePageSpeed(pageSpeed(2))).toThrow(/score/);
+  });
+});
+
+const run = (overrides: Record<string, unknown> = {}) => ({
+  url: "http://localhost:4322/",
+  isRepresentativeRun: true,
+  htmlPath: "/tmp/a.html",
+  jsonPath: "/tmp/a.json",
+  summary: { performance: 0.97 },
+  ...overrides,
+});
+
+describe("parseLighthouseManifest", () => {
+  it("returns the score from 0 to 100 of each representative run", () => {
+    const manifest = [
+      run({ isRepresentativeRun: false, summary: { performance: 0.5 } }),
+      run(),
+      run({ url: "http://localhost:4322/posts", summary: { performance: 1 } }),
+    ];
+    expect(parseLighthouseManifest(manifest)).toEqual([
+      { url: "http://localhost:4322/", score: 97 },
+      { url: "http://localhost:4322/posts", score: 100 },
+    ]);
+  });
+  it("does not change its input", () => {
+    const manifest = [run()];
+    parseLighthouseManifest(manifest);
+    expect(manifest).toEqual([run()]);
+  });
+  it.each([null, "x", 5, {}, { 0: run() }])(
+    "throws when the manifest is not an array: %j",
+    (input) => {
+      expect(() => parseLighthouseManifest(input)).toThrow(/Lighthouse/);
+    },
+  );
+  it("throws on an empty manifest", () => {
+    expect(() => parseLighthouseManifest([])).toThrow(/no runs/);
+  });
+  it("throws when no run is representative", () => {
+    expect(() =>
+      parseLighthouseManifest([run({ isRepresentativeRun: false })]),
+    ).toThrow(/no runs/);
+  });
+  it.each([null, "x", 5, []])("throws on a run that is %j", (item) => {
+    expect(() => parseLighthouseManifest([item])).toThrow(/Lighthouse/);
+  });
+  it.each([null, "x", 5, {}, { performance: null }, { performance: "1" }])(
+    "throws on the summary %j",
+    (summary) => {
+      expect(() => parseLighthouseManifest([run({ summary })])).toThrow(
+        /score/,
+      );
+    },
+  );
+  it("throws when the summary is missing", () => {
+    const { summary: _summary, ...rest } = run();
+    expect(() => parseLighthouseManifest([rest])).toThrow(/score/);
+  });
+  it.each([-0.1, 1.01, 2, Number.NaN, Number.POSITIVE_INFINITY])(
+    "throws on a score of %j outside 0 to 1",
+    (performance) => {
+      expect(() =>
+        parseLighthouseManifest([run({ summary: { performance } })]),
+      ).toThrow(/score/);
+    },
+  );
+  it("throws when the URL is missing", () => {
+    expect(() => parseLighthouseManifest([run({ url: undefined })])).toThrow(
+      /url/,
+    );
   });
 });
 

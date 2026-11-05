@@ -68,6 +68,41 @@ export const parsePageSpeed = (json: unknown): PageSpeedResult => {
   };
 };
 
+// Lighthouse CI
+
+export interface LighthouseRun {
+  url: string;
+  score: number;
+}
+
+const toLighthouseRun = (item: unknown): LighthouseRun | undefined => {
+  if (!isRecord(item)) {
+    throw new Error("Lighthouse manifest has a run that is not an object");
+  }
+  if (item.isRepresentativeRun !== true) return undefined;
+  if (typeof item.url !== "string") {
+    throw new Error("Lighthouse manifest has a run with no url");
+  }
+  const score = isRecord(item.summary) ? item.summary.performance : undefined;
+  if (!isNumber(score) || score < 0 || score > 1) {
+    throw new Error(`Lighthouse manifest has no valid score for a run`);
+  }
+  return { url: item.url, score: Math.round(score * 100) };
+};
+
+// The manifest that `lhci upload` writes to the filesystem target: one entry
+// per run, one of them per URL marked as the representative (median) run.
+export const parseLighthouseManifest = (json: unknown): LighthouseRun[] => {
+  if (!Array.isArray(json)) {
+    throw new Error("Lighthouse manifest is not an array");
+  }
+  const runs = json.flatMap((item) => toLighthouseRun(item) ?? []);
+  if (runs.length === 0) {
+    throw new Error("Lighthouse manifest has no runs marked as representative");
+  }
+  return runs;
+};
+
 // Workers Observability queries
 
 export interface TimeWindow {

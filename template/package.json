@@ -17,6 +17,7 @@
     "format:check": "oxfmt --check",
     "knip": "knip",
     "fonts": "tsx scripts/check-fonts.ts",
+    "lighthouse": "lhci collect && lhci upload && tsx scripts/report-lighthouse.ts",
     "pagespeed": "tsx scripts/check-pagespeed.ts",
     "worker-cpu": "tsx scripts/check-worker-cpu.ts",
     "test": "vitest run --coverage",
@@ -42,6 +43,7 @@
     "zod-compiler": "2.0.7"
   },
   "devDependencies": {
+    "@lhci/cli": "0.15.1",
     "@astrojs/check": "0.9.12",
     "@astrojs/compiler-rs": "0.5.2",
     "@cloudflare/vitest-plugin": "1.4.11",

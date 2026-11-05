@@ -318,6 +318,26 @@ step "Run pnpm run build"
 step "Run pnpm run size"
 (cd "$APP_DIR" && pnpm run size)
 
+step "Run pnpm run lighthouse"
+LH_WORKFLOW="$APP_DIR/.github/workflows/lighthouse.yml"
+grep -q 'run: pnpm run lighthouse' "$LH_WORKFLOW" || fail "lighthouse.yml does not run pnpm run lighthouse"
+grep -q 'cancel-in-progress: true' "$LH_WORKFLOW" || fail "lighthouse.yml does not cancel older runs"
+grep -q '^    paths:' "$LH_WORKFLOW" || fail "lighthouse.yml has no paths filter"
+grep -q '"numberOfRuns": 3' "$APP_DIR/lighthouserc.json" || fail "lighthouserc.json does not take 3 runs"
+# The lhci server uses port 4322. The preview of this script uses 4501 or higher,
+# and it starts later.
+if [ -z "${CHROME_PATH:-}" ] && ! command -v google-chrome >/dev/null && ! command -v chromium >/dev/null && ! command -v chrome >/dev/null; then
+  echo "skip: no Chrome found (set CHROME_PATH to run Lighthouse)"
+else
+  # In Actions mode, a score below 100 is a warning and not a failure.
+  (cd "$APP_DIR" && GITHUB_ACTIONS=true pnpm run lighthouse) || fail "pnpm run lighthouse failed"
+  [ -f "$APP_DIR/.lighthouseci/out/manifest.json" ] || fail "lighthouse wrote no manifest"
+  if curl -s -o /dev/null --max-time 2 "http://localhost:4322/"; then
+    fail "port 4322 still listens after pnpm run lighthouse"
+  fi
+  echo "ok: pnpm run lighthouse ran and left port 4322 free"
+fi
+
 step "Check the button in the built CSS"
 grep -lqE 'opacity:(8%|\.08)' "$APP_DIR"/dist/client/_astro/*.css || fail "the built CSS has no hover state layer"
 echo "ok: the built CSS has the state layer"
