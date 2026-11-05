@@ -467,7 +467,7 @@ flowchart TD
 
 Apps share code only from `src/lib/`, `src/layouts/`, and `src/components/ui/`. An app does not import from another app or read its database: it calls the other app's API route or sends a Queue message.
 
-Each D1 database counts toward the account limit. The Free plan has 10 databases per account, and EmDash uses 1, so you can run up to 9 apps. Move to the Paid plan before you launch to paying customers.
+Each D1 database counts toward the account limit of your plan, and EmDash uses 1. Move to the Paid plan before you launch to paying customers.
 
 #### Advantages
 
