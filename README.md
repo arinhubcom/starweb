@@ -1,6 +1,6 @@
 # ✨ Starweb
 
-**[Star it](https://github.com/arinhubcom/starweb). [Fork it](https://github.com/arinhubcom/starweb/fork). Change it.**
+**[Star it](https://github.com/arinhubcom/starweb). [Fork it](https://github.com/arinhubcom/starweb/fork). [Change it](#-change-starweb).**
 
 Starweb is a template for AI agents. Use it to build websites and web apps.
 It is built on [Astro](https://astro.build) and
@@ -23,6 +23,14 @@ The steps are in [rules/SETUP.md](rules/SETUP.md). The [template/](template/) fo
 When Starweb has new rules or a better template, ask your AI agent in the project to update Starweb. The `starweb-update` skill finds your Starweb clone, pulls it, and follows the newest steps.
 
 The steps are in [rules/UPDATE.md](rules/UPDATE.md). The script [scripts/update.mjs](scripts/update.mjs) merges the new rules and template files with your changes, and lists the rules that changed.
+
+## 🔧 Change Starweb
+
+To change your fork, give your AI agent one sentence that says what must be true when it finishes. For example, use this prompt with the [`/goal` command in Claude Code](https://code.claude.com/docs/en/goal):
+
+```text
+/goal Use Svelte instead of React for islands, update rules/ and template/, and make the Template CI workflow pass.
+```
 
 ## 🏗️ Architecture
 
