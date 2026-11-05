@@ -49,6 +49,40 @@ flowchart TD
     Worker -.->|"Fallback"| Node["Node.js<br/>Astro and EmDash<br/>also run here"]
 ```
 
+### Platform services
+
+The diagram shows the services that a deployed Starweb project uses on Cloudflare, on GitHub, and outside both. Solid lines lead to services that every project uses. Dashed lines lead to services that you add when you need them. The steps are in [rules/DEPLOY.md](rules/DEPLOY.md).
+
+```mermaid
+%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%
+flowchart TD
+    accTitle: Starweb platform services
+    accDescr: You and your AI agent push commits, pull requests, and release tags to a GitHub repository. Dependabot opens pull requests with dependency updates. The repository starts GitHub Actions, which uses Wrangler to apply database migrations and deploy to Cloudflare Workers. Visitors, app users, and editors reach the Cloudflare network, which returns cache hits and sends other requests to the Worker. The Worker always uses D1, R2, KV, Images, the Rate Limiting binding, Cron Triggers, and Workers Logs. You can add more Cloudflare services for background work, AI, email, and analytics. You can also add Sentry for errors, and Stripe or Creem for payments.
+
+    Team["You and your AI agent"] -->|"Commits, pull requests,<br/>and release tags"| Repo
+    People["Visitors, app users,<br/>and editors"] --> Network
+
+    subgraph GitHub["GitHub"]
+        Dependabot["Dependabot<br/>Weekly dependency updates"] -->|"Pull requests"| Repo["Repository<br/>Environments and secrets"]
+        Repo -->|"Starts"| Actions["GitHub Actions<br/>Checks, PR previews,<br/>and releases"]
+    end
+
+    subgraph Cloudflare["Cloudflare"]
+        Network["Cloudflare network<br/>Custom domain and WAF<br/>Workers Cache returns cache hits<br/>Access protects stage and preview URLs"]
+        Network -->|"Cache miss or<br/>dynamic request"| Worker["Workers<br/>Astro, EmDash, and your apps<br/>Targeted Placement"]
+        Worker --> Storage["Storage<br/>D1: content and app data<br/>R2: media<br/>KV: sessions"]
+        Worker --> Platform["Platform<br/>Images: image transformations<br/>Rate Limiting binding: forms<br/>Cron Triggers: schedules<br/>Workers Logs: logs"]
+        Storage ~~~ Background
+        Platform ~~~ Extras
+        Worker -.-> Background["Background work and state<br/>Queues and Workflows<br/>Durable Objects: real time<br/>Worker Loader: sandboxed plugins"]
+        Worker -.-> Extras["More services<br/>Workers AI: translation and chat<br/>Email Service: login and app email<br/>Turnstile: bot protection<br/>Web Analytics: cookieless analytics<br/>Analytics Engine: usage events<br/>Flagship: feature flags"]
+    end
+
+    Actions -->|"Wrangler: migrations,<br/>versions, and deployments"| Worker
+    Worker -.->|"Errors and uptime"| Sentry["Sentry"]
+    Worker <-.->|"Billing and webhooks"| Payments["Stripe or Creem"]
+```
+
 ## 🚀 Features
 
 - Rules and instructions in `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and `rules/`.
