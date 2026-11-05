@@ -114,7 +114,8 @@
 - Dev deploy: `push` with `branches: [main]`, checkout `${{ github.sha }}`; `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""`, `wrangler deploy --env=""`. Not `pull_request` `closed`.
 - Dev deploy `concurrency` with `cancel-in-progress: false`.
 - Stage: `push` with `tags: ["<worker>-[0-9]*"]`, `environment: production`; `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env production`, `wrangler versions upload --env production --tag ${{ github.ref_name }} --preview-alias stage`.
-- Environment `production`: deploy only from tag pattern `<worker>-[0-9]*` and branch `main` (`GITHUB_REF`: `refs/tags/<tag>` for stage, `refs/heads/main` for promotion), required reviewers.
+- Environment `production`: deploy only from tag pattern `<worker>-[0-9]*` and branch `main` (`GITHUB_REF`: `refs/tags/<tag>` for stage, `refs/heads/main` for promotion).
+- Private repository: GitHub Pro or Team (GitHub Free has no environments). → [GITHUB](GITHUB.md#plans)
 - Promotion: `workflow_dispatch`, environment `production`; find the version by tag, `wrangler versions deploy <version-id>@10% <old-version-id>@90% --env production -y`, then Releases steps.
 
 ### Previews

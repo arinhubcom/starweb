@@ -1,7 +1,7 @@
 name: Performance
 
 # Repository-level variables and secrets, not the production environment:
-# that environment has required reviewers, which would block a schedule.
+# these checks do not deploy.
 # A project stays silent until it sets the variable PRODUCTION_WORKER.
 on:
   schedule:

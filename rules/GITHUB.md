@@ -25,15 +25,14 @@ Rules for GitHub Actions, plans, and cost. CI steps → [DEPLOY](DEPLOY.md#ci). 
 - Public repository: GitHub disables a scheduled workflow after 60 days without repository activity. After a pause, check that it is still enabled in **Actions**.
 - A forked public repository starts with scheduled workflows disabled.
 - A scheduled run can start late, and GitHub can drop it under high load. No job may depend on an exact time.
-- Use repository-level variables and secrets, not `environment: production`. Required reviewers would block the schedule.
+- Use repository-level variables and secrets for a scheduled check, not `environment: production`. It does not deploy.
 
 ## Plans
 
 - Check the plan before you set up environments. → [SETUP](SETUP.md)
 - Private repository on GitHub Free: no environments, no environment secrets, no protected branches, no repository rules.
-- Private repository on GitHub Pro or Team: environments and deployment branches and tags work. Required reviewers do not.
-- Required reviewers on a private repository: GitHub Enterprise Cloud only. [DEPLOY](DEPLOY.md#ci) expects them on the `production` environment.
-- Public repository: all of the above work on every plan.
+- Private repository: GitHub Pro or Team. Environments and deployment branches and tags work there, as [DEPLOY](DEPLOY.md#ci) needs.
+- Public repository: these work on every plan.
 
 ## Cost
 
@@ -49,7 +48,6 @@ Prices checked 2026-11-05, in USD, without tax.
 | Actions cache | Not stated | 10 GB per repository | 10 GB per repository | 10 GB per repository | $0.07 per GB-month, only when you raise the limit |
 | Dependabot version and security updates | Free | Free | Free | Free | None |
 | Environments | Yes | No | Yes | Yes | None |
-| Required reviewers on an environment | Yes | No | No | No | Enterprise only |
 | Repository rules | Yes | No | Not stated | Not stated | None |
 | Secret scanning and CodeQL | Free | No | Not stated | Paid add-on | Price not checked |
 | Lighthouse CI | Free | Free | Free | Free | Uses Actions minutes |

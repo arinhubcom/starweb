@@ -602,7 +602,7 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 
 ### Why GitHub Actions and not Workers Builds
 
-- GitHub Actions runs the full flow in one place: PR preview, dev deploy on each push to `main`, stage on a release tag, and a prod promotion that a GitHub environment can protect with required reviewers.
+- GitHub Actions runs the full flow in one place: PR preview, dev deploy on each push to `main`, stage on a release tag, and a prod promotion that a GitHub environment limits to `main` and the release tags.
 - Each step is a workflow file in the repository, so you can review and change it in a PR.
 - With both connected, each push deploys twice.
 
@@ -610,8 +610,10 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 
 - The dev deploy runs on `push` to `main`, not on a `pull_request` `closed` event. GitHub passes no secrets to runs that a fork triggers, and a direct push to `main` would not run the old trigger.
 - PR previews and the dev deploy use `cancel-in-progress: false`. A cancelled `emdash migrate` leaves the D1 migration lock held. A newer pending run replaces an older pending run, which is safe because each run applies all pending migrations of its commit.
-- Stage runs in the `production` GitHub environment, because the tag push applies migrations to the production database before any promotion approval.
-- There are two Cloudflare tokens, and only approved jobs can read the production token. Cloudflare tokens cannot be scoped to one Worker, so the separation is by approval, not by resource.
+- Stage runs in the `production` GitHub environment, because the tag push applies migrations to the production database before any promotion.
+- There are two Cloudflare tokens, and only jobs from `main` or a release tag can read the production token. Cloudflare tokens cannot be scoped to one Worker, so the separation is by branch and tag, not by resource.
+- A private repository needs GitHub Pro or Team, because GitHub Free has environments only for public repositories.
+- No required reviewers: they are out of scope for Starweb. A release tag and the promotion workflow are already manual steps.
 - `wrangler versions secret put` changes the latest uploaded version. A secret change after the stage upload creates a version that the release tag does not point to.
 
 ### Why Wrangler and not cf
