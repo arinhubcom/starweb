@@ -98,6 +98,44 @@ flowchart TD
 - Zod schemas are compiled at build time.
 - Performance budget: less than 10 ms of CPU time per request.
 
+The diagram shows how a request gets through the page and cache layers, and which checks guard the targets. Read the details in [rules/PERF.md](rules/PERF.md).
+
+```mermaid
+%%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%
+flowchart TD
+    accTitle: Starweb performance layers and checks
+    accDescr: A browser request first reaches static assets or Workers Cache, and neither runs the Worker. Other requests run the Worker, which has a target of 10 ms of CPU time. The Worker reads the Cache API, Workers KV, and D1. It returns Astro pages with zero JavaScript by default and islands only for interactive parts. Three groups of checks guard the targets. Pull requests check JavaScript size and fonts. Each release has a Lighthouse score target of 100. Production uses PageSpeed Insights, Core Web Vitals field data, and CPU time in Workers Logs.
+
+    Browser["Browser"] -->|"Prerendered pages<br/>and /_astro files"| Static
+    Browser --> Cache1
+
+    subgraph Edge["Cloudflare"]
+        Static["Static assets<br/>Do not run the Worker<br/>Immutable browser cache for /_astro"]
+        Cache1["Cache 1: Workers Cache<br/>Full responses, also SSR pages<br/>A cache hit does not run the Worker"]
+        Cache1 -->|"Cache miss or<br/>per-user page"| Worker["Worker<br/>Target: 10 ms of CPU per request<br/>Waiting for I/O does not count<br/>Plugins share the budget"]
+        Worker --> Cache2["Cache 2: Cache API<br/>Slow upstream data<br/>One data center"]
+        Worker --> Cache3["Cache 3: Workers KV<br/>Small, rarely changing data<br/>Global"]
+        Worker --> D1["D1<br/>Targeted Placement<br/>keeps the Worker near it"]
+    end
+
+    Worker -->|"HTML"| Page
+
+    subgraph Page["Astro page in the browser"]
+        Html["Static HTML and CSS<br/>Zero JavaScript by default"]
+        Html ~~~ Islands["Islands only for interactive parts<br/>client:visible, client:idle, or client:media<br/>before client:load"]
+    end
+
+    subgraph Checks["Checks that guard the targets"]
+        PR["Each pull request, in CI<br/>pnpm run size: 10 kB brotli per island,<br/>limit per page in page-js-limits.json<br/>Fonts in the build"]
+        PR --> Release["Before each release, by hand<br/>Lighthouse performance score 100,<br/>mobile and desktop"]
+        Release --> Prod["In production<br/>PageSpeed Insights score 100<br/>Field data at P75: LCP ≤ 2.5 s,<br/>INP ≤ 200 ms, CLS ≤ 0.1<br/>Workers Logs: $workers.cpuTimeMs"]
+    end
+
+    Page ~~~ Checks
+```
+
+CI blocks a pull request only for the JavaScript and font checks. The other checks do not fail a build, so you run them and read the results. Field data decides.
+
 ## 🛠️ DX
 
 - Built for AI agents: rules in `AGENTS.md` and `rules/`, EmDash agent skills, CLI, and MCP server.
