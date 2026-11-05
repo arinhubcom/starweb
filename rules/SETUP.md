@@ -1,116 +1,117 @@
 # SETUP
 
-Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb project; steps 1-3 create it from the [template](https://github.com/arinhubcom/starweb/tree/main/template) and [setup.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/setup.mjs), the rest is manual.
+Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb project; step 1 chooses the optional parts, steps 2-4 create the project from the [template](https://github.com/arinhubcom/starweb/tree/main/template) and [setup.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/setup.mjs), the rest is manual.
 
-## Optional parts
+## Choose
 
-Ask first.
+### Optional parts
 
-- Before step 1, ask the user which optional parts to add. Show the whole list in one question. → [WHY](../WHY.md#why-setup-asks-about-optional-parts-first)
-- Nothing in the list is on by default. Add only what the user picks, and skip the steps of the other parts. A step that starts with a condition (`X →`) follows this answer.
-- List:
-  - Sandboxed plugins (Workers paid plan): step 2.
-  - No scheduled publishing: step 6.
-  - Queues: step 7.
-  - Many languages: step 8.
-  - User login, emdash-better-auth: step 11.
-  - Apps with their own D1 database: steps 12 and 13. A multi-tenant app also needs user login with organizations.
-  - OpenAPI contract for an app: step 14.
-  - Stripe billing, needs user login: step 11, then [PAYMENTS](PAYMENTS.md). Creem, needs user login with organizations: step 15.
-  - Sentry: step 16.
-  - Storybook: step 17.
-  - Playwright and axe: step 18.
-- User not sure about a part → leave it out, and say that the steps can run later.
+1. Ask the user which optional parts to add, with the whole list in one question. Wait for the answer before step 2. → [WHY](../WHY.md#why-setup-asks-about-optional-parts-first)
+   - Sandboxed plugins (Workers paid plan): step 3.
+   - Queues: step 8.
+   - Many languages: step 9.
+   - User login, emdash-better-auth: step 12.
+   - Apps with their own D1 database: steps 13 and 14. A multi-tenant app needs user login with organizations.
+   - OpenAPI contract for an app: step 15. Needs an app.
+   - Stripe billing, without EU consumer sales: step 16. Needs user login.
+   - Creem, for EU consumer sales: step 17. Needs user login with organizations, Queues, and an app database.
+   - Sentry: step 18.
+   - Storybook: step 19.
+   - Playwright and axe: step 20.
+   - The template turns on scheduled publishing. Ask whether to keep it; no → step 7.
+
+   Add only what the user picks, and skip the steps of the other parts. A pick needs another part → add that part too, and tell the user. User not sure about a part → leave it out, and say that the step can run later.
 
 ## Project
 
 ### [EmDash](STACK.md#emdash)
 
-1. Newest Node.js LTS, the major in `template/.nvmrc`; `node --version` starts with it, `pnpm --version` ≥ 12 ([installation](https://pnpm.io/installation)). → [DEPS](DEPS.md) (Install)
-2. No `create-emdash` run: `template/` holds its `cloudflare:starter` output. Sandboxed plugins (Workers paid plan) → uncomment `worker_loaders` in `wrangler.jsonc`. Never the `node` platform. → [CMS](CMS.md)
+2. Newest Node.js LTS, the major in `template/.nvmrc`; `node --version` starts with it, `pnpm --version` ≥ 12 ([installation](https://pnpm.io/installation)). → [DEPS](DEPS.md) (Install)
+3. No `create-emdash` run: `template/` holds its `cloudflare:starter` output. Sandboxed plugins (Workers paid plan) → uncomment `worker_loaders` in `wrangler.jsonc`. Never the `node` platform. → [CMS](CMS.md)
 
 ### setup.mjs
 
-3. `node <starweb>/scripts/setup.mjs my-site --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, [UPDATE](UPDATE.md)); `my-site` = new or empty folder. Writes `.starweb.json` (clone commit, name, site); commit it. The script: copies `template/` to the project root: starter files, configs, security, tests, CI, Dependabot ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), copies agent files and `rules/`, writes `package.json` with the project name, copies `pnpm-lock.yaml`, writes a new `EMDASH_ENCRYPTION_KEY` to `.env`, `pnpm install --frozen-lockfile`, `pnpm exec wrangler types`, `pnpm exec tsx scripts/theme.ts`, `oxfmt`, `git init`.
+4. `node <starweb>/scripts/setup.mjs my-site --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, [UPDATE](UPDATE.md)); `my-site` = new or empty folder. Writes `.starweb.json` (clone commit, name, site); commit it. The script: copies `template/` to the project root: starter files, configs, security, tests, CI, Dependabot ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), copies agent files and `rules/`, writes `package.json` with the project name, copies `pnpm-lock.yaml`, writes a new `EMDASH_ENCRYPTION_KEY` to `.env`, `pnpm install --frozen-lockfile`, `pnpm exec wrangler types`, `pnpm exec tsx scripts/theme.ts`, `oxfmt`, `git init`.
 
 ## Cloudflare
 
 ### [Wrangler](STACK.md#wrangler)
 
-4. `pnpm exec wrangler login`.
-5. Create the [D1](STACK.md#d1) database with a location hint, set `database_id` in `wrangler.jsonc`, and change the Targeted Placement region if the database is not near the template default `aws:eu-central-1`. Give `FORMS_LIMITER` a `namespace_id` that no other Worker in the account uses. → [PERF](PERF.md) (Placement), [SAAS](SAAS.md), [CMS](CMS.md#emdash-forms) (Architecture)
-6. No scheduled publishing → remove the Cron Trigger and the `scheduled` handler in `src/worker.ts`. → [CMS](CMS.md) (Drafts and preview)
-7. Uses [Queues](STACK.md#queues) → producers, consumers, a dead letter queue, `queue()` export in `src/worker.ts`. → [ARCH](ARCH.md) (Backend)
+5. `pnpm exec wrangler login`.
+6. Create the [D1](STACK.md#d1) database with a location hint, set `database_id` in `wrangler.jsonc`, and change the Targeted Placement region if the database is not near the template default `aws:eu-central-1`. Give `FORMS_LIMITER` a `namespace_id` that no other Worker in the account uses. → [PERF](PERF.md) (Placement), [SAAS](SAAS.md), [CMS](CMS.md#emdash-forms) (Architecture)
+7. No scheduled publishing → remove the Cron Trigger and the `scheduled` handler in `src/worker.ts`. → [CMS](CMS.md) (Drafts and preview)
+8. Uses [Queues](STACK.md#queues) → producers, consumers, a dead letter queue, `queue()` export in `src/worker.ts`. → [ARCH](ARCH.md) (Backend)
 
 ## Astro
 
 ### [Astro](STACK.md#astro) i18n
 
-8. Multilingual → Astro i18n routing, [Paraglide JS](STACK.md#paraglide-js) plugin for UI strings, `isPrerendered` branch in `src/middleware.ts` with `sequence()`; [PolyStella](STACK.md#polystella) EmDash plugin and the `AI` binding for content. → [I18N](I18N.md), [SECURITY](SECURITY.md) (CSRF), [DEPLOY](DEPLOY.md)
+9. Multilingual → Astro i18n routing, [Paraglide JS](STACK.md#paraglide-js) plugin for UI strings, `isPrerendered` branch in `src/middleware.ts` with `sequence()`; [PolyStella](STACK.md#polystella) EmDash plugin and the `AI` binding for content. → [I18N](I18N.md), [SECURITY](SECURITY.md) (CSRF), [DEPLOY](DEPLOY.md)
 
 ## UI
 
 ### [Fulldev UI](STACK.md#fulldev-ui)
 
-9. `template/` already holds [Fulldev UI](STACK.md#fulldev-ui): `components.json`, `src/lib/utils.ts`, the button, and the home page button. No `shadcn init`. Add components with `pnpm exec shadcn add`, then apply `tv()` and [MATERIAL](MATERIAL.md). React island → add `@base-ui/react` and its [Knip](STACK.md#knip) exception. → [COMPONENTS](COMPONENTS.md), [QUALITY](QUALITY.md) (Unused code)
-10. Set the brand color in `SEED` in `scripts/theme.ts`; `pnpm exec tsx scripts/theme.ts` rewrites `src/styles/theme.css` (`setup.mjs` generates it with the default seed, and `src/styles/global.css` imports it). → [MATERIAL](MATERIAL.md) (Color). Keep or change the fonts in `src/lib/fonts.ts`; `pnpm run fonts` checks them. → [MEDIA](MEDIA.md) (Fonts)
+10. `template/` already holds [Fulldev UI](STACK.md#fulldev-ui): `components.json`, `src/lib/utils.ts`, the button, and the home page button. No `shadcn init`. Add components with `pnpm exec shadcn add`, then apply `tv()` and [MATERIAL](MATERIAL.md). React island → add `@base-ui/react` and its [Knip](STACK.md#knip) exception. → [COMPONENTS](COMPONENTS.md), [QUALITY](QUALITY.md) (Unused code)
+11. Set the brand color in `SEED` in `scripts/theme.ts`; `pnpm exec tsx scripts/theme.ts` rewrites `src/styles/theme.css` (`setup.mjs` generates it with the default seed, and `src/styles/global.css` imports it). → [MATERIAL](MATERIAL.md) (Color). Keep or change the fonts in `src/lib/fonts.ts`; `pnpm run fonts` checks them. → [MEDIA](MEDIA.md) (Fonts)
 
 ## Auth
 
 ### [emdash-better-auth](STACK.md#emdash-better-auth)
 
-11. User login → emdash-better-auth, an email provider, `BETTER_AUTH_SECRET` in `.env`. → [AUTH](AUTH.md), [DEPS](DEPS.md) (Install)
+12. User login → emdash-better-auth, an email provider, `BETTER_AUTH_SECRET` in `.env`. → [AUTH](AUTH.md), [DEPS](DEPS.md) (Install)
 
 ## Apps and payments
 
 ### SaaS
 
-12. App → `src/apps/<app>/` with pages, API routes, `db/`, own D1 database and migrations folder. → [SAAS](SAAS.md) (Multiple apps), [ARCH](ARCH.md) (Apps)
-13. App database → `src/apps/<app>/db/seed.sql` and package script `db:seed`. → [DATA](DATA.md) (Seed data)
-14. App API → `scripts/openapi.ts` and route `src/apps/app1/api/openapi.ts`, injected in `integration.ts` with `injectRoute({ pattern: "/app1/api/openapi.json", ... })`. → [API](API.md) (Contract)
-15. Sells with [Creem](STACK.md#creem) → table with a unique constraint for processed webhook event IDs. → [PAYMENTS](PAYMENTS.md) (EU sales)
+13. App → `src/apps/<app>/` with pages, API routes, `db/`, own D1 database and migrations folder. → [SAAS](SAAS.md) (Multiple apps), [ARCH](ARCH.md) (Apps)
+14. App database → `src/apps/<app>/db/seed.sql` and package script `db:seed`. → [DATA](DATA.md) (Seed data)
+15. App API → `scripts/openapi.ts` and route `src/apps/app1/api/openapi.ts`, injected in `integration.ts` with `injectRoute({ pattern: "/app1/api/openapi.json", ... })`. → [API](API.md) (Contract)
+16. Sells with [Stripe](STACK.md#stripe) → secrets and price variables, then "Stripe billing" in the Better Auth admin settings page. → [PAYMENTS](PAYMENTS.md) (Providers)
+17. Sells with [Creem](STACK.md#creem) → table with a unique constraint for processed webhook event IDs. → [PAYMENTS](PAYMENTS.md) (EU sales)
 
 ## Observability
 
 ### [Sentry](STACK.md#sentry)
 
-16. Uses Sentry → `@sentry/astro`, `@sentry/cloudflare`; wrap the handler in `src/worker.ts` with `Sentry.withSentry`; `.env.sentry-build-plugin` in `.gitignore`; Sentry sources in the CSP module; `vite: { build: { sourcemap: true } }`; after upload delete only `./dist/client/**/*.map`. → [OBSERVABILITY](OBSERVABILITY.md) (Errors, Source maps), [SECURITY](SECURITY.md) (Headers)
+18. Uses Sentry → `@sentry/astro`, `@sentry/cloudflare`; wrap the handler in `src/worker.ts` with `Sentry.withSentry`; `.env.sentry-build-plugin` in `.gitignore`; Sentry sources in the CSP module; `vite: { build: { sourcemap: true } }`; after upload delete only `./dist/client/**/*.map`. → [OBSERVABILITY](OBSERVABILITY.md) (Errors, Source maps), [SECURITY](SECURITY.md) (Headers)
 
 ## Tests
 
 ### [Storybook](STACK.md#storybook)
 
-17. Component library → Storybook with [Storybook Astro](STACK.md#storybook-astro), not `pnpm create storybook`; create `.storybook/main.ts`. → [TESTING](TESTING.md) (Components)
+19. Component library → Storybook with [Storybook Astro](STACK.md#storybook-astro), not `pnpm create storybook`; create `.storybook/main.ts`. → [TESTING](TESTING.md) (Components)
 
 ### [Playwright](STACK.md#playwright)
 
-18. End-to-end tests → Playwright and `@axe-core/playwright` ([axe](STACK.md#axe)), `pnpm exec playwright install chromium`, `playwright.config.ts` with `webServer` for `astro preview`. → [TESTING](TESTING.md) (Screenshots, End-to-end tests, Accessibility)
+20. End-to-end tests → Playwright and `@axe-core/playwright` ([axe](STACK.md#axe)), `pnpm exec playwright install chromium`, `playwright.config.ts` with `webServer` for `astro preview`. → [TESTING](TESTING.md) (Screenshots, End-to-end tests, Accessibility)
 
 ## Agent skills
 
 ### [skills CLI](STACK.md#skills-cli)
 
-19. Install the skills listed in [CMS](CMS.md) and [COMPONENTS](COMPONENTS.md).
+21. Install the skills listed in [CMS](CMS.md) and [COMPONENTS](COMPONENTS.md).
 
 ## Checks
 
-20. `pnpm run dev`; open `http://localhost:4321/_emdash/admin/`; complete the setup wizard. To test a form, set the [Turnstile test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) in the Forms plugin settings. → [DEV](DEV.md), [CMS](CMS.md#emdash-forms)
-21. `pnpm run check`, `pnpm run build`, `pnpm run size`, `pnpm run preview` all pass before the first commit. → [QUALITY](QUALITY.md) (Order), [PERF](PERF.md#client-javascript), [DEV](DEV.md)
-22. `pnpm exec emdash doctor`; read only the scheduler line (its database check looks for local SQLite, not D1). → [CMS](CMS.md) (Drafts and preview)
-23. Commit.
+22. `pnpm run dev`; open `http://localhost:4321/_emdash/admin/`; complete the setup wizard. To test a form, set the [Turnstile test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) in the Forms plugin settings. → [DEV](DEV.md), [CMS](CMS.md#emdash-forms)
+23. `pnpm run check`, `pnpm run build`, `pnpm run size`, `pnpm run preview` all pass before the first commit. → [QUALITY](QUALITY.md) (Order), [PERF](PERF.md#client-javascript), [DEV](DEV.md)
+24. `pnpm exec emdash doctor`; read only the scheduler line (its database check looks for local SQLite, not D1). → [CMS](CMS.md) (Drafts and preview)
+25. Commit.
 
 ## Deploy
 
 ### [Workers](STACK.md#workers)
 
-24. In `src/lib/site.ts`, set `SITE`, `CONTROLLER`, and the contact addresses (`SECURITY_CONTACT` must be a mailbox that someone reads). In `src/pages/privacy.astro`, replace each `[Add` marker; `grep -n '\[Add' src/pages/privacy.astro` prints nothing. → [SECURITY](SECURITY.md) (Disclosure), [PRIVACY](PRIVACY.md) (Privacy policy)
-25. Back up `EMDASH_ENCRYPTION_KEY` from `.env` in a password manager; never commit `.env` (plugin secrets are undecryptable without it).
-26. `env.production` block in `wrangler.jsonc`: own D1 database, R2 bucket, `routes`, `"preview_urls": true`, plus every used non-inheritable key (`d1_databases`, `r2_buckets`, `kv_namespaces` with `SESSION`, `version_metadata`, `images`, `ratelimits`, `ai`, `queues`, `workflows`, `durable_objects`, `services`, `vars`, `secrets`, `define`). → [DEPLOY](DEPLOY.md) (Environments)
-27. `EMDASH_SITE_URL` = production URL in `env.production.vars`, before the prod admin setup. Never top level (dev keeps the address setup runs on).
-28. GitHub environments `dev` and `production`: variables `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID`, `EMDASH_TARGET_FINGERPRINT`, plus the Cloudflare tokens. `production`: release tag pattern and `main` only. Private repository: GitHub Pro or Team → [GITHUB](GITHUB.md#plans). → [DEPLOY](DEPLOY.md) (CI, Migrations)
-29. Prod secret `EMDASH_ENCRYPTION_KEY`, and `BETTER_AUTH_SECRET` with user login, before the first stage upload. → [DEPLOY](DEPLOY.md) (Secrets)
-30. Dependabot automerge workflow and the CI workflows the template lacks: PR preview, dev deploy, stage upload on release tag, promotion; scheduled D1 export if the site has app data. → [DEPS](DEPS.md) (Update), [DEPLOY](DEPLOY.md) (CI)
-31. First dev deploy: `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""` per app database, `wrangler deploy --env=""`. Then each push to `main` deploys dev. → [DEPLOY](DEPLOY.md) (Migrations, CI)
-32. First release: push tag `<worker>-YYYY-MM-DD-r1`, test the stage URL, run the promotion workflow (traffic in steps). Site uses forms → create a Turnstile widget and set its keys in the Forms plugin settings on production. → [DEPLOY](DEPLOY.md) (Releases, CI), [CMS](CMS.md#emdash-forms)
-33. Dev-bypass routes return `403` on prod. → [SECURITY](SECURITY.md) (Auth)
-34. Production checks, after the first release: create a Google API key with the PageSpeed Insights API enabled, and set the repository secret `PAGESPEED_API_KEY`. Create a Cloudflare API token with the permission Workers Observability Write, and set the repository secret `CLOUDFLARE_OBSERVABILITY_TOKEN`. Set the repository variables `CLOUDFLARE_ACCOUNT_ID` and `PRODUCTION_WORKER` (`<worker>-production`). Repository level, not the `production` environment, because these checks do not deploy. `.github/workflows/perf.yml` runs daily and stays silent until `PRODUCTION_WORKER` is set. → [PERF](PERF.md) (Core Web Vitals, Workers)
+26. In `src/lib/site.ts`, set `SITE`, `CONTROLLER`, and the contact addresses (`SECURITY_CONTACT` must be a mailbox that someone reads). In `src/pages/privacy.astro`, replace each `[Add` marker; `grep -n '\[Add' src/pages/privacy.astro` prints nothing. → [SECURITY](SECURITY.md) (Disclosure), [PRIVACY](PRIVACY.md) (Privacy policy)
+27. Back up `EMDASH_ENCRYPTION_KEY` from `.env` in a password manager; never commit `.env` (plugin secrets are undecryptable without it).
+28. `env.production` block in `wrangler.jsonc`: own D1 database, R2 bucket, `routes`, `"preview_urls": true`, plus every used non-inheritable key (`d1_databases`, `r2_buckets`, `kv_namespaces` with `SESSION`, `version_metadata`, `images`, `ratelimits`, `ai`, `queues`, `workflows`, `durable_objects`, `services`, `vars`, `secrets`, `define`). → [DEPLOY](DEPLOY.md) (Environments)
+29. `EMDASH_SITE_URL` = production URL in `env.production.vars`, before the prod admin setup. Never top level (dev keeps the address setup runs on).
+30. GitHub environments `dev` and `production`: variables `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID`, `EMDASH_TARGET_FINGERPRINT`, plus the Cloudflare tokens. `production`: release tag pattern and `main` only. Private repository: GitHub Pro or Team → [GITHUB](GITHUB.md#plans). → [DEPLOY](DEPLOY.md) (CI, Migrations)
+31. Prod secret `EMDASH_ENCRYPTION_KEY`, `BETTER_AUTH_SECRET` with user login, and the secrets of the other picked parts, before the first stage upload. → [DEPLOY](DEPLOY.md) (Secrets)
+32. Dependabot automerge workflow and the CI workflows the template lacks: PR preview, dev deploy, stage upload on release tag, promotion; scheduled D1 export if the site has app data. → [DEPS](DEPS.md) (Update), [DEPLOY](DEPLOY.md) (CI)
+33. First dev deploy: `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""` per app database, `wrangler deploy --env=""`. Then each push to `main` deploys dev. → [DEPLOY](DEPLOY.md) (Migrations, CI)
+34. First release: push tag `<worker>-YYYY-MM-DD-r1`, test the stage URL, run the promotion workflow (traffic in steps). Site uses forms → create a Turnstile widget and set its keys in the Forms plugin settings on production. → [DEPLOY](DEPLOY.md) (Releases, CI), [CMS](CMS.md#emdash-forms)
+35. Dev-bypass routes return `403` on prod. → [SECURITY](SECURITY.md) (Auth)
+36. Production checks, after the first release: create a Google API key with the PageSpeed Insights API enabled, and set the repository secret `PAGESPEED_API_KEY`. Create a Cloudflare API token with the permission Workers Observability Write, and set the repository secret `CLOUDFLARE_OBSERVABILITY_TOKEN`. Set the repository variables `CLOUDFLARE_ACCOUNT_ID` and `PRODUCTION_WORKER` (`<worker>-production`). Repository level, not the `production` environment, because these checks do not deploy. `.github/workflows/perf.yml` runs daily and stays silent until `PRODUCTION_WORKER` is set. → [PERF](PERF.md) (Core Web Vitals, Workers)

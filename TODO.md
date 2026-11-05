@@ -36,16 +36,16 @@ Gaps in the rules and the steps:
 
 Steps that no test has run:
 
-- [ ] Run a real deploy on Cloudflare (steps 31 and 32). Confirm that the deploy creates the `SESSION` KV namespace from the binding without an ID, and that `env.production` works with it.
-- [ ] Run `pnpm run dev` and the admin setup wizard (step 20), and `pnpm exec emdash doctor` (step 22) on a generated project.
-- [ ] Run the optional steps 8-18 on a generated project, and confirm that `pnpm run check` and `pnpm run build` still pass.
+- [ ] Run a real deploy on Cloudflare (steps 33 and 34). Confirm that the deploy creates the `SESSION` KV namespace from the binding without an ID, and that `env.production` works with it.
+- [ ] Run `pnpm run dev` and the admin setup wizard (step 22), and `pnpm exec emdash doctor` (step 24) on a generated project.
+- [ ] Run the optional steps 8-20 on a generated project, and confirm that `pnpm run check` and `pnpm run build` still pass.
 
 - [ ] Measure the CPU time of `@emdash-cms/plugin-forms` and `@emdash-cms/plugin-field-kit` as [rules/CMS.md](rules/CMS.md#emdash-plugin-cpu-budget) requires: `/`, and a page with a form. The Chrome DevTools Protocol `Profiler` hung through the `wrangler dev` inspector proxy, so use the DevTools UI or `$workers.cpuTimeMs` after a real deploy.
 - [ ] Wait for a real weekly run of the Forms `cleanup` task, and confirm that it deletes old submissions and their files. No test has run the cron task.
 
 Possible template additions:
 
-- [ ] Decide whether the template ships the workflows that step 30 lists (Dependabot automerge, PR preview, dev deploy, stage upload, promotion, and D1 export), in place of a manual step.
+- [ ] Decide whether the template ships the workflows that step 32 lists (Dependabot automerge, PR preview, dev deploy, stage upload, promotion, and D1 export), in place of a manual step.
 
 Dependency updates:
 

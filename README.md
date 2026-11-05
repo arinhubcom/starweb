@@ -16,7 +16,24 @@ Set up a new Starweb project named my-site. Clone https://github.com/arinhubcom/
 
 Replace `my-site` with your project name.
 
-The steps are in [rules/SETUP.md](rules/SETUP.md). The agent first asks which optional parts to add, for example login, payments, apps, or many languages. The [template/](template/) folder holds the `create-emdash` output with the Starweb changes in place, Fulldev UI, `package.json`, the lockfile, and the tested configs. The new project takes it over: the script [scripts/setup.mjs](scripts/setup.mjs) copies the folder to the project root and writes a new encryption key. The rules hold decisions, not install commands. Each EmDash update runs `create-emdash` again: [scripts/update-starter.mjs](scripts/update-starter.mjs) merges the new output into `template/`, and [starter/](starter/) keeps the last output as the merge base. See the steps in [rules/UPDATE.md](rules/UPDATE.md#emdash-update). CI tests the template every week. Read [why](WHY.md#why-a-template-setupmjs-and-ci).
+The steps are in [rules/SETUP.md](rules/SETUP.md). The agent first asks which [optional parts](#optional-parts) to add. The [template/](template/) folder holds the `create-emdash` output with the Starweb changes in place, Fulldev UI, `package.json`, the lockfile, and the tested configs. The new project takes it over: the script [scripts/setup.mjs](scripts/setup.mjs) copies the folder to the project root and writes a new encryption key. The rules hold decisions, not install commands. Each EmDash update runs `create-emdash` again: [scripts/update-starter.mjs](scripts/update-starter.mjs) merges the new output into `template/`, and [starter/](starter/) keeps the last output as the merge base. See the steps in [rules/UPDATE.md](rules/UPDATE.md#emdash-update). CI tests the template every week. Read [why](WHY.md#why-a-template-setupmjs-and-ci).
+
+### Optional parts
+
+The template holds what every project uses. The agent asks which of these parts you want, and it adds only those. You can add a part later.
+
+- Sandboxed plugins (Workers paid plan).
+- Queues for background work.
+- Many languages: Astro i18n routing, Paraglide JS, and PolyStella.
+- Customer login with emdash-better-auth: 2FA, organizations, and more.
+- Apps with their own D1 database.
+- An OpenAPI contract for an app.
+- Stripe billing, or Creem for EU consumer sales.
+- Sentry for errors and uptime.
+- Storybook for components.
+- Playwright and axe for end-to-end and accessibility tests.
+
+Some parts need others: for example, Stripe billing needs customer login. The template also turns on scheduled publishing, and the agent asks whether to keep it.
 
 ## 🔄 Update a project
 
@@ -125,7 +142,7 @@ flowchart TD
 - Privacy by default: a privacy page to complete, and cookieless Web Analytics.
 - Design rules: Fulldev UI, a Material Design 3 theme from one brand color, and WCAG 2.2 level AA.
 - JavaScript size limits for each island and each page fail the pull request when you go over them.
-- Add when you need it: login, payments, apps with their own D1 database, many languages, and an OpenAPI contract.
+- [Optional parts](#optional-parts) that you add when you need them: login, payments, apps, many languages, and more.
 
 The diagram groups the main features. Solid lines show what every project gets from the template. The dashed line shows what you add during setup when you need it: read [rules/SETUP.md](rules/SETUP.md).
 
