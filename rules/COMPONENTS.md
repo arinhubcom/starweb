@@ -25,7 +25,7 @@
 
 - Source of `.astro` components and page blocks (sections, hero, features, pricing, FAQ); no client JS.
 - `tsconfig.json` `compilerOptions` keep `"baseUrl": "."`, `"paths": { "@/*": ["./src/*"] }`; `shadcn add` needs them.
-- `template/` holds the output of `shadcn init` with `https://ui.full.dev/r/styles/base-vega/base.json`: `components.json` (`@fulldev` registry), theme tokens in `src/styles/global.css`, `cn()` in `src/lib/utils.ts`, packages `shadcn`, `cn`, `tw-animate-css`. No second `shadcn init`.
+- The project holds the output of `shadcn init` with `https://ui.full.dev/r/styles/base-vega/base.json`: `components.json` (`@fulldev` registry), theme tokens in `src/styles/global.css`, `cn()` in `src/lib/utils.ts`, packages `shadcn`, `cn`, `tw-animate-css`. No second `shadcn init`.
 - `tailwind-variants`; no `class-variance-authority` (`no-restricted-imports` in `.oxlintrc.json` fails on it).
 - After each `shadcn add` (Fulldev or shadcn/ui): convert every `cva()` in the added files to `tv()`. `cva("<base>", { variants, defaultVariants })` → `tv({ base: "<base>", variants, defaultVariants })`; `import { tv, type VariantProps } from "tailwind-variants"`. Call sites stay. Registry items import `class-variance-authority` without listing it; `pnpm exec astro check` reports each file left. → [DESIGN](DESIGN.md)
 - After each `shadcn add` (Fulldev or shadcn/ui): replace every `@lucide/astro` and `lucide-react` icon with `MaterialIcon` (→ [MEDIA](MEDIA.md) (Icons)), with `size-*` → `text-*`, and add the name to `ICON_NAMES`. Remove `@lucide/astro` and `lucide-react` from `package.json`.

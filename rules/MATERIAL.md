@@ -71,7 +71,7 @@
 - Generate from one seed with [material-color-utilities](https://github.com/material-foundation/material-color-utilities) (`@material/material-color-utilities`); no hand-picked theme colors.
 - `new SchemeTonalSpot(Hct.fromInt(argbFromHex(seed)), isDark, 0, "2025")` (Expressive, standard contrast): `false` → `:root`, `true` → `.dark`.
 - `SchemeFidelity` only when the exact brand color must show (seed in `primaryContainer`; 2021 spec only). No `SchemeExpressive` (shifts hues).
-- Build time: `scripts/theme.ts` (in the template, with the `SEED` constant), run `pnpm exec tsx scripts/theme.ts`; the template pins `@material/material-color-utilities` and `tsx`. No plain `node` (0.4.0 imports without `.js`).
+- Build time: `scripts/theme.ts` with the `SEED` constant, run `pnpm exec tsx scripts/theme.ts`; packages `@material/material-color-utilities` and `tsx`. No plain `node` (0.4.0 imports without `.js`).
 - Roles as hex: `hexFromArgb(scheme.surfaceContainerHigh)`.
 - Output `src/styles/theme.css`, imported in `global.css`; never hand-edit, change the seed and rerun.
 - `global.css` has no color variables in `:root` and `.dark`, only `--radius`, shadows, fonts, `--chart-1`..`--chart-5` from Fulldev UI. A registry item adds some → remove them.
@@ -102,7 +102,7 @@
 
 ### Buttons
 
-- `size` variants of Fulldev UI and [Base UI](STACK.md#base-ui) buttons (→ [DESIGN](DESIGN.md)): `xs`, `default` and `sm`, `md`, `lg`, `xl` in `src/components/ui/button/button-variants.ts` (in the template); same values in `src/components/ui/react/button.tsx` after install:
+- `size` variants of Fulldev UI and [Base UI](STACK.md#base-ui) buttons (→ [DESIGN](DESIGN.md)): `xs`, `default` and `sm`, `md`, `lg`, `xl` in `src/components/ui/button/button-variants.ts`; same values in `src/components/ui/react/button.tsx` after install:
 
   | Size | Height | Side padding | Icon | Gap | Tailwind |
   |---|---|---|---|---|---|

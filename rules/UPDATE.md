@@ -4,7 +4,7 @@ Ordered procedures for a project that exists. `<starweb>` = the kept Starweb clo
 
 ## Starweb update
 
-New rules and a better template reach a project through [update.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/update.mjs), which uses `.starweb.json`. It merges files. It does not change project code: the steps under Apply do that.
+New rules and files reach a project through [update.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/update.mjs), which uses `.starweb.json`. It merges files. It does not change project code: the steps under Apply do that.
 
 The `starweb-update` skill in `.agents/skills/` points here. Keep the steps in this file, not in the skill.
 
@@ -17,7 +17,7 @@ The `starweb-update` skill in `.agents/skills/` points here. Keep the steps in t
 
 ### Merge
 
-5. `node <starweb>/scripts/update.mjs <project>`: merges agent files, `rules/`, template files; updates unchanged `package.json` versions and scripts; `pnpm install`. A project with `package-lock.json` moves to pnpm: `pnpm import` keeps the resolved versions, and the script removes `package-lock.json`.
+5. `node <starweb>/scripts/update.mjs <project>`: merges agent files, `rules/`, and the other Starweb files; updates unchanged `package.json` versions and scripts; `pnpm install`. A project with `package-lock.json` moves to pnpm: `pnpm import` keeps the resolved versions, and the script removes `package-lock.json`.
 6. Resolve conflicts (markers `7. `Deleted upstream`: Starweb removed the file or the package; the script keeps it. Remove it unless project code uses it. A replaced tool shows up here: remove its config, package, scripts, and editor settings. After the move to pnpm: delete `min-release-age` from `.npmrc` (the file too when it holds nothing else) and `overrides` from `package.json`, then run `pnpm install`. A package that code names and only npm hoisted fails `pnpm run check`: add it as a direct dependency.
 8. `Kept (project version differs)`: take the Starweb value unless the project has a reason to hold it back; write the reason in the project `AGENTS.md`.
 9. `Kept (the project deleted the file)`: add it back only if a changed rule needs it.
@@ -39,7 +39,7 @@ The `starweb-update` skill in `.agents/skills/` points here. Keep the steps in t
 
 ### Older projects
 
-A project whose `.starweb.json` commit is older than the `create-emdash` output in `template/` keeps its starter files: `update.mjs` has no base to merge them. If they are missing, add the footer link to `/privacy` in `src/layouts/Base.astro`, add `public/.well-known/security.txt` to `.gitignore`, and run `pnpm exec tsx scripts/theme.ts`.
+A project whose `.starweb.json` commit is older than the Starweb commit that added the `create-emdash` output keeps its starter files: `update.mjs` has no base to merge them. If they are missing, add the footer link to `/privacy` in `src/layouts/Base.astro`, add `public/.well-known/security.txt` to `.gitignore`, and run `pnpm exec tsx scripts/theme.ts`.
 
 ## EmDash update
 

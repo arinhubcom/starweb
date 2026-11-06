@@ -1,6 +1,6 @@
 # SETUP
 
-Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb project; step 1 chooses the optional parts, steps 2-4 create the project from the [template](https://github.com/arinhubcom/starweb/tree/main/template) and [setup.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/setup.mjs), the rest is manual.
+Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb project; step 1 chooses the optional parts, steps 2-4 create the project with [setup.mjs](https://github.com/arinhubcom/starweb/blob/main/scripts/setup.mjs), the rest is manual.
 
 ## Choose
 
@@ -19,7 +19,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
    - Sentry: step 19.
    - Storybook: step 20.
    - Playwright and axe: step 21.
-   - The template turns on scheduled publishing. Ask whether to keep it; no → step 7.
+   - Scheduled publishing is on by default. Ask whether to keep it; no → step 7.
 
    Add only what the user picks, and skip the steps of the other parts. A step that names no optional part runs in every project. A pick needs another part → add that part too, and tell the user. User not sure about a part → leave it out, and say that the step can run later.
 
@@ -27,19 +27,19 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 
 ### [EmDash](STACK.md#emdash)
 
-2. Newest Node.js LTS, the major in `template/.nvmrc`; `node --version` starts with it, `pnpm --version` ≥ 12 ([installation](https://pnpm.io/installation)). → [DEPS](DEPS.md) (Install)
-3. No `create-emdash` run: `template/` holds its `cloudflare:starter` output. Sandboxed plugins (Workers paid plan) → uncomment `worker_loaders` in `wrangler.jsonc`. Never the `node` platform. → [CMS](CMS.md)
+2. Newest Node.js LTS, the major in `<starweb>/template/.nvmrc`; `node --version` starts with it, `pnpm --version` ≥ 12 ([installation](https://pnpm.io/installation)). → [DEPS](DEPS.md) (Install)
+3. No `create-emdash` run: `setup.mjs` copies its `cloudflare:starter` output. Sandboxed plugins (Workers paid plan) → uncomment `worker_loaders` in `wrangler.jsonc`. Never the `node` platform. → [CMS](CMS.md)
 
 ### setup.mjs
 
-4. `node <starweb>/scripts/setup.mjs <project-dir> --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, [UPDATE](UPDATE.md)); `<project-dir>` = path of a new or empty folder; `<name>` = lowercase letters, digits, and hyphens, starting with a letter. Writes `.starweb.json` (clone commit, name, site); step 26 commits it. The script: copies `template/` to the project root: starter files, configs, security, tests, CI, Dependabot ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), copies agent files and `rules/`, writes `package.json` with the project name, copies `pnpm-lock.yaml`, writes a new `EMDASH_ENCRYPTION_KEY` to `.env`, `pnpm install --frozen-lockfile`, `pnpm exec wrangler types`, `pnpm exec tsx scripts/theme.ts`, `git init`, `oxfmt`.
+4. `node <starweb>/scripts/setup.mjs <project-dir> --name <name> --site <url>`; `<starweb>` = Starweb clone kept outside the project (for example `~/starweb`), never in a temporary folder (`update.mjs` needs it, [UPDATE](UPDATE.md)); `<project-dir>` = path of a new or empty folder; `<name>` = lowercase letters, digits, and hyphens, starting with a letter. Writes `.starweb.json` (clone commit, name, site); step 26 commits it. The script: copies starter files, configs, security, tests, CI, Dependabot ([QUALITY](QUALITY.md), [SECURITY](SECURITY.md), [TESTING](TESTING.md), [DEPLOY](DEPLOY.md), [DEPS](DEPS.md)), copies agent files and `rules/`, writes `package.json` with the project name, copies `pnpm-lock.yaml`, writes a new `EMDASH_ENCRYPTION_KEY` to `.env`, `pnpm install --frozen-lockfile`, `pnpm exec wrangler types`, `pnpm exec tsx scripts/theme.ts`, `git init`, `oxfmt`.
 
 ## Cloudflare
 
 ### [Wrangler](STACK.md#wrangler)
 
 5. `pnpm exec wrangler login`.
-6. Create the [D1](STACK.md#d1) database with a location hint, set `database_id` in `wrangler.jsonc`, and change the Targeted Placement region if the database is not near the template default `aws:eu-central-1`. Give `FORMS_LIMITER` a `namespace_id` that no other Worker in the account uses. → [PERF](PERF.md) (Placement), [SAAS](SAAS.md), [CMS](CMS.md#emdash-forms) (Architecture)
+6. Create the [D1](STACK.md#d1) database with a location hint, set `database_id` in `wrangler.jsonc`, and change the Targeted Placement region if the database is not near the default `aws:eu-central-1`. Give `FORMS_LIMITER` a `namespace_id` that no other Worker in the account uses. → [PERF](PERF.md) (Placement), [SAAS](SAAS.md), [CMS](CMS.md#emdash-forms) (Architecture)
 7. No scheduled publishing → remove the Cron Trigger and the `scheduled` handler in `src/worker.ts`. → [CMS](CMS.md) (Drafts and preview)
 8. Uses [Queues](STACK.md#queues) → producers, consumers, a dead letter queue, `queue()` export in `src/worker.ts`. → [ARCH](ARCH.md) (Backend)
 
@@ -53,7 +53,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 
 ### [Fulldev UI](STACK.md#fulldev-ui)
 
-10. `template/` already holds [Fulldev UI](STACK.md#fulldev-ui): `components.json`, `src/lib/utils.ts`, the button, and the home page button. No `shadcn init`. Add components with `pnpm exec shadcn add`, then apply `tv()` and [MATERIAL](MATERIAL.md). React island → add `@base-ui/react` and its [Knip](STACK.md#knip) exception. → [COMPONENTS](COMPONENTS.md), [QUALITY](QUALITY.md) (Unused code)
+10. The project already holds [Fulldev UI](STACK.md#fulldev-ui): `components.json`, `src/lib/utils.ts`, the button, and the home page button. No `shadcn init`. Add components with `pnpm exec shadcn add`, then apply `tv()` and [MATERIAL](MATERIAL.md). React island → add `@base-ui/react` and its [Knip](STACK.md#knip) exception. → [COMPONENTS](COMPONENTS.md), [QUALITY](QUALITY.md) (Unused code)
 11. Set the brand color in `SEED` in `scripts/theme.ts`; `pnpm exec tsx scripts/theme.ts` rewrites `src/styles/theme.css` (`setup.mjs` generates it with the default seed, and `src/styles/global.css` imports it). → [MATERIAL](MATERIAL.md) (Color). Keep or change the fonts in `src/lib/fonts.ts`; `pnpm run fonts` checks them. → [MEDIA](MEDIA.md) (Fonts)
 
 ## Auth
@@ -112,7 +112,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 30. `EMDASH_SITE_URL` = production URL in `env.production.vars`, before the prod admin setup. Never top level (dev keeps the address setup runs on).
 31. GitHub environments `dev` and `production`: variables `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID`, `EMDASH_TARGET_FINGERPRINT`, plus the Cloudflare tokens. `dev`: `main` and `refs/pull/*/merge`. `production`: release tag pattern and `main` only. Private repository: GitHub Pro or Team → [GITHUB](GITHUB.md#plans). → [DEPLOY](DEPLOY.md) (CI, Migrations), [TOKENS](TOKENS.md)
 32. Prod secret `EMDASH_ENCRYPTION_KEY`, `BETTER_AUTH_SECRET` with user login, and the secrets of the other picked parts, before the first stage upload: `<source> | pnpm run set-secrets production` (after `gh auth login` and `wrangler login`). Worker secrets need an uploaded version of the production Worker, or Cloudflare fails with error 10222; for the first version use `wrangler versions upload --secrets-file <file>`. → [TOKENS](TOKENS.md), [DEPLOY](DEPLOY.md) (Secrets)
-33. Dependabot automerge workflow and the CI workflows the template lacks: PR preview, dev deploy, stage upload on release tag, promotion; scheduled D1 export if the site has app data. → [DEPS](DEPS.md) (Update), [DEPLOY](DEPLOY.md) (CI)
+33. Dependabot automerge workflow and the CI workflows the project lacks: PR preview, dev deploy, stage upload on release tag, promotion; scheduled D1 export if the site has app data. → [DEPS](DEPS.md) (Update), [DEPLOY](DEPLOY.md) (CI)
 34. First dev deploy: `pnpm run build`, `pnpm exec emdash migrate`, `wrangler d1 migrations apply <db> --remote --env=""` per app database, `wrangler deploy --env=""`. Then each push to `main` deploys dev. → [DEPLOY](DEPLOY.md) (Migrations, CI)
 35. First release: push tag `<worker>-YYYY-MM-DD-r1`, test the stage URL, run the promotion workflow (traffic in steps). Site uses forms → create a Turnstile widget and set its keys in the Forms plugin settings on production. → [DEPLOY](DEPLOY.md) (Releases, CI), [CMS](CMS.md#emdash-forms)
 36. Dev-bypass routes return `403` on prod. → [SECURITY](SECURITY.md) (Auth)

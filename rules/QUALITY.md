@@ -9,7 +9,7 @@
 - Strict. `tsconfig.json` extends `astro/tsconfigs/strict` (or `strictest`).
 - With `strict`, add `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noUnusedLocals`, `noUnusedParameters`. Not with `strictest` (sets all).
 - `"jsx": "react-jsx"`, `"jsxImportSource": "react"` in `tsconfig.json`. The inherited `preserve` fails `vitest run --coverage` on any uncovered `.tsx` (`Support for the experimental syntax 'jsx'`).
-- Keep `exactOptionalPropertyTypes`; `template/` already fixes the starter pages and `Base.astro`. Spread optional values only when set: `...(cursor ? { cursor } : {})` for `getEmDashCollection()`; `...(Astro.currentLocale ? { currentLocale: Astro.currentLocale } : {})` for `createPublicPageContext()`; pass `canonical ?? null`, `image ?? null`; spread `content` the same way.
+- Keep `exactOptionalPropertyTypes`. Spread optional values only when set: `...(cursor ? { cursor } : {})` for `getEmDashCollection()`; `...(Astro.currentLocale ? { currentLocale: Astro.currentLocale } : {})` for `createPublicPageContext()`; pass `canonical ?? null`, `image ?? null`; spread `content` the same way.
 - No `satisfies ExportedHandler` in `src/worker.ts` (`handler.fetch` optional → fails).
 
 ## Checks
@@ -40,7 +40,7 @@
 ### React Doctor rules
 
 - `jsPlugins`: `{ "name": "react-doctor", "specifier": "oxlint-plugin-react-doctor" }`. No preset: list each rule in `rules`, with its default severity.
-- `settings["react-doctor"].capabilities` is required: without it, rules run for every library they name. Template list: `base-ui`, `react`, `react:19`, `react:19.2`, `shadcn`, `ssr`, `tailwind`, `tailwind:3.4`, `tailwind:4`, `zod:4`.
+- `settings["react-doctor"].capabilities` is required: without it, rules run for every library they name. List: `base-ui`, `react`, `react:19`, `react:19.2`, `shadcn`, `ssr`, `tailwind`, `tailwind:3.4`, `tailwind:4`, `zod:4`.
 - Listed: active rules with `framework: "global"` whose `requires` fits the capabilities (`REACT_DOCTOR_RULES` from the package).
 - Not listed: `defaultEnabled: false`, `scan` and `project` rules (no effect in Oxlint), ports of built-in rules (`originallyExternal`; use `react/*`, `jsx-a11y/*`), `no-array-index-as-key` (= `react/no-array-index-key`), and the `ink-`, `jotai-`, `motion-`, `redux-`, `react-markdown-`, `server-`, `webgl-` families.
 - Project adds a library from one of those families (for example: Motion) → add its rules, and its capability if the rules need one.
@@ -49,7 +49,7 @@
 ### e18e rules
 
 - `jsPlugins`: `{ "name": "e18e", "specifier": "@e18e/eslint-plugin" }`. No preset in `.oxlintrc.json`: list each rule in `rules` as `error`.
-- Template list: `ban-dependencies`, `prefer-array-at`, `prefer-array-fill`, `prefer-array-from-map`, `prefer-array-some`, `prefer-array-to-reversed`, `prefer-array-to-sorted`, `prefer-array-to-spliced`, `prefer-date-now`, `prefer-includes`, `prefer-nullish-coalescing`, `prefer-object-has-own`, `prefer-regex-test`, `prefer-spread-syntax`, `prefer-static-regex`, `prefer-timer-args`, `prefer-url-canparse`.
+- List: `ban-dependencies`, `prefer-array-at`, `prefer-array-fill`, `prefer-array-from-map`, `prefer-array-some`, `prefer-array-to-reversed`, `prefer-array-to-sorted`, `prefer-array-to-spliced`, `prefer-date-now`, `prefer-includes`, `prefer-nullish-coalescing`, `prefer-object-has-own`, `prefer-regex-test`, `prefer-spread-syntax`, `prefer-static-regex`, `prefer-timer-args`, `prefer-url-canparse`.
 
 ## Format
 
@@ -70,8 +70,8 @@
 - `knip` in CI, zero issues. Delete unused code/deps; no ignore-list additions except the named exceptions below.
 - Wrangler plugin adds `main` (`src/worker.ts`) as entry; do not list it.
 - `entry` in `knip.json` (replaces default `index`, `main`, `cli`; not an ignore list): at least `src/live.config.ts`, `src/apps/*/pages/**/*.astro!`, `src/apps/*/middleware.ts!`, `src/apps/*/admin/{plugin.ts,pages.tsx}!`, `scripts/*.ts`; add a glob per other file kind registered via `injectRoute()`, `addMiddleware()`, `adminEntry`. `!` = production code for `knip --production`.
-- Keep the template `knip.json`: `entry` and that `ignoreIssues`, no ignore list.
-- Template `knip.json`: `"ignoreIssues": { "src/components/ui/**": ["files", "exports", "types"], ".agents/skills/**": ["files"] }` for installed components and agent skills. No other folders.
+- Keep `knip.json`: `entry` and that `ignoreIssues`, no ignore list.
+- `knip.json`: `"ignoreIssues": { "src/components/ui/**": ["files", "exports", "types"], ".agents/skills/**": ["files"] }` for installed components and agent skills. No other folders.
 - `ignoreDependencies`, only after installing and until code uses them: `@base-ui/react` (React components); `@storybook/builder-vite` (Storybook). No other packages.
 - No `.agents/**` in `ignore`: `ignoreIssues` covers it.
 - Storybook, Vitest, Playwright plugins find stories, `.storybook/`, tests, `playwright.config.ts`: not in `entry`.
@@ -81,7 +81,7 @@
 
 ### [pnpm](STACK.md#pnpm) scripts
 
-- Template `package.json`: `dev`, `build`, `preview`, `typecheck`, `lint` (`oxlint --type-aware --max-warnings 0`), `format` (`oxfmt`), `format:check` (`oxfmt --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
+- `package.json` scripts: `dev`, `build`, `preview`, `typecheck`, `lint` (`oxlint --type-aware --max-warnings 0`), `format` (`oxfmt`), `format:check` (`oxfmt --check`), `knip` (`knip`), `test` (`vitest run --coverage`; → [TESTING](TESTING.md#coverage)).
 - `check` = `pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run knip && pnpm run test`.
 - Not in `test` or `check`: `fonts` (needs the network; → [MEDIA](MEDIA.md) (Fonts)), `build`, `size` (needs `dist/`; → [PERF](PERF.md#client-javascript)), API checks, dependency checks, screenshot and e2e tests (CI only).
 

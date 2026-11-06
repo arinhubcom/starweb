@@ -14,7 +14,7 @@
 ### [Cloudflare Vitest plugin](STACK.md#cloudflare-vitest-plugin)
 
 - `@cloudflare/vitest-plugin`, not `@cloudflare/vitest-pool-workers` → [WHY](../WHY.md#why-cloudflarevitest-plugin).
-- Config in the template: `vitest.config.ts`, `wrangler.test.jsonc`, `test/setup.ts`.
+- Config: `vitest.config.ts`, `wrangler.test.jsonc`, `test/setup.ts`.
 - `wrangler.test.jsonc`: no `main`, no `triggers`; add each binding a test needs → [WHY](../WHY.md#why-tests-use-wranglertestjsonc).
 - No `astro:*` imports in tested code: `import type` or `vi.mock()`.
 - App database: apply migrations in `test/setup.ts`, never on `env.DB` → [SAAS](SAAS.md) (Multiple apps).

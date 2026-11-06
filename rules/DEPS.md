@@ -7,9 +7,9 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 ### [pnpm](STACK.md#pnpm)
 
 - pnpm only ([SETUP](SETUP.md)); no npm/Yarn/Bun; only `pnpm-lock.yaml` in the repository. Commit it with each `package.json` change. → [WHY](../WHY.md#why-pnpm)
-- Package that every project needs: exact version in `template/package.json`, with `template/pnpm-lock.yaml`. `create-emdash` only in the root `package.json`: a project does not use it. Project package: let pnpm write the version; never edit it by hand.
+- Exact versions in `package.json`, with `pnpm-lock.yaml`. No `create-emdash`: a project does not use it. New package: let pnpm write the version; never edit it by hand.
 - CI: `pnpm install --frozen-lockfile`, not `pnpm install`.
-- Fix a peer dependency conflict; do not hide it. `emdash-better-auth` needs React ≥ 19.2.6: template pins 19.3.1.
+- Fix a peer dependency conflict; do not hide it. `emdash-better-auth` needs React ≥ 19.2.6.
 - Settings in `pnpm-workspace.yaml` (pnpm reads only auth, registry, TLS, and proxy settings from `.npmrc`).
 - Build scripts: `allowBuilds` in `pnpm-workspace.yaml` lists each allowed package (`esbuild`, `workerd`). An install fails on a new package with a build script: read the script, then add the package with `true` or `false`.
 - Each package that code, a config, or `tsconfig.json` names is a direct dependency (`@types/node`). pnpm does not hoist the others to the top of `node_modules`; no `shamefullyHoist`, no `nodeLinker: hoisted`.
@@ -60,7 +60,7 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 ### pnpm audit
 
 - CI: `pnpm audit --prod --audit-level high`; `pnpm audit signatures`.
-- `overrides: { zod: "catalog:" }` and `catalog: { zod: <version> }` in `template/pnpm-workspace.yaml`, `"zod": "catalog:"` in `template/package.json`: `emdash` 1.4.0 pins `zod` 4.5.4 ([GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5), fixed in 4.6.6). The catalog holds the one `zod` version for the project and its dependencies. Remove all three once `emdash` pins `zod` ≥ 4.6.6. → [WHY](../WHY.md#why-zod-has-a-pnpm-override)
+- `overrides: { zod: "catalog:" }` and `catalog: { zod: <version> }` in `pnpm-workspace.yaml`, `"zod": "catalog:"` in `package.json`: `emdash` 1.4.0 pins `zod` 4.5.4 ([GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5), fixed in 4.6.6). The catalog holds the one `zod` version for the project and its dependencies. Remove all three once `emdash` pins `zod` ≥ 4.6.6. → [WHY](../WHY.md#why-zod-has-a-pnpm-override)
 - Full review: `pnpm audit` without `--prod`; fix by update or `pnpm audit --fix update`. `--fix` without a method adds overrides to `pnpm-workspace.yaml`: review them.
 
 ## Add a package

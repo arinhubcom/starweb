@@ -13,6 +13,7 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project
 - Keep every project decision: chosen tool, forbidden tool, exact path, file name, command, binding, version pin, limit, number, order. Drop the reason unless the agent would otherwise "fix" the rule back.
 - Write the forbidden option and its replacement in one bullet: `No Drizzle/Prisma → Kysely.`
 - Cross-reference with `→ [FILE](FILE.md)`.
+- `rules/` is copied to each project, so a rule never names the Starweb template: `package.json`, not `template/package.json`. Exceptions: a path in the Starweb clone that a step in [SETUP](SETUP.md) or [UPDATE](UPDATE.md) reads, and this file.
 
 ## WHY.md
 
