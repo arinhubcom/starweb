@@ -43,7 +43,7 @@ A project whose `.starweb.json` commit is older than the Starweb commit that add
 
 ## EmDash update
 
-`emdash`, `@emdash-cms/cloudflare`, and the starter files move only through Starweb. No bump by hand or by Dependabot (`ignore` in `dependabot.yml` also stops its security updates). No `upgrade-emdash` and no `upgrading-emdash` skill: it takes an npm tag, not a version, so it skips the pin and `minimumReleaseAge`. A security alert for these packages → these steps.
+`emdash`, `@emdash-cms/cloudflare`, and the starter files move only through Starweb. No bump by hand or by Dependabot (`ignore` in `dependabot.yml` also stops its security updates). A security alert for these packages → these steps.
 
 ### Starweb repository
 
