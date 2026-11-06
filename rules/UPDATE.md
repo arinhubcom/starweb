@@ -43,7 +43,7 @@ A project whose `.starweb.json` commit is older than the Starweb commit that add
 
 ## EmDash update
 
-`emdash`, `@emdash-cms/cloudflare`, and the starter files move only through Starweb. No bump by hand or by Dependabot (`ignore` in `dependabot.yml` also stops its security updates). A security alert for these packages → these steps.
+`emdash`, `@emdash-cms/cloudflare`, and the starter files move through Starweb. No bump by hand or by Dependabot (`ignore` in `dependabot.yml` also stops its security updates). A security alert for these packages → these steps; no fix in Starweb yet → `upgrading-emdash` skill.
 
 ### Starweb repository
 
@@ -60,3 +60,13 @@ A project whose `.starweb.json` commit is older than the Starweb commit that add
 2. The steps in Starweb update. `update.mjs` moves the pins and merges the starter files.
 3. Apply the changelog entries that affect project code.
 4. New core migrations in the changelog → back up first; they run in the release pipeline. → [DEPLOY](DEPLOY.md) (EmDash core migrations)
+
+### `upgrading-emdash` skill
+
+A project needs an EmDash version that Starweb does not pin yet, for example for a security fix. Otherwise → Project.
+
+1. `pnpm dlx upgrade-emdash@latest --dry-run`; read the plan. Then the same command without `--dry-run`. Not `npx`. It takes an npm tag, not a version.
+2. Read `.emdash/UPGRADE.md`, and follow the skill for each entry.
+3. `pnpm run check`, `pnpm run build`, and `pnpm run size` exit with 0. `pnpm peers check` has no new line for `@emdash-cms/plugin-forms` or `@emdash-cms/plugin-field-kit` → [DEPS](DEPS.md) (Astro, Cloudflare, and EmDash).
+4. New core migrations → back up first; they run in the release pipeline. → [DEPLOY](DEPLOY.md) (EmDash core migrations)
+5. Write the version and the reason in the project `AGENTS.md`. At the next Starweb update, `Kept (project version differs)`: keep the project version until the Starweb pin reaches it, then take the Starweb value and remove the note.
