@@ -62,7 +62,7 @@ This file covers performance targets, limits, and caching. Read it before you me
 
 - Choose the D1 location during setup, because you set it when you create the database. See [SETUP](SETUP.md#optional-parts).
 - To set a location, pick the hint near most users: `pnpm exec wrangler d1 create <name> --location=weur`.
-- The hints are `wnam`, `enam`, `weur`, `eeur`, `apac`, and `oc`.
+- The hints are `wnam` (Western North America), `enam` (Eastern North America), `weur` (Western Europe), `eeur` (Eastern Europe), `apac` (Asia-Pacific), and `oc` (Oceania).
 - To set no location, leave out `--location`. D1 then creates the database close to where you run the command.
 - Use the same choice for each D1 database of the project. A comment next to `d1_databases` in `wrangler.jsonc` holds it.
 - Put the `database_id` in `wrangler.jsonc`.

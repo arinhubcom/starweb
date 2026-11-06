@@ -11,7 +11,14 @@ Step 1 chooses the optional parts. Steps 2 to 4 create the project with [setup.m
 1. Ask the user which optional parts to add.
    - Put the whole list in one question.
    - Ask for the site URL for step 4 in the same question.
-   - Ask for the D1 location for step 6 in the same question. The choices are `wnam` (Western North America), `enam` (Eastern North America), `weur` (Western Europe), `eeur` (Eastern Europe), `apac` (Asia-Pacific), `oc` (Oceania), or no location.
+   - Ask for the D1 location for step 6 in the same question. Show the user each choice with its full name:
+     - `wnam`: Western North America
+     - `enam`: Eastern North America
+     - `weur`: Western Europe
+     - `eeur`: Eastern Europe
+     - `apac`: Asia-Pacific
+     - `oc`: Oceania
+     - No location
    - Say that with no location, D1 creates the database close to where step 6 runs.
    - If the user is not sure about the location, use no location.
    - Wait for the answer before step 2. See [WHY](../WHY.md#why-setup-asks-about-optional-parts-first).
