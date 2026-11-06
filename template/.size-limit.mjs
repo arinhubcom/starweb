@@ -8,6 +8,9 @@ const DEFAULT_LIMIT = "10 kB";
 // Island name (file name without extension) -> limit. Example: Counter: "15 kB".
 const LIMIT_OVERRIDES = {};
 
+// Check that these patterns match real files. With no match the list is empty,
+// and `pnpm run size` skips the island check and passes (`size-limit` itself
+// fails on an empty config).
 const patterns = ["src/components/islands/*.tsx", "src/apps/*/islands/*.tsx"];
 
 const NOT_AN_ISLAND = /\.(stories|test)$/;

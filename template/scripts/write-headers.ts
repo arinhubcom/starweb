@@ -10,5 +10,6 @@ const lines = Object.entries(headers).map(
   ([name, value]) => `  ${name}: ${value}`,
 );
 
+// Cloudflare limits `_headers` to 100 rules and 2,000 characters per line.
 mkdirSync("public", { recursive: true });
 writeFileSync("public/_headers", `/*\n${lines.join("\n")}\n`);

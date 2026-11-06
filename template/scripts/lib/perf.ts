@@ -1,5 +1,5 @@
 // Pure helpers for the production performance checks: PageSpeed Insights
-// results and Workers Observability queries. No I/O. See Performance in
+// results and Workers Observability queries. No I/O. See Measure Core Web Vitals in
 // rules/PERF.md.
 
 export const TARGET_SCORE = 100;

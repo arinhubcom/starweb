@@ -21,11 +21,13 @@ export default defineConfig({
     setupFiles: ["./test/setup.ts"],
     exclude: [...configDefaults.exclude, "e2e/**"],
     coverage: {
-      // No `v8`: the plugin does not support it.
+      // No `v8`: the plugin does not support it. Coverage thresholds apply only
+      // when coverage runs, so the `test` script passes `--coverage`.
       // https://developers.cloudflare.com/workers/testing/vitest-integration/known-issues/
       provider: "istanbul",
       // The default counts only imported files.
       include: ["src/**/*.{ts,tsx}"],
+      // Starter files that need no test, and re-export files.
       exclude: [
         ...coverageConfigDefaults.exclude,
         "**/*.stories.*",
@@ -36,6 +38,7 @@ export default defineConfig({
         "src/lib/utils.ts",
         "src/components/ui/**/index.ts",
       ],
+      // The same threshold for all four metrics.
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },

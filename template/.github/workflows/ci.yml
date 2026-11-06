@@ -20,8 +20,12 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
+          # Caches the pnpm store. Keep it in every workflow that installs packages.
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Restores the folder where Astro stores the downloaded fonts. Without it,
+      # a build fetches the fonts from the provider. Keep it in every workflow
+      # that builds.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: node_modules/.astro/fonts
@@ -30,5 +34,8 @@ jobs:
       - run: pnpm run check
       - run: pnpm run build
       - run: pnpm run size
+      # Fails on a known vulnerability of high severity or worse in a production
+      # dependency. The full review without `--prod` is manual: rules/DEPS.md.
       - run: pnpm audit --prod --audit-level high
+      # Checks the registry signatures of the installed packages.
       - run: pnpm audit signatures

@@ -1,101 +1,131 @@
 # UI-UX
 
-Behavior and task completion, site and app. Look → [MATERIAL](MATERIAL.md), [DESIGN](DESIGN.md). Components → [COMPONENTS](COMPONENTS.md). UI text → [WRITING](WRITING.md). EmDash admin pages follow Kumo → [DESIGN](DESIGN.md).
+This file covers behavior and task completion on the site and in apps: accessibility, states, forms, feedback, motion, navigation, and theme. Read it before you build a page or a flow.
 
-## Accessibility
+- For the look, see [MATERIAL](MATERIAL.md) and [DESIGN](DESIGN.md).
+- For components, see [COMPONENTS](COMPONENTS.md).
+- For UI text, see [WRITING](WRITING.md).
+- EmDash admin pages follow Kumo. See [DESIGN](DESIGN.md).
 
-### [WCAG 2.2](STACK.md#wcag-22)
+## Meet the accessibility requirements
 
-- Level AA on each page → [WHY](../WHY.md#why-wcag-22-aa).
-- Contrast 4.5:1 text, 3:1 large text (1.4.3); 3:1 for borders, icons, states that identify a control (1.4.11). Check every theme token pair in light and dark.
-- Keyboard-only operable (2.1.1); no focus trap, every component leavable (2.1.2); modal dialog keeps focus until closed.
-- Focus order = visual order (2.4.3); no positive `tabindex`.
-- Focus ring via `focus-visible:` (`focus-visible:outline-3 focus-visible:outline-offset-2`, → [MATERIAL](MATERIAL.md#states)). No `outline-none` without a `focus-visible:` style in the same class list (2.4.7).
-- `scroll-padding-top` and `scroll-padding-bottom` on `<html>` equal to sticky header or bottom bar height (2.4.11).
-- 320px width without horizontal scroll (1.4.10); only tables and code blocks scroll horizontally, in their own container.
-- Hover or focus content (tooltip): Escape closes, stays open under the pointer (1.4.13). No action reachable only via tooltip or hover.
-- Single-pointer alternative for each drag (buttons to move up and down) (2.5.7).
-- Visible label text at the start of the accessible name (2.5.3); no differing `aria-label`.
+### Meet WCAG 2.2
 
-### WAI-ARIA APG
+- Meet [WCAG 2.2](STACK.md#wcag-22) level AA on each page. See [WHY](../WHY.md#why-wcag-22-aa).
+- Use a contrast of 4.5:1 for text and 3:1 for large text (1.4.3).
+- Use a contrast of 3:1 for borders, icons, and states that identify a control (1.4.11).
+- Check every theme token pair in light and dark.
+- Make everything operable with the keyboard alone (2.1.1).
+- Do not create a focus trap. Every component must be leavable (2.1.2). A modal dialog keeps focus until it closes.
+- Make the focus order match the visual order (2.4.3). Do not use a positive `tabindex`.
+- Show the focus ring with `focus-visible:`. See [MATERIAL](MATERIAL.md#style-states).
+- Do not use `outline-none` without a `focus-visible:` style in the same class list (2.4.7).
+- Set `scroll-padding-top` and `scroll-padding-bottom` on `<html>` equal to the height of the sticky header or bottom bar (2.4.11).
+- Keep the page usable at 320px width without horizontal scroll (1.4.10).
+- Let only tables and code blocks scroll horizontally, in their own container.
+- For hover or focus content such as a tooltip, let Escape close it and keep it open under the pointer (1.4.13).
+- Do not make an action reachable only through a tooltip or hover.
+- Give each drag a single-pointer alternative, such as buttons to move up and down (2.5.7).
+- Start the accessible name with the visible label text (2.5.3). Do not use an `aria-label` that differs.
 
-- Native elements first: `<button>`, `<a href>`, `<input>`, `<select>`, `<dialog>`, `<details>`. No `onClick` on `<div>` or `<span>`.
-- Dialogs, menus, tabs, comboboxes, composite widgets: [Base UI](STACK.md#base-ui) → [COMPONENTS](COMPONENTS.md). No own focus traps, roving `tabindex`, key handlers.
-- Dialog: focus in on open, Escape closes, focus returns to the opener (Base UI default). `initialFocus`/`finalFocus` on `Dialog.Popup` only when the default is wrong (trigger gone after delete).
-- One `<main>` per page; `<nav>` with `aria-label` per navigation; "Skip to main content" link as first focusable element in the base layout (2.4.1).
+### Use native elements and WAI-ARIA APG
 
-## States
+- Use native elements first: `<button>`, `<a href>`, `<input>`, `<select>`, `<dialog>`, `<details>`.
+- Do not put `onClick` on a `<div>` or `<span>`.
+- For dialogs, menus, tabs, comboboxes, and other composite widgets, use [Base UI](STACK.md#base-ui). See [COMPONENTS](COMPONENTS.md).
+- Do not write your own focus traps, roving `tabindex`, or key handlers.
+- In a dialog, focus moves in on open, Escape closes it, and focus returns to the opener. This is the Base UI default.
+- Set `initialFocus` or `finalFocus` on `Dialog.Popup` only when the default is wrong, for example when the trigger is gone after a delete.
+- Use one `<main>` per page.
+- Give each `<nav>` an `aria-label`.
 
-### [Web performance](STACK.md#web-performance) CLS
+## Show loading, empty, and error states
 
-- Views that load data: loading, empty, error, success. No blank area.
-- Skeleton at final content size; no full-page spinner.
-- `width` and `height` on each `<img>` and `<video>` or `aspect-ratio`; `min-height` for late content; CLS 0.1 or less → [MEDIA](MEDIA.md).
+- Give each view that loads data a loading, an empty, an error, and a success state. Do not leave a blank area.
+- Use a skeleton at the final content size. Do not use a full-page spinner.
+- Set `width` and `height` on each `<img>` and `<video>`, or use `aspect-ratio`. See [Web performance](STACK.md#web-performance) and [MEDIA](MEDIA.md).
+- Use `min-height` for content that arrives late. Keep CLS at 0.1 or less.
 - Animate only `transform` and `opacity`.
-- Empty state: why empty plus next action (**Create project**). Error state: what failed plus way out (**Try again**), rest of page usable. Text → [WRITING](WRITING.md).
-- No island on the page: render error and empty states on the server. [TanStack](STACK.md#tanstack) Query states (`isPending`, `isError`) only in islands → [ARCH](ARCH.md).
+- In an empty state, say why it is empty and give the next action (**Create project**).
+- In an error state, say what failed and give a way out (**Try again**). The rest of the page stays usable.
+- For the text, see [WRITING](WRITING.md).
+- If the page has no island, render the error and empty states on the server.
+- Use [TanStack](STACK.md#tanstack) Query states (`isPending`, `isError`) only in islands. See [ARCH](ARCH.md).
 
-## Forms
+## Build a form
 
-### [Astro](STACK.md#astro) Actions
+### Handle input and errors
 
-- Server validation with the action's [Zod](STACK.md#zod) schema, also when the island validates.
-- Field errors next to the field: `error.fields` after `isInputError(error)`; `aria-describedby` to the message, `aria-invalid="true"` on the input (3.3.1).
-- Say how to fix (expected format) unless that weakens security (3.3.3) → [WRITING](WRITING.md).
-- After a failed submit focus the first error field; long forms also an error summary at the top with links to fields.
-- Show errors on `blur` or submit, not while typing the first time.
-- Keep entered values after a failed submit (Astro clears inputs): render from submitted data, or `transition:persist` on inputs with view transitions.
-- Success: `Astro.redirect()` (POST, redirect, GET). Action handlers cannot redirect: in the page `return Astro.redirect(Astro.url.pathname)` when `Astro.getActionResult(actions.x)?.data` is set, before reading the flash.
-- Form without an island: result as status message in `role="status"` after the redirect (a toast needs an island).
-- Message via [Astro session](https://docs.astro.build/en/guides/sessions/): handler `context.session?.set("flash", message, { ttl: 60 })`; page `await Astro.session?.get("flash")`, then `Astro.session?.set("flash", null)`. Per-user pages only, with `Astro.cache.set(false)` → [PERF](PERF.md) (Cache). Cloudflare adapter: `SESSION` KV binding.
-- Public CDN-cached pages: no session read; redirect to a fixed URL (`/contact/thanks`).
-- Disable submit and show progress while sending. Keep the label (**Save**), no **Saving…** (buttons have no ellipsis → [WRITING](WRITING.md)); progress via spinner or "Saving…" in `role="status"`.
+- Validate on the server with the [Zod](STACK.md#zod) schema of the [Astro](STACK.md#astro) action, also when the island validates.
+- Show field errors next to the field, from `error.fields` after `isInputError(error)`.
+- Link the message with `aria-describedby` and set `aria-invalid="true"` on the input (3.3.1).
+- Say how to fix the error, such as the expected format, unless that weakens security (3.3.3). See [WRITING](WRITING.md).
+- After a failed submit, focus the first error field.
+- In a long form, also show an error summary at the top with links to the fields.
+- Show errors on `blur` or on submit, not while the user types for the first time.
+- Keep the entered values after a failed submit, because Astro clears inputs.
+- To keep them, render from the submitted data, or use `transition:persist` on inputs with view transitions.
 
-### WCAG 2.2 input
+### Finish a submit
 
-- Visible `<label>`; placeholder is not a label (3.3.2).
-- `autocomplete` on user inputs: `email`, `name`, `tel`, `current-password` (1.3.5).
-- No re-asking data entered in the same flow; fill or let the user pick (3.3.7).
-- Allow paste and password managers in login and code fields; no puzzle or cross-screen code memory without paste or copy (3.3.8).
-- No submit or page change on field change (select); wait for a button (3.2.2).
-- Review, confirm, or undo for each submit with legal or financial effect or data deletion (3.3.4).
+- After success, use `Astro.redirect()` (POST, redirect, GET).
+- Action handlers cannot redirect. In the page, `return Astro.redirect(Astro.url.pathname)` when `Astro.getActionResult(actions.x)?.data` is set, before you read the flash.
+- For a form without an island, show the result as a status message in `role="status"` after the redirect. A toast needs an island.
+- Pass the message through the [Astro session](https://docs.astro.build/en/guides/sessions/).
+- In the handler, call `context.session?.set("flash", message, { ttl: 60 })`.
+- In the page, call `await Astro.session?.get("flash")`, then `Astro.session?.set("flash", null)`.
+- Read the session only on per-user pages, with `Astro.cache.set(false)`. See [PERF](PERF.md#use-astro-route-caching).
+- The Cloudflare adapter uses the `SESSION` KV binding.
+- On public pages cached by the CDN, do not read the session. Redirect to a fixed URL such as `/contact/thanks`.
+- While sending, disable submit and show progress.
+- Keep the button label (**Save**). Do not change it to **Saving…**, because buttons have no ellipsis. See [WRITING](WRITING.md).
+- Show progress with a spinner, or with "Saving…" in `role="status"`.
 
-## Feedback
+### Follow the WCAG 2.2 input criteria
 
-### [Base UI](STACK.md#base-ui) Toast
+- Use a visible `<label>`. A placeholder is not a label (3.3.2).
+- Set `autocomplete` on user inputs: `email`, `name`, `tel`, `current-password` (1.3.5).
+- Do not ask for data again that the user entered in the same flow. Fill it in or let the user pick (3.3.7).
+- Allow paste and password managers in login and code fields (3.3.8).
+- Do not require a puzzle or a code that the user must remember across screens without paste or copy (3.3.8).
+- Do not submit or change the page on a field change such as a select. Wait for a button (3.2.2).
+- Offer review, confirm, or undo for each submit with legal or financial effect, and for data deletion (3.3.4).
 
-- Toast confirms a finished action ("Project deleted"); no success dialog.
-- Undoable delete: **Undo** via `actionProps` in `add()` plus `<Toast.Action />`; data restorable (soft delete) while the toast is open.
-- Toast with an action: `timeout: 0` plus close button → [WHY](../WHY.md#why-toasts-with-an-action-do-not-close-on-their-own). Without an action: default 5000 ms.
-- `priority: "high"` only for blocking errors; `"low"` for confirmations.
-- Irreversible action (delete account): dialog first; confirm button names the action (**Delete account**), not **OK**.
-- Background change result ("3 results", "Saved"): `role="status"` (4.1.3).
+## Give feedback
 
-## Motion
+- Use a toast to confirm a finished action, such as "Project deleted". Do not use a success dialog.
+- For an undoable delete, add **Undo** with `actionProps` in `add()` and `<Toast.Action />` from the Base UI toast.
+- Keep the data restorable (soft delete) while the toast is open.
+- Give a toast with an action `timeout: 0` and a close button. See [WHY](../WHY.md#why-toasts-with-an-action-do-not-close-on-their-own).
+- A toast without an action uses the default of 5000 ms.
+- Use `priority: "high"` only for blocking errors. Use `"low"` for confirmations.
+- For an irreversible action such as deleting an account, show a dialog first.
+- Name the action on the confirm button (**Delete account**), not **OK**.
+- Announce the result of a background change, such as "3 results" or "Saved", in `role="status"` (4.1.3).
 
-### [Tailwind CSS](STACK.md#tailwind-css) reduced motion
+## Respect reduced motion
 
-- Movement animations behind `motion-safe:` (`motion-safe:transition motion-safe:hover:-translate-y-0.5`). `motion-reduce:` only to switch off one animation (`motion-reduce:hidden` on a spinner with text alternative).
-- Reduced motion keeps fades and color changes; drops movement, scale, parallax, auto-play.
-- No information only in animation (state change).
-- MD3 easing and durations (`duration-200 ease-standard`) or installed component animations → [MATERIAL](MATERIAL.md#motion).
+- Put movement animations behind `motion-safe:`, as in `motion-safe:transition motion-safe:hover:-translate-y-0.5`. Use [Tailwind CSS](STACK.md#tailwind-css) variants.
+- Use `motion-reduce:` only to switch off one animation, such as `motion-reduce:hidden` on a spinner that has a text alternative.
+- Under reduced motion, keep fades and color changes.
+- Under reduced motion, drop movement, scale, parallax, and auto-play.
+- Do not show information only in an animation, such as a state change.
+- For MD3 easing and durations (`duration-200 ease-standard`) and installed component animations, see [MATERIAL](MATERIAL.md#animate).
 
-## Navigation
+## Build navigation
 
-### Astro routing
+- Put shareable or reloadable view state in the URL: filters, sort, search, page, and selected tab.
+- On the server, read it from `Astro.url.searchParams`. In a TanStack Router SPA, use search params with `validateSearch`.
+- Use `<a href>` to navigate and `<button>` to act. Do not navigate with a button and `onClick`.
+- Give each page-like view its own URL. Do not replace history for normal navigation.
+- Set `aria-current="page"` on the current navigation item.
+- Open links in the same tab.
+- Open a new tab only for an external link in a flow the user must not leave, such as checkout. State this in the link text or icon label.
 
-- Shareable or reloadable view state in the URL: filters, sort, search, page, selected tab. Server: `Astro.url.searchParams`; TanStack Router SPA: search params with `validateSearch`.
-- `<a href>` navigates, `<button>` acts; no button plus `onClick` navigation.
-- Each page-like view has its own URL; no history replace for normal navigation.
-- `aria-current="page"` on the current nav item.
-- Same-tab links; new tab only for external links in a flow the user must not leave (checkout), stated in link text or icon label.
+## Support light and dark themes
 
-## Theme
-
-### [MDN](STACK.md#mdn) `prefers-color-scheme`
-
-- Default follows the system. Theme setting: light, dark, system.
-- `localStorage` key `theme` (`light`, `dark`, `system`). No cookie, no server-rendered `.dark` (CDN caches public pages → [PERF](PERF.md) (Cache); server cannot know the system setting).
-- `.dark` on `<html>` before first paint: the one blocking inline script in `<head>` of the base layout; reads `theme`, falls back to `matchMedia("(prefers-color-scheme: dark)")` for `system` or missing → [COMPONENTS](COMPONENTS.md) (Astro components).
-- On pick, update `localStorage` and `.dark` together; for `system` also listen to the query's `change` event.
-- Contrast rules (Accessibility) hold in both themes.
+- Follow the system by default, using [`prefers-color-scheme`](STACK.md#mdn). Offer a theme setting with light, dark, and system.
+- When the user picks a theme, update `localStorage` and `.dark` together.
+- For `system`, also listen to the `change` event of the media query.
+- Do not use a cookie. Do not render `.dark` on the server. The CDN caches public pages, and the server cannot know the system setting. See [PERF](PERF.md#cache-pages).
+- Keep the contrast rules from [Meet WCAG 2.2](#meet-wcag-22) in both themes.

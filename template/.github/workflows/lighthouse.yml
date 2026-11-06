@@ -1,6 +1,9 @@
 # Lighthouse CI for pull requests. Warning only: a low score adds an annotation
 # and never fails the job. Never make this a required check. Scores vary
-# between runs on shared runners. See Performance in rules/PERF.md.
+# between runs on shared runners. See Measure Core Web Vitals in rules/PERF.md.
+# This check has its own workflow, so that it does not delay the PR workflow.
+# `paths` lists the files that can change its result. `if` on the job skips
+# draft pull requests.
 name: Lighthouse
 
 on:
@@ -38,6 +41,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Restores the downloaded fonts, as in ci.yml.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: node_modules/.astro/fonts

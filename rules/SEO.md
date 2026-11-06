@@ -1,81 +1,120 @@
 # SEO
 
-Public site only. `hreflang` → [I18N](I18N.md). Images, social preview images → [MEDIA](MEDIA.md). Speed → [PERF](PERF.md). EmDash content → [CMS](CMS.md).
+This file covers search engine optimization of the public site: site URL, page head, crawling, structured data, errors, and redirects. Read it before you add a public page.
 
-## Site URL
+- For `hreflang`, see [I18N](I18N.md).
+- For images and social preview images, see [MEDIA](MEDIA.md).
+- For speed, see [PERF](PERF.md).
+- For EmDash content, see [CMS](CMS.md).
 
-### [Astro](STACK.md#astro) `site`
+## Set the site URL
 
-- Same origin for [EmDash](STACK.md#emdash): **Settings > General > Site URL**, `siteUrl` in `emdash()`, or `EMDASH_SITE_URL`. It builds sitemap, `robots.txt`, JSON-LD URLs; Astro `site` alone leaves `localhost` there.
-- Check `/robots.txt` and `WebSite` JSON-LD show the public origin.
-- Absolute URLs: `new URL(path, Astro.site)`, never `Astro.url.origin`.
-- Never `trailingSlash: 'ignore'`. Check prerendered pages on the deployed Worker (host may ignore it). No Astro `redirects` fix (unsupported).
+- Set the same origin for [EmDash](STACK.md#emdash): **Settings > General > Site URL**, `siteUrl` in `emdash()`, or `EMDASH_SITE_URL`.
+- EmDash builds the sitemap, `robots.txt`, and JSON-LD URLs from it. The [Astro](STACK.md#astro) `site` alone leaves `localhost` there.
+- Check that `/robots.txt` and the `WebSite` JSON-LD show the public origin.
+- Build absolute URLs with `new URL(path, Astro.site)`. Never use `Astro.url.origin`.
+- Never set `trailingSlash: 'ignore'`.
+- Check prerendered pages on the deployed Worker, because the host may ignore `trailingSlash`.
+- Do not fix it with Astro `redirects`. They do not support it.
 
-## Page head
+## Write the page head
 
-### [Google Search Central](STACK.md#google-search-central)
+### Set the title, description, and canonical
 
-- Per page: unique, specific, short `<title>`; no "Home"; site name after a separator at the end or start (`Pricing | Starweb`); full tagline on home only. One `<h1>` matching the title.
-- `<meta name="description">`: unique, 160 characters or less. Generate from page data (`excerpt`) for many similar siblings.
-- Exactly one absolute `<link rel="canonical">` on every indexable page (self-canonical too). Same URL in `rel="canonical"`, `og:url`, and the sitemap. Check rendered HTML of a sample page per template.
+- Follow [Google Search Central](STACK.md#google-search-central).
+- Give each page a unique, specific, short `<title>`. Do not use "Home".
+- Put the site name after a separator, at the end or the start: `Pricing | Starweb`.
+- Use the full tagline on the home page only.
+- Use one `<h1>` that matches the title.
+- Give each page a unique `<meta name="description">` of 160 characters or fewer.
+- For many similar sibling pages, generate the description from page data such as `excerpt`.
+- Put exactly one absolute `<link rel="canonical">` on every indexable page, also a self-canonical.
+- Use the same URL in `rel="canonical"`, `og:url`, and the sitemap.
+- Check the rendered HTML of one sample page for each template.
 
-### EmDash SEO
+### Use EmDash SEO
 
-- `"seo"` in `supports` of each routable collection, or **SEO** in **Content Types** (SEO panel: title, description, image, canonical, **Hide from search engines**).
-- `<EmDashHead>` renders description, robots, canonical, Open Graph, Twitter Card.
-- Content page: `content: { collection, id, slug }`; title and canonical from `getSeoMeta()`. Custom pages use the `Base.astro` default, built from the pathname. A page that is not indexable passes `canonical={null}`. `<EmDashHead>` emits no `hreflang` there → [I18N](I18N.md) (hreflang).
-- Skip `<EmDashHead>` only on private pages and app routes; add `<meta name="robots" content="noindex">`.
-- No own description, canonical, or Open Graph tags on pages with `<EmDashHead>`; change via SEO panel, page context, or plugin `page:metadata` hook.
-- Title separator and default social image: **Settings > SEO**; pass `settings.seo?.titleSeparator` to `getSeoMeta()` as `titleSeparator`.
+- Add `"seo"` to `supports` of each routable collection, or turn on **SEO** in **Content Types**.
+- The SEO panel has title, description, image, canonical, and **Hide from search engines**.
+- `<EmDashHead>` renders description, robots, canonical, Open Graph, and Twitter Card.
+- On a content page, pass `content: { collection, id, slug }`. Take the title and canonical from `getSeoMeta()`.
+- A custom page uses the `Base.astro` default, which is built from the pathname.
+- A page that is not indexable passes `canonical={null}`.
+- `<EmDashHead>` emits no `hreflang` on a custom page. See [I18N](I18N.md#add-hreflang-links).
+- Skip `<EmDashHead>` only on private pages and app routes. Add `<meta name="robots" content="noindex">` there.
+- On a page with `<EmDashHead>`, do not write your own description, canonical, or Open Graph tags.
+- Change them with the SEO panel, the page context, or the plugin `page:metadata` hook.
+- Set the title separator and the default social image in **Settings > SEO**.
+- Pass `settings.seo?.titleSeparator` to `getSeoMeta()` as `titleSeparator`.
 
-### [Open Graph](STACK.md#open-graph)
+### Add Open Graph tags
 
-- With `<EmDashHead>`: no own tags; verify `og:type`, `og:title`, `og:description`, `og:image`, `og:site_name`, `og:url`; fill gaps in SEO panel, **Settings > SEO**, or page context.
-- Shared page without it: `<meta property>` `og:title`, `og:type`, `og:image`, `og:url`, `og:description`, `og:site_name`; `og:url` = canonical; `og:image:alt` with `og:image`; image `new URL('/images/preview.png', Astro.site)`.
+- With `<EmDashHead>`, do not write your own tags. Follow [Open Graph](STACK.md#open-graph).
+- Verify `og:type`, `og:title`, `og:description`, `og:image`, `og:site_name`, and `og:url`.
+- Fill gaps in the SEO panel, in **Settings > SEO**, or in the page context.
+- On a shared page without `<EmDashHead>`, add `<meta property>` tags: `og:title`, `og:type`, `og:image`, `og:url`, `og:description`, and `og:site_name`.
+- Set `og:url` to the canonical URL.
+- Add `og:image:alt` with `og:image`.
+- Build the image URL as `new URL('/images/preview.png', Astro.site)`.
 
-## Crawling
+## Configure crawling
 
-### Sitemaps
+### Add sitemaps
 
-- EmDash `/sitemap.xml` for CMS content (published, routable, SEO-enabled, not hidden); no own `/sitemap.xml`.
-- [`@astrojs/sitemap`](https://docs.astro.build/en/guides/integrations-guide/sitemap/) `sitemap()` for prerendered non-CMS pages (`/sitemap-index.xml`, `/sitemap-0.xml`; no dynamic routes in on-demand mode). `filter` out private/app pages (`!page.includes('/app')`) and `noindex` them. Add `<link rel="sitemap" href="/sitemap-index.xml" />` in the base layout `<head>`.
+- Use the EmDash `/sitemap.xml` for CMS content: published, routable, SEO-enabled, and not hidden. Do not add your own `/sitemap.xml`.
+- For prerendered non-CMS pages, use [`@astrojs/sitemap`](https://docs.astro.build/en/guides/integrations-guide/sitemap/) `sitemap()`. It writes `/sitemap-index.xml` and `/sitemap-0.xml`.
+- In on-demand mode, `sitemap()` has no dynamic routes.
+- Use `filter` to drop private and app pages, such as `!page.includes('/app')`, and add `noindex` to them.
+- Add `<link rel="sitemap" href="/sitemap-index.xml" />` in the `<head>` of the base layout.
 
-### robots.txt
+### Configure robots.txt
 
-- EmDash `/robots.txt` only; no `public/robots.txt` or `src/pages/robots.txt.ts` (default: allow all, disallow `/_emdash/`).
-- Change in **Settings > SEO > robots.txt** with full text; one `Sitemap:` line each (`/sitemap.xml`, plus `/sitemap-index.xml` with `@astrojs/sitemap`); EmDash adds its own only if none.
-- No `Disallow` to deindex: `noindex` meta or `X-Robots-Tag: noindex`, crawlable. No `noindex` in `robots.txt`.
+- Use the EmDash `/robots.txt` only. Do not add `public/robots.txt` or `src/pages/robots.txt.ts`.
+- The default allows all and disallows `/_emdash/`.
+- To change it, edit **Settings > SEO > robots.txt** with the full text.
+- Write one `Sitemap:` line for each sitemap: `/sitemap.xml`, plus `/sitemap-index.xml` with `@astrojs/sitemap`. EmDash adds its own line only if none exists.
+- Do not use `Disallow` to deindex a page. Use a `noindex` meta tag or `X-Robots-Tag: noindex`, and keep the page crawlable.
+- Do not put `noindex` in `robots.txt`.
 
-## Structured data
+## Add structured data
 
-### [Schema.org](STACK.md#schemaorg)
+- Use [Schema.org](STACK.md#schemaorg) JSON-LD only. Do not use Microdata or RDFa.
+- `<EmDashHead>` renders `BlogPosting` and the `WebSite` graph. Change them with the plugin `page:metadata` hook.
+- For other types such as `Organization`, `BreadcrumbList`, and `Product`, use `<script type="application/ld+json" set:html={JSON.stringify(data)} />`.
+- Make `data` a typed object.
+- Include all required properties, as Search Central lists them.
+- Prefer fewer, complete recommended properties over many incomplete ones.
 
-- JSON-LD only; no Microdata or RDFa.
-- `<EmDashHead>` renders `BlogPosting` and the `WebSite` graph; change via plugin `page:metadata`.
-- Other types (`Organization`, `BreadcrumbList`, `Product`): `<script type="application/ld+json" set:html={JSON.stringify(data)} />`, `data` a typed object.
-- All required properties per Search Central; fewer complete recommended ones over many incomplete.
+## Handle errors and redirects
 
-## Errors and redirects
+### Return 404
 
-### 404
+- Return a real `404` status, never `200` (a soft 404).
+- For a dynamic page without an entry, `return Astro.rewrite("/404")`.
+- For custom markup in on-demand mode, set `Astro.response.status = 404`.
 
-- Real `404` status, never `200` (soft 404). Dynamic page without entry: `return Astro.rewrite("/404")`; custom markup on-demand: `Astro.response.status = 404`.
+### Return 410
 
-### 410
+- Return `410` for deliberately removed content. Return `404` for content that never existed.
+- For CMS paths, use an EmDash **Redirects** rule, or mark the path from the **404 Errors** tab. Do not write your own handler.
+- For other on-demand pages, set `Astro.response.status = 410` and show a "removed" page. Astro `redirects` cannot do this.
 
-- `410` for deliberately removed content, `404` for never-existed. CMS paths: EmDash **Redirects** rule or mark from **404 Errors** tab; no own handler. Other on-demand pages: `Astro.response.status = 410` + "removed" page (Astro `redirects` cannot).
+### Redirect moved URLs
 
-### Redirects
+- Use a permanent `301` or `308` for moved URLs.
+- Use `302` or `307` only if the old URL returns.
+- For a fixed redirect, use `redirects` in `astro.config`. The default is `301` for GET.
+- For a temporary fixed redirect, use `{ status: 302, destination }`.
+- For a request-dependent redirect, use `Astro.redirect(path, 301)`. The default is `302`.
+- Call `Astro.redirect()` in the page, not in a child component.
+- For static assets such as old PDFs, use `public/_redirects`.
+- For CMS paths, use the EmDash **Redirects** page, which adds a `301` on a slug change. Do not add a config redirect for them.
 
-- Permanent `301`/`308` for moved URLs; `302`/`307` only if the old URL returns.
-- Fixed: `redirects` in `astro.config` (default `301` for GET; `{ status: 302, destination }` for temporary).
-- Request-dependent: `Astro.redirect(path, 301)` (default `302`), in the page, not a child component.
-- Static assets (old PDFs): `public/_redirects`.
-- CMS paths: EmDash **Redirects** page (auto `301` on slug change); no config redirect for those.
+## Add llms.txt
 
-## LLM files
-
-### [llms.txt](STACK.md#llmstxt)
-
-- `src/pages/llms.txt.ts` exports `GET` returning `Response`; site URL from `site` in endpoint context.
-- Order: H1 site name (required), blockquote summary, H2 sections with `- [Name](url): note` lists; secondary links under H2 `Optional`.
+- Create `src/pages/llms.txt.ts` that exports `GET` and returns a `Response`. See [llms.txt](STACK.md#llmstxt).
+- Take the site URL from `site` in the endpoint context.
+- Start with an H1 that holds the site name. It is required.
+- Add a blockquote with a summary.
+- Add H2 sections with `- [Name](url): note` lists.
+- Put secondary links under an H2 named `Optional`.

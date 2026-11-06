@@ -1,84 +1,112 @@
 # WRITING
 
-## Docs
+This file covers how to write docs, rules, code comments, commit messages, and UI text. Read it before you write any text.
 
-### [Google developer documentation style guide](STACK.md#google-developer-documentation-style-guide)
+## Write docs
 
-- Applies to docs, rules, code comments, commit messages. UI text: UI text rules first. `AGENTS.md` and `rules/` win where they differ.
-- Word list for spelling and term use: https://developers.google.com/style/word-list
-- Friendly, conversational voice; not flippant.
-- Global readers: simple, consistent text; no slang, jargon, clichés, figurative language, culture-specific references.
-- No announcements of future features or changes.
-- "You"; no "we" in instructions. Active voice. Present tense; "will" only for a later action (next backup). American spelling and punctuation.
-- Condition before instruction: "To install the package, run `pnpm add`."
-- Sentence case for titles and headings.
-- Numbered lists for ordered steps, bulleted for others, description lists for pairs.
-- Serial (Oxford) comma.
-- Code font: code, file names, commands, API names (`astro.config`, `pnpm add`, `injectRoute()`). UI elements bold: Click **Save**.
-- Unambiguous dates: 2026-10-14 or October 14, 2026; not 10/14/26.
-- Link text readable alone; no "click here", "this document", "this article".
-- Alt text on every image; vector or high-resolution images (SVG). Accessible to people with disabilities.
+- Follow the [Google developer documentation style guide](STACK.md#google-developer-documentation-style-guide) for docs, rules, code comments, and commit messages.
+- For UI text, follow the UI text rules first.
+- Where `AGENTS.md` and `rules/` differ from the style guide, they win.
+- Check spelling and term use against the word list: https://developers.google.com/style/word-list
+- Use a friendly, conversational voice. Do not be flippant.
+- Write for global readers: simple, consistent text with no slang, jargon, clichés, figurative language, or culture-specific references.
+- Do not announce future features or changes.
+- Address the reader as "you". Do not use "we" in instructions.
+- Use the active voice and the present tense. Use "will" only for a later action, such as the next backup.
+- Use American spelling and punctuation.
+- Put the condition before the instruction: "To install the package, run `pnpm add`."
+- Use sentence case for titles and headings.
+- Use numbered lists for ordered steps, bulleted lists for the rest, and description lists for pairs.
+- Use the serial (Oxford) comma.
+- Use code font for code, file names, commands, and API names, such as `astro.config`, `pnpm add`, and `injectRoute()`.
+- Use bold for UI elements: Click **Save**.
+- Write unambiguous dates: 2026-10-14 or October 14, 2026. Do not write 10/14/26.
+- Write link text that reads alone. Do not use "click here", "this document", or "this article".
+- Add alt text to every image, so that people with disabilities can use it.
+- Use vector or high-resolution images, such as SVG.
 
-## UI text
+## Write UI text
 
-### [Material Design 3](STACK.md#material-design-3) content design
+### Follow content design
 
-- MD3 content design for all UI text: labels, buttons, menus, headings, dialogs, errors, emails, alt text. Gaps → Google style guide. Conflicts → MD3.
+- Follow [Material Design 3](STACK.md#material-design-3) content design for all UI text: labels, buttons, menus, headings, dialogs, errors, emails, and alt text.
+- Where MD3 has gaps, follow the Google style guide.
+- Where they conflict, MD3 wins.
 
-### UX writing best practices
+### Follow UX writing practices
 
-- Say what happens on an action and how to undo it. Neutral, direct words; no alarming or condescending warnings.
-- No misrepresented consequences, no steering the decision (cancel subscription).
-- Specific, scannable titles; headings and subheads prioritize and group.
-- Sentence case for all UI text (titles, headings, labels, menu items, navigation, app bars, buttons); capitalize only product and brand names. No all caps.
-- Spelled-out words; no "e.g.", "etc." → "for example", "and more".
+- Say what happens on an action and how to undo it.
+- Use neutral, direct words. Do not write alarming or condescending warnings.
+- Do not misrepresent consequences. Do not steer the decision, for example when the user cancels a subscription.
+- Write specific, scannable titles. Use headings and subheads to prioritize and group.
+- Use sentence case for all UI text: titles, headings, labels, menu items, navigation, app bars, and buttons.
+- Capitalize only product and brand names. Do not use all caps.
+- Spell out words. Write "for example" and "and more", not "e.g." and "etc."
 
-### Word choice
+### Choose words
 
-- "You" and "your". No "me"/"my" mixed with "you"/"your" on one screen.
-- No "we", "our", "I" for the product. "I"/"my" only where the user agrees ("I agree to the terms of service").
+- Use "you" and "your".
+- Do not mix "me" and "my" with "you" and "your" on one screen.
+- Do not use "we", "our", or "I" for the product.
+- Use "I" and "my" only where the user agrees, such as "I agree to the terms of service".
 
-### Conversation mining
+### Use the words of your users
 
-- Before writing UI text for a feature, find users' words: support requests, feedback, reviews, forums, social media.
-- Set a goal first (feature name, one problem's words). Positive conversations for new text, negative for pain points.
-- Use users' words for things and actions in labels, buttons, headings, search; no slang, idioms, hashtags → Global writing.
-- Glossary of chosen terms; same term for the same thing everywhere.
+- Before you write UI text for a feature, find the words of users: support requests, feedback, reviews, forums, and social media.
+- Set a goal first, such as the feature name or the words for one problem.
+- Use positive conversations for new text and negative conversations for pain points.
+- Use the words of users for things and actions in labels, buttons, headings, and search.
+- Do not use slang, idioms, or hashtags. See [Write for a global audience](#write-for-a-global-audience).
+- Keep a glossary of the chosen terms.
+- Use the same term for the same thing everywhere.
 
-### [Mailchimp content style guide](STACK.md#mailchimp-content-style-guide) voice and tone
+### Set voice and tone
 
-- Voice and tone only; MD3 wins elsewhere (for example "we").
-- One voice in all UI text, home page to system alerts: plain, warm, human. Vary only tone, matched to the user's state of mind (relieved, confused).
-- Clarity before fun; humor only when natural; unsure → none.
-- Positive: what the user can do, not cannot.
-- No hype, over-promises, upsell, emotional tricks.
-- Hard concepts in plain words, no condescension.
+- Follow the [Mailchimp content style guide](STACK.md#mailchimp-content-style-guide) for voice and tone only. MD3 wins elsewhere, for example on "we".
+- Use one voice in all UI text, from the home page to system alerts: plain, warm, and human.
+- Vary only the tone, matched to the state of mind of the user, such as relieved or confused.
+- Put clarity before fun.
+- Use humor only when it is natural. If you are unsure, use none.
+- Write what the user can do, not what the user cannot do.
+- Do not use hype, over-promises, upsell, or emotional tricks.
+- Explain hard concepts in plain words. Do not be condescending.
 
-### Grammar and punctuation
+### Use grammar and punctuation
 
-- No period on a single sentence in labels, tooltips, bulleted lists, dialog body, link text; periods when more than one sentence.
-- Contractions ("don't", "can't"); "do not" only for emphasis in a caution.
-- Serial comma, except before "&".
-- Commas in numbers 1,000 to 1 million; none in years, street addresses, similar IDs. "M" for rounded millions (2M downloads).
-- No colons in headings; colon before a list in body text.
-- Exclamation points only for celebrations and greetings; not empty states or common tasks.
-- Ellipsis only for action in progress, no space before; none in buttons or menu items.
-- Parentheses only to define terms and acronyms, not side notes.
-- "&" only in headlines, table and column headers, navigation labels, buttons when space is short; "and" in sentences.
-- No em dashes. En dash without spaces for ranges (9 AM–5 PM). No spaces around hyphens.
-- Unsure about a compound hyphen: [AP Style](https://www.apstylebook.com), for that only.
-- Bold for emphasis; italics only for one word or a name, never a sentence.
+- Do not end a single sentence with a period in labels, tooltips, bulleted lists, dialog body, and link text.
+- Use periods when there is more than one sentence.
+- Use contractions, such as "don't" and "can't". Use "do not" only for emphasis in a caution.
+- Use the serial comma, except before "&".
+- Use commas in numbers from 1,000 to 1 million. Do not use them in years, street addresses, and similar IDs.
+- Use "M" for rounded millions, such as 2M downloads.
+- Do not use colons in headings. Use a colon before a list in body text.
+- Use exclamation points only for celebrations and greetings. Do not use them in empty states or for common tasks.
+- Use an ellipsis only for an action in progress, with no space before it. Do not use it in buttons or menu items.
+- Use parentheses only to define terms and acronyms. Do not use them for side notes.
+- Use "&" only in headlines, table and column headers, navigation labels, and buttons when space is short. Use "and" in sentences.
+- Do not use em dashes.
+- Use an en dash without spaces for ranges, such as 9 AM–5 PM.
+- Do not put spaces around hyphens.
+- If you are unsure about a compound hyphen, use [AP Style](https://www.apstylebook.com) for that only.
+- Use bold for emphasis.
+- Use italics only for one word or a name, never for a sentence.
 
-### Global writing
+### Write for a global audience
 
-- Global examples; no one country's holidays, places, companies.
-- Short, simple sentences; plan space for translations (about 1.5 times longer).
-- No abbreviations except common time abbreviations.
-- Repeat the noun instead of an unclear "it"; no sentence start with "this"/"that" without a noun.
-- No idioms, colloquial phrases, jargon.
-- No "please", "sorry", "thank you", especially in errors; "please" only for an inconvenient request.
-- Translator description on each message with a local reference (name, place, currency, temperature, date format) or abbreviation.
+- Use global examples. Do not use the holidays, places, or companies of one country.
+- Write short, simple sentences.
+- Plan space for translations, which are about 1.5 times longer.
+- Do not use abbreviations, except common time abbreviations.
+- Repeat the noun instead of an unclear "it".
+- Do not start a sentence with "this" or "that" without a noun.
+- Do not use idioms, colloquial phrases, or jargon.
+- Do not use "please", "sorry", or "thank you", especially in errors.
+- Use "please" only for an inconvenient request.
+- Add a translator description to each message that has a local reference (name, place, currency, temperature, date format) or an abbreviation.
 
-### Alt text
+### Write alt text
 
-- Meaning and context, not details. 140 characters or less. No "image of" start. `alt=""` for decorative images.
+- Describe the meaning and context, not the details.
+- Use 140 characters or fewer.
+- Do not start with "image of".
+- Use `alt=""` for decorative images.

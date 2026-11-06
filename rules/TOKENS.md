@@ -1,33 +1,38 @@
 # TOKENS
 
-Where each token belongs. → [DEPLOY](DEPLOY.md) (Secrets, CI), [AUTH](AUTH.md), [PAYMENTS](PAYMENTS.md), [OBSERVABILITY](OBSERVABILITY.md), [SETUP](SETUP.md) (steps 28, 31, 32, 37).
+This file covers where each token belongs and how to send it. Read it before you add, rotate, or set a token. See also [DEPLOY](DEPLOY.md#set-secrets), [DEPLOY](DEPLOY.md#set-up-ci), [AUTH](AUTH.md), [PAYMENTS](PAYMENTS.md), [OBSERVABILITY](OBSERVABILITY.md), and [SETUP](SETUP.md) steps 28, 31, 32, and 37.
 
-## Tokens
-
-### Token table
+## Find where a token belongs
 
 | Name | Read by | Lives in | Set with | Every project |
 | --- | --- | --- | --- | --- |
 | `BETTER_AUTH_SECRET` | Worker | Worker secret; locally `.env` | `set-secrets` (Worker) | Yes |
-| `EMDASH_ENCRYPTION_KEY` | Worker | Worker secret; locally `.env`; password manager backup (→ [SETUP](SETUP.md) step 28) | `set-secrets` (Worker) | Yes |
+| `EMDASH_ENCRYPTION_KEY` | Worker | Worker secret; locally `.env`; password manager backup (see [SETUP](SETUP.md) step 28) | `set-secrets` (Worker) | Yes |
 | `CLOUDFLARE_API_TOKEN` | GitHub Actions (`wrangler-action`) | Two tokens, each a secret of a GitHub environment: `dev` (PR previews, dev deploy) and `production` (stage, promotion) | `set-secrets dev`, `set-secrets production` | Yes |
-| `PAGESPEED_API_KEY` | `perf.yml` | Secret of the GitHub environment `production` | `set-secrets production` | Only with production checks (→ [SETUP](SETUP.md) step 37) |
-| `CLOUDFLARE_OBSERVABILITY_TOKEN` | `perf.yml` | Secret of the GitHub environment `production` | `set-secrets production` | Only with production checks (→ [SETUP](SETUP.md) step 37) |
+| `PAGESPEED_API_KEY` | `perf.yml` | Secret of the GitHub environment `production` | `set-secrets production` | Only with production checks (see [SETUP](SETUP.md) step 37) |
+| `CLOUDFLARE_OBSERVABILITY_TOKEN` | `perf.yml` | Secret of the GitHub environment `production` | `set-secrets production` | Only with production checks (see [SETUP](SETUP.md) step 37) |
 | `SENTRY_AUTH_TOKEN` | Build (source map upload) | Secret of each GitHub environment that builds; locally `.env.sentry-build-plugin` | `set-secrets` (GitHub) | Only with [Sentry](STACK.md#sentry) |
 | `SENTRY_DSN` | Worker | Worker secret or var | `set-secrets` (Worker) | Only with Sentry |
 | `STRIPE_SECRET_KEY` | Worker | Worker secret | `set-secrets` (Worker) | Only with [Stripe](STACK.md#stripe) |
 | `STRIPE_WEBHOOK_SECRET` | Worker | Worker secret | `set-secrets` (Worker) | Only with Stripe |
 
-## Rules
+## Send secrets
 
-### [GitHub CLI](STACK.md#github-cli) and [Wrangler](STACK.md#wrangler) script
+- Use a password manager as the source of truth. Which one is your choice.
+- Send the values with `<source> | pnpm run set-secrets <dev|production>`. See [WHY](../WHY.md#why-a-secrets-script-reads-stdin).
+- Run `gh auth login` and `wrangler login` before `pnpm run set-secrets`.
+- Use [GitHub CLI](STACK.md#github-cli) and [Wrangler](STACK.md#wrangler) through `scripts/set-secrets.ts`.
+- The Worker command creates a version and does not deploy it. `wrangler versions deploy` releases it. See [DEPLOY](DEPLOY.md#set-secrets).
+- If the Worker has no uploaded version, Cloudflare fails with error 10222. Create the first version with `wrangler versions upload --secrets-file <file>`. See [DEPLOY](DEPLOY.md#set-secrets).
+- Create the GitHub environments before you send environment secrets. See [SETUP](SETUP.md) step 31.
 
-- A password manager is the source of truth. Which one is your choice. `<source> | pnpm run set-secrets <dev|production>` sends the values. → [WHY](../WHY.md#why-a-secrets-script-reads-stdin)
-- `scripts/set-secrets.ts` reads `KEY=VALUE` lines from stdin; `--dry-run` lists names and destinations and sends nothing. It is not in `pnpm run check`.
-- `pnpm run set-secrets` needs `gh auth login` and `wrangler login` first.
-- Worker secrets go in one `wrangler versions secret bulk` call (`--env=` for dev, `--env=production`). It creates a version and does not deploy it; `wrangler versions deploy` releases it. → [DEPLOY](DEPLOY.md) (Secrets)
-- `set-secrets` needs an uploaded version for Worker secrets, or Cloudflare fails with error 10222. No version yet → `wrangler versions upload --secrets-file <file>` for the first one. → [DEPLOY](DEPLOY.md) (Secrets)
-- Environment secrets: `gh secret set NAME --env <dev|production>` with the value on stdin. Create the environments first (→ [SETUP](SETUP.md) step 31).
-- All tokens that CI reads live in GitHub environments; no repository secrets. Production checks (→ [GITHUB](GITHUB.md)): `set-secrets production` only; `set-secrets dev` refuses them.
-- No Cloudflare Secrets Store for these tokens. → [WHY](../WHY.md#why-no-secrets-store-for-setup-tokens)
-- A new secret goes in `SECRETS` in `scripts/lib/secrets.ts` and in the table above.
+## Store a token
+
+- Keep all tokens that CI reads in GitHub environments. Use no repository secrets.
+- Send the production check tokens with `set-secrets production` only. See [GITHUB](GITHUB.md).
+- Do not use Cloudflare Secrets Store for these tokens. See [WHY](../WHY.md#why-no-secrets-store-for-setup-tokens).
+
+## Add a new secret
+
+- Add the name to `SECRETS` in `scripts/lib/secrets.ts`.
+- Add the name to the table above.

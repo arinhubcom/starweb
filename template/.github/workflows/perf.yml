@@ -4,6 +4,8 @@ name: Performance
 # keeps these checks out of the deployment history.
 # A project stays silent until it sets the repository variable PRODUCTION_WORKER:
 # a job `if` runs before the job has its environment.
+# A scheduled run can start late, and GitHub can drop it. No job may depend on
+# an exact time.
 on:
   schedule:
     - cron: "0 4 * * *"

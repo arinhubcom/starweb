@@ -6,13 +6,23 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  /*
+   * MD3 window size classes. Compact is below `medium` and has no prefix. Keep
+   * the default `sm:` and `md:` prefixes too, because Fulldev UI uses them.
+   */
   --breakpoint-medium: 37.5rem;
   --breakpoint-expanded: 52.5rem;
   --breakpoint-large: 75rem;
   --breakpoint-xlarge: 100rem;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  /* Use for enter. */
   --ease-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  /* Use for exit. */
   --ease-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  /*
+   * Use for the `transform` of a small component, with `duration-350`. It
+   * overshoots, so do not use it for opacity or color: use `--ease-standard`.
+   */
   --ease-spring-fast-spatial: linear(
     0,
     0.099,

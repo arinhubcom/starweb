@@ -2,7 +2,7 @@
 // with the Workers Observability Telemetry API.
 // Run with: pnpm run worker-cpu <worker-name>
 // Needs network access, CLOUDFLARE_ACCOUNT_ID, and CLOUDFLARE_OBSERVABILITY_TOKEN.
-// See Performance in rules/PERF.md.
+// See Keep the Worker fast in rules/PERF.md.
 import {
   MIN_REQUESTS,
   buildOutcomesQuery,

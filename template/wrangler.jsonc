@@ -2,9 +2,15 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "__NAME__",
   "main": "./src/worker.ts",
+  // Update it on purpose, not with each Wrangler update. Stay at 2026-08-04 or
+  // later. Do not add `nodejs_compat`: from that date the Node.js APIs are on by
+  // default.
   "compatibility_date": "2026-08-04",
   "placement": { "mode": "targeted", "region": "aws:eu-central-1" },
+  // Add `env.CF_VERSION_METADATA.id` as `version` to each log entry and error
+  // report.
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
+  // Workers Logs are on. Deploy again after a change.
   "observability": { "enabled": true },
   "d1_databases": [
     {
@@ -18,6 +24,8 @@
       "bucket_name": "__NAME__-media",
     },
   ],
+  // The Astro session store (the default `sessionKVBindingName` is `SESSION`).
+  // Do not set `session: false`: EmDash stores admin logins in Astro sessions.
   "kv_namespaces": [
     {
       "binding": "SESSION",
@@ -25,7 +33,10 @@
   ],
   // Sandboxed plugins require Worker Loader, available on Workers paid plans. Uncomment to enable:
   // "worker_loaders": [{ "binding": "LOADER" }],
-  // General maintenance cron trigger
+  // Rate Limiting binding. It counts per location and is eventually consistent,
+  // so use it for per-tenant or per-key limits, not for exact quotas. `period` is
+  // 10 or 60 seconds. Add one entry per limiter, such as `API_LIMITER` when the
+  // app adds an API.
   "ratelimits": [
     {
       "name": "FORMS_LIMITER",
@@ -33,6 +44,8 @@
       "simple": { "limit": 10, "period": 60 },
     },
   ],
+  // General maintenance cron trigger. A custom cron expression in code must match
+  // this list.
   "triggers": {
     "crons": ["* * * * *"],
   },

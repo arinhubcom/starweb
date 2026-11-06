@@ -1,5 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // Do not add the `react-perf` plugin: it flags each inline prop, and
+  // `react-doctor/no-inline-prop-on-memo-component` covers the case that matters.
   "plugins": [
     "typescript",
     "unicorn",
@@ -10,6 +12,7 @@
     "react",
     "jsx-a11y"
   ],
+  // JS plugins are alpha and outside semver, so the versions are pinned.
   "jsPlugins": [
     {
       "name": "react-doctor",
@@ -99,6 +102,14 @@
     "e18e/prefer-static-regex": "error",
     "e18e/prefer-timer-args": "error",
     "e18e/prefer-url-canparse": "error",
+    // React Doctor rules, listed by name. The plugin has no Oxlint preset.
+    // Listed: active rules with `framework: "global"` whose `requires` fits the
+    // `capabilities` above (`REACT_DOCTOR_RULES` from the package).
+    // Not listed: `defaultEnabled: false`, `scan` and `project` rules (no effect
+    // in Oxlint), ports of built-in rules (`originallyExternal`: use `react/*` and
+    // `jsx-a11y/*`), `no-array-index-as-key` (same as `react/no-array-index-key`),
+    // and the `ink-`, `jotai-`, `motion-`, `redux-`, `react-markdown-`, `server-`,
+    // and `webgl-` families.
     "react-doctor/advanced-event-handler-refs": "warn",
     "react-doctor/anchor-target-exists": "warn",
     "react-doctor/async-await-in-loop": "warn",

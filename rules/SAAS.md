@@ -1,152 +1,171 @@
 # SAAS
 
-Small SaaS: few tenants, little data per tenant, no real-time collaboration. Site and apps in one Astro project, one Worker, one domain.
+Read this file when you build a small SaaS: few tenants, little data per tenant, and no real-time collaboration. The site and the apps run in one Astro project, one Worker, and one domain.
 
-## Architecture
+## Set up the architecture
 
-### [EmDash](STACK.md#emdash)
+### Combine site, apps, and [EmDash](STACK.md#emdash)
 
-- Site, apps, EmDash: one [Astro](STACK.md#astro) project, one Worker.
-- App in `src/apps/<app>/`, pages and API under its prefix (`/app1`, `/app1/api`); `src/pages/` is the site. → [ARCH](ARCH.md) (Apps)
-- Never use `/_emdash/*`, `/sitemap.xml`, `/robots.txt`, `/.well-known/oauth-protected-resource` (EmDash owns them).
-- EmDash content only for editorial content (pages, posts, docs); app data in own tables.
-- No EmDash internals (`handleContentCreate`, `emdash/internal/*`) in app code → REST API, MCP, or plugin `ctx.content`.
-- `outer` middleware option skips EmDash middleware on app routes that do not need it.
-- Bindings from `env` in `cloudflare:workers`.
-- `queue`, `scheduled`, [Durable Object](STACK.md#durable-objects) exports in `src/worker.ts` next to the EmDash handler.
-- Custom cron expressions match `triggers.crons`.
+- Run the site, the apps, and EmDash in one [Astro](STACK.md#astro) project and one Worker.
+- Put each app in `src/apps/<app>/`, with its pages and API under its prefix (`/app1`, `/app1/api`). `src/pages/` is the site. See [ARCH](ARCH.md#add-a-micro-frontend-as-an-astro-integration).
+- Do not add routes or files at `/_emdash/*`, `/sitemap.xml`, `/robots.txt`, or `/.well-known/oauth-protected-resource`. EmDash owns them.
+- Use EmDash content only for editorial content: pages, posts, and docs. Keep app data in your own tables.
+- Do not use EmDash internals (`handleContentCreate`, `emdash/internal/*`) in app code. Use the REST API, MCP, or plugin `ctx.content`.
+- Use the `outer` middleware option to skip EmDash middleware on app routes that do not need it.
+- Read bindings from `env` in `cloudflare:workers`.
+- Export `queue`, `scheduled`, and [Durable Object](STACK.md#durable-objects) classes from `src/worker.ts`, next to the EmDash handler.
+- Make custom cron expressions match `triggers.crons`.
 
-## Multiple apps
+## Add more than one app
 
-### Micro frontends
+### Use micro frontends
 
-- One micro frontend per app in `src/apps/<app>/`, own prefix (`/app1`, `/app2`). → [ARCH](ARCH.md) (Apps)
-- Same login and organizations for all apps. → [AUTH](AUTH.md)
-- Check app access (plan or membership) at the start of each app route; not the path prefix alone. → [AUTH](AUTH.md) (Organizations)
+- Build one micro frontend per app in `src/apps/<app>/`, each with its own prefix (`/app1`, `/app2`). See [ARCH](ARCH.md#add-a-micro-frontend-as-an-astro-integration).
+- Share one login and one set of organizations across all apps. See [AUTH](AUTH.md).
+- Check app access (plan or membership) at the start of each app route. Do not rely on the path prefix alone. See [AUTH](AUTH.md#use-organizations).
 
-### [D1](STACK.md#d1)
+### Give each app a [D1](STACK.md#d1) database
 
-- One D1 database and binding per app (`APP1_DB`, `APP2_DB`); no shared app tables.
-- Count databases first against the D1 limit per account of your plan; EmDash uses 1.
-- `migrations_dir` per `d1_databases` entry (`migrations/app1`, `migrations/app2`).
-- Apply per database by name, not binding: `wrangler d1 migrations apply app1-db --remote` (`--local` for dev).
+- Use one D1 database and one binding per app, such as `APP1_DB` and `APP2_DB`. Share no app tables.
+- Count the databases first against the D1 limit per account of your plan. EmDash uses one.
+- Set `migrations_dir` on each `d1_databases` entry: `migrations/app1`, `migrations/app2`.
+- Apply migrations per database by name, not by binding: `wrangler d1 migrations apply app1-db --remote`. Use `--local` for development.
 
-### [Kysely](STACK.md#kysely)
+### Give each app a [Kysely](STACK.md#kysely) instance
 
-- One Kysely instance per app database in `src/apps/app1/db/`, own `Database` interface. → [DATA](DATA.md)
+- Create one Kysely instance per app database in `src/apps/app1/db/`, with its own `Database` interface. See [DATA](DATA.md).
 
-## Auth
+## Authenticate
 
-- → [AUTH](AUTH.md)
+See [AUTH](AUTH.md).
 
-## Data
+## Store data
 
-### D1
+### Use D1 for app data
 
-- Separate D1 database per app (`APP1_DB`); no app tables in the EmDash database.
-- Read `APP1_DB` from `env` in `cloudflare:workers`; not `locals.emdash.db`.
-- D1 migrations for app tables, no manual schema changes. Kysely for queries. → [DATA](DATA.md)
-- EmDash migrations manual: run `emdash migrate` and app migrations before each release. → [DEPLOY](DEPLOY.md) (Migrations)
-- One app database for all tenants: `tenant_id` column on each tenant table, index starting with `tenant_id`.
-- Filter every query by `tenant_id` from the session; never from body or URL.
-- Tenant filtering in one data-access module; no raw tenant queries in route handlers.
-- Organizations on for any multi-tenant app: `tenant_id` = `session.activeOrganizationId` ([emdash-better-auth](STACK.md#emdash-better-auth)), `user_id` = `locals.user.id`. → [AUTH](AUTH.md) (Organizations)
-- API key requests: `tenant_id` and `user_id` from the key row. → [API](API.md) (API keys)
-- `tenant_id`, `user_id` as plain text columns; no foreign keys or joins to EmDash tables.
-- Deleted user or organization → Cleanup.
+- Use a separate D1 database per app (`APP1_DB`). Put no app tables in the EmDash database.
+- Read `APP1_DB` from `env` in `cloudflare:workers`, not from `locals.emdash.db`.
+- Create app tables with D1 migrations. Make no manual schema changes.
+- Query with Kysely. See [DATA](DATA.md).
+- Run `emdash migrate` and the app migrations before each release. EmDash migrations are manual. See [DEPLOY](DEPLOY.md#migrate-the-databases).
 
-### Durable Objects
+### Separate tenants
 
-- Only for real-time state (WebSockets, collaboration) or per-tenant locks; not the main database.
-- SQLite backend (the only one on Free).
-- [WebSocket Hibernation API](https://developers.cloudflare.com/durable-objects/best-practices/websockets/); no `accept()` (bills full connection duration).
-- One larger RPC call over many small (each stub call is a billed request).
+- Keep all tenants in one app database.
+- Add a `tenant_id` column to each tenant table.
+- Start each index with `tenant_id`.
+- Filter every query by `tenant_id` from the session. Never take it from the body or the URL.
+- Do tenant filtering in one data-access module. Write no raw tenant queries in route handlers.
+- Turn organizations on for any multi-tenant app.
+- Set `tenant_id` to `session.activeOrganizationId` ([emdash-better-auth](STACK.md#emdash-better-auth)). See [AUTH](AUTH.md#use-organizations).
+- Set `user_id` to `locals.user.id`.
+- For API key requests, take `tenant_id` and `user_id` from the key row. See [API](API.md#issue-api-keys).
+- Store `tenant_id` and `user_id` as plain text columns. Add no foreign keys or joins to EmDash tables.
+- For a deleted user or organization, see [cleanup](#clean-up-deleted-users-and-organizations).
 
-## Plugins
+### Use Durable Objects
 
-### EmDash plugins
+- Use a Durable Object only for real-time state (WebSockets, collaboration) or per-tenant locks. Never use it as the main database.
+- Use the SQLite backend. It is the only one on Free.
+- Use the [WebSocket Hibernation API](https://developers.cloudflare.com/durable-objects/best-practices/websockets/). Do not call `accept()`, because it bills the full connection duration.
+- Prefer one larger RPC call over many small ones, because each stub call is a billed request.
 
-- Native plugin for admin pages and dashboard widgets that manage the app.
-- No plugin API routes for customer traffic → `src/apps/<app>/api/`, under `/<app>/api/`.
-- Sandboxed plugins only on Paid; each call < 50 ms CPU (hard stop; target ≤ 10 ms → [CMS](CMS.md#plugins)), ≤ 10 subrequests.
+## Add plugins
 
-## Building blocks
+### Use EmDash plugins
 
-Not in the stack; add when the app needs them.
+- Use a native plugin for admin pages and dashboard widgets that manage the app.
+- Do not add plugin API routes for customer traffic. Put them in `src/apps/<app>/api/`, under `/<app>/api/`.
+- Use sandboxed plugins only on Paid.
+- Keep each sandboxed call under 50 ms CPU, which is a hard stop. Aim for 10 ms or less. See [CMS](CMS.md#keep-to-the-cpu-budget).
+- Make at most 10 subrequests in each sandboxed call.
 
-### App admin: EmDash native plugins
+## Add building blocks
 
-- Admin for app data = native EmDash plugin with React admin pages in the app folder; no second admin panel. → [ARCH](ARCH.md) (App admin)
-- [Kumo](STACK.md#kumo) (`@cloudflare/kumo`) components; no Base UI wrappers, no site theme.
-- `@cloudflare/kumo`, `react`, `react-dom` as plugin peer dependencies; no second bundled copy.
-- Kumo props for layout/style; Tailwind in `className` only for small gaps (`space-y-4`, `text-kumo-danger`). Verify in the browser: admin CSS is compiled before the plugin, unused classes may have no styles.
-- [TanStack](STACK.md#tanstack) Table for lists, Form for edit forms.
-- Data through app repository modules; no direct app database queries from the plugin.
+These are not in the stack. Add them when the app needs them.
+
+### Add an app admin as an EmDash native plugin
+
+- Build the admin for app data as a native EmDash plugin with React admin pages in the app folder. Do not add a second admin panel. See [ARCH](ARCH.md#add-an-app-admin-as-an-emdash-native-plugin).
+- Use [Kumo](STACK.md#kumo) (`@cloudflare/kumo`) components. Do not use Base UI wrappers or the site theme.
+- List `@cloudflare/kumo`, `react`, and `react-dom` as plugin peer dependencies. Do not bundle a second copy.
+- Use Kumo props for layout and style. Use Tailwind in `className` only for small gaps, such as `space-y-4` and `text-kumo-danger`.
+- Verify Tailwind classes in the browser. Admin CSS is compiled before the plugin, so unused classes may have no styles.
+- Use [TanStack](STACK.md#tanstack) Table for lists and Form for edit forms.
+- Read data through the app repository modules. Do not query the app database directly from the plugin.
 - Log each admin change (who, what, when) to an `audit_log` table in the app database.
 
-### Cleanup: Cron Triggers
+### Clean up deleted users and organizations
 
-- Daily cron deletes app data of deleted users/organizations (EmDash has no documented delete hook).
-- `deleted_at` first, hard delete after a grace period (for example 30 days).
-- Many rows → [Workflow](STACK.md#workflows), one `step.do()` per batch; never all rows in one request.
-- Per-tenant data export (JSON or CSV) and full delete. → [PRIVACY](PRIVACY.md)
+- Run a daily Cron Trigger that deletes the app data of deleted users and organizations. EmDash has no documented delete hook.
+- Set `deleted_at` first. Hard delete after a grace period, for example 30 days.
+- For many rows, use a [Workflow](STACK.md#workflows) with one `step.do()` per batch. Never process all rows in one request.
+- Offer a per-tenant data export (JSON or CSV) and a full delete. See [PRIVACY](PRIVACY.md).
 
-### Plan limits: Rate Limiting binding
+### Enforce plan limits
 
-- Plans and limits in one module (`src/lib/plans.ts`); none hardcoded in routes.
-- Count limits (projects, seats) checked on the server before each create, counting app database rows.
-- Workers Rate Limiting binding (`ratelimits` in Wrangler config) for API rate limits per tenant or API key.
-- Usage events (API calls, AI tokens) → Workers Analytics Engine; not one D1 row per event.
-- Durable Object per tenant only for limits that must be exact in real time.
+- Keep plans and limits in one module, `src/lib/plans.ts`. Hardcode none in routes.
+- Check count limits (projects, seats) on the server before each create, by counting rows in the app database.
+- Use the Workers Rate Limiting binding (`ratelimits` in the Wrangler config) for API rate limits per tenant or API key.
+- Send usage events (API calls, AI tokens) to Workers Analytics Engine. Do not write one D1 row per event.
+- Use a Durable Object per tenant only for limits that must be exact in real time.
 
-### Email
+### Send email
 
-- → [EMAIL](EMAIL.md) ([React Email](STACK.md#react-email))
+See [EMAIL](EMAIL.md) and [React Email](STACK.md#react-email).
 
-### Outgoing webhooks: [Standard Webhooks](STACK.md#standard-webhooks)
+### Send outgoing webhooks with [Standard Webhooks](STACK.md#standard-webhooks)
 
-- Sign with the spec (`standardwebhooks` package).
-- Send from a [Queue](STACK.md#queues) consumer with retries; store each delivery and status in the app database.
-- Svix when customers need a webhook portal.
+- Sign webhooks with the spec, using the `standardwebhooks` package.
+- Send from a [Queue](STACK.md#queues) consumer with retries.
+- Store each delivery and its status in the app database.
+- Use Svix when customers need a webhook portal.
 
-### Files: [R2](STACK.md#r2)
+### Store files in [R2](STACK.md#r2)
 
-- Tenant files under a `tenant_id/` key prefix.
-- Large uploads: presigned URLs from the browser, signed with `aws4fetch`; not streamed through the Worker.
+- Store tenant files under a `tenant_id/` key prefix.
+- For large uploads, use presigned URLs from the browser, signed with `aws4fetch`. Do not stream them through the Worker.
 
-### Search: D1 FTS5
+### Search with D1 FTS5
 
-- FTS5 tables in the app database; `tenant_id` in each FTS query.
+- Put FTS5 tables in the app database.
+- Include `tenant_id` in each FTS query.
 
-### Real time: [PartyServer](STACK.md#partyserver)
+### Add real time with [PartyServer](STACK.md#partyserver)
 
-- Live updates and presence; room named by `tenant_id` or document ID.
+- Use PartyServer for live updates and presence.
+- Name each room by `tenant_id` or document ID.
 
-### Feature flags: [Flagship](STACK.md#flagship)
+### Use feature flags with [Flagship](STACK.md#flagship)
 
-- Feature flags and staged rollouts per tenant; no code-constant flags that need a deploy.
+- Use Flagship for feature flags and staged rollouts per tenant.
+- Do not use code-constant flags that need a deploy.
 
-### Errors and logs: [Sentry](STACK.md#sentry)
+### Track errors and logs with [Sentry](STACK.md#sentry)
 
-- → [OBSERVABILITY](OBSERVABILITY.md). `tenant_id` and `user_id` on the Sentry scope.
+- See [OBSERVABILITY](OBSERVABILITY.md).
+- Set `tenant_id` and `user_id` on the Sentry scope.
 
-### App i18n: [Paraglide JS](STACK.md#paraglide-js)
+### Translate the app with [Paraglide JS](STACK.md#paraglide-js)
 
-- UI strings in app pages and islands; Astro i18n routing for URLs. Site → [I18N](I18N.md).
+- Use Paraglide JS for UI strings in app pages and islands.
+- Use Astro i18n routing for URLs.
+- For the site, see [I18N](I18N.md).
 
-### Tests
+### Test the app
 
-- → [TESTING](TESTING.md), incl. the tenant isolation test per repository module.
+- See [TESTING](TESTING.md), including the tenant isolation test per repository module.
 
-## Limits
+## Plan for limits
 
 ### Workers Free plan
 
-- Over a free daily limit → errors; reset 00:00 UTC.
-- Move to Paid before launching to paying customers. Prices → [CLOUDFLARE](CLOUDFLARE.md#cost).
+- Over a free daily limit, requests fail with errors. The limits reset at 00:00 UTC.
+- Move to Paid before you launch to paying customers. For prices, see [CLOUDFLARE](CLOUDFLARE.md#look-up-a-price).
 
-## Billing
+## Bill customers
 
-- → [PAYMENTS](PAYMENTS.md)
-- Subscription plan per organization, not per user. `premium` content flag is per user. → [PAYMENTS](PAYMENTS.md) (Premium content)
-- Plan limits checked on the server before each create.
+- See [PAYMENTS](PAYMENTS.md).
+- Attach the subscription plan to the organization, not to the user.
+- The `premium` content flag is per user. See [PAYMENTS](PAYMENTS.md#gate-premium-content).
+- Check plan limits on the server before each create.

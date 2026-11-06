@@ -1,5 +1,5 @@
 // Print the Lighthouse CI scores of a pull request. Run with:
-// pnpm run lighthouse (after pnpm run build). See Performance in rules/PERF.md.
+// pnpm run lighthouse (after pnpm run build). See Measure Core Web Vitals in rules/PERF.md.
 // In GitHub Actions a low score is a warning annotation and the exit code is 0,
 // so that the check never holds up a pull request. Elsewhere it exits with 1.
 import { appendFileSync, readFileSync } from "node:fs";

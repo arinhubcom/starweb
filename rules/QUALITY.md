@@ -1,68 +1,61 @@
 # QUALITY
 
-→ [TESTING](TESTING.md) (tests), [DEPLOY](DEPLOY.md#ci) (CI).
+This file covers the code checks in a project: types, lint, format, and unused code. Read it when a check fails or before you change a check. Tests are in [TESTING](TESTING.md), and CI is in [DEPLOY](DEPLOY.md#set-up-ci).
 
-## Language
+## Before you commit
 
-### [TypeScript](STACK.md#typescript)
+- Run `pnpm run check`.
+- Run `pnpm run typecheck` before each release. See [DEPLOY](DEPLOY.md).
+- These commands are not in `test` or `check`: `fonts`, `build`, `size`, API checks, and dependency checks.
+- Run screenshot and e2e tests in CI only.
+- `fonts` needs the network. See [MEDIA](MEDIA.md).
+- `size` needs `dist/`. See [PERF](PERF.md#set-a-size-limit).
 
-- No `"jsx": "preserve"` in `tsconfig.json`: it fails `vitest run --coverage` on any uncovered `.tsx` (`Support for the experimental syntax 'jsx'`).
-- Keep `exactOptionalPropertyTypes`. Spread optional values only when set: `...(cursor ? { cursor } : {})` for `getEmDashCollection()`; `...(Astro.currentLocale ? { currentLocale: Astro.currentLocale } : {})` for `createPublicPageContext()`; pass `canonical ?? null`, `image ?? null`; spread `content` the same way.
-- No `satisfies ExportedHandler` in `src/worker.ts` (`handler.fetch` optional → fails).
+## Write TypeScript
 
-## Lint
+- Keep `exactOptionalPropertyTypes` on. Spread an optional value only when it is set: `...(cursor ? { cursor } : {})`.
+- For the other options, read the comments in `tsconfig.json`. See [TypeScript](STACK.md#typescript).
+- Use this form for `cursor` in `getEmDashCollection()`.
+- Use `...(Astro.currentLocale ? { currentLocale: Astro.currentLocale } : {})` in `createPublicPageContext()`.
+- Pass `canonical ?? null` and `image ?? null`.
+- Spread `content` in the same way.
+- Do not add `satisfies ExportedHandler` in `src/worker.ts`. `handler.fetch` is optional, so the check fails.
 
-### [Oxlint](STACK.md#oxlint)
+## Fix a lint error
 
-- The only linter. No ESLint, no `typescript-eslint`, no Biome. Oxlint lints only the `<script>` blocks of `.astro` files; `astro check` covers the rest.
-- `oxlint-plugin-react-doctor`, `@e18e/eslint-plugin`: JS plugins are alpha and outside semver.
-- Fix or disable the rule.
-- No `react-perf` plugin.
-- `tsconfig.json`: no `baseUrl` (`oxlint-tsgolint` rejects it; TypeScript 7 removed it).
-- Type-aware rules need `.astro/types.d.ts`: run `pnpm run typecheck` once before `pnpm run lint` in a new clone (else false `no-unsafe-*` errors on `astro:*` imports). `check` already runs them in this order.
+- Use only [Oxlint](STACK.md#oxlint). Do not add ESLint, `typescript-eslint`, or Biome.
+- Oxlint lints only the `<script>` blocks of `.astro` files. `astro check` covers the rest.
+- Fix the code, or disable the rule.
+- In a new clone, run `pnpm run typecheck` once before `pnpm run lint`. Type-aware rules need `.astro/types.d.ts`, and without it you get false `no-unsafe-*` errors on `astro:*` imports.
+- `pnpm run check` already runs them in this order.
 
-### React Doctor rules
+## Change the React Doctor rules
 
-- Listed: active rules with `framework: "global"` whose `requires` fits the capabilities (`REACT_DOCTOR_RULES` from the package).
-- Not listed: `defaultEnabled: false`, `scan` and `project` rules (no effect in Oxlint), ports of built-in rules (`originallyExternal`; use `react/*`, `jsx-a11y/*`), `no-array-index-as-key` (= `react/no-array-index-key`), and the `ink-`, `jotai-`, `motion-`, `redux-`, `react-markdown-`, `server-`, `webgl-` families.
-- Project adds a library from one of those families (for example: Motion) → add its rules, and its capability if the rules need one.
-- Plugin update → compare `REACT_DOCTOR_RULES` with `rules`; an update does not turn on new rules.
+- `.oxlintrc.json` explains which rules are on and which are off.
+- If a project adds a library from a family that is off, such as Motion, add the rules of that family.
+- Add the capability of the family too, if its rules need one.
+- After a plugin update, compare `REACT_DOCTOR_RULES` with `rules`. An update does not turn on new rules.
 
-## Format
+## Format code
 
-### [Oxfmt](STACK.md#oxfmt)
+- Use only [Oxfmt](STACK.md#oxfmt). Do not add Prettier plugins, the `prettier` package, or `.prettierignore`.
+- Do not add formatting rules to Oxlint.
+- Do not use `useTabs`.
+- Run `scripts/theme.ts` before Oxfmt, because `stylesheet` imports the generated `theme.css`.
 
-- No formatting rules in Oxlint.
-- No Prettier plugins, no `prettier` package.
-- `stylesheet` imports the generated `theme.css`: run `scripts/theme.ts` before Oxfmt. `scripts/update-starter.mjs` drops `stylesheet`: the starter has no `global.css`.
-- No `useTabs`. Run `oxfmt` once after setup, commit.
-- No `.prettierignore`.
+## Remove unused code
 
-## Unused code
+- Delete unused code and dependencies. Do not add them to an ignore list.
+- If a file is registered through `injectRoute()`, `addMiddleware()`, or `adminEntry`, add a glob for it to `entry` in `knip.json`. See [Knip](STACK.md#knip).
+- Add `!` to the glob when the file is production code.
+- If you use `@base-ui/react` for React components, add it to `ignoreDependencies` until code uses it.
+- If you use Storybook, add `@storybook/builder-vite` to `ignoreDependencies`.
+- Do not add other packages to `ignoreDependencies`.
+- Do not add other folders to `ignoreIssues`.
 
-### [Knip](STACK.md#knip)
+## Order the steps of a pull request workflow
 
-- [Astro](STACK.md#astro) plugin auto-adds `src/pages/**`, `src/content.config.ts`, `src/middleware.ts`.
-- Delete unused code/deps; no ignore-list additions except the named exceptions below.
-- Wrangler plugin adds `main` (`src/worker.ts`) as entry; do not list it.
-- `entry` in `knip.json` replaces default `index`, `main`, `cli`; it is not an ignore list. Add a glob per other file kind registered via `injectRoute()`, `addMiddleware()`, `adminEntry`. `!` = production code for `knip --production`.
-- `ignoreIssues` (installed components, agent skills): no other folders.
-- `ignoreDependencies`, only after installing and until code uses them: `@base-ui/react` (React components); `@storybook/builder-vite` (Storybook). No other packages.
-- No `.agents/**` in `ignore`: `ignoreIssues` covers it.
-- Storybook, Vitest, Playwright plugins find stories, `.storybook/`, tests, `playwright.config.ts`: not in `entry`.
-- `knip --production` finds code used only by tests and stories.
-
-## Scripts
-
-### [pnpm](STACK.md#pnpm) scripts
-
-- Not in `test` or `check`: `fonts` (needs the network; → [MEDIA](MEDIA.md) (Fonts)), `build`, `size` (needs `dist/`; → [PERF](PERF.md#client-javascript)), API checks, dependency checks, screenshot and e2e tests (CI only).
-
-## Order
-
-### [GitHub Actions](STACK.md#github-actions)
-
-- `pnpm run check` locally before commit.
-- Optional PR workflow steps, in order, stop at first failure: API after `size` and before the audits (regenerate `openapi.json` + `git diff --exit-code`, `redocly lint`, `oasdiff breaking`). → [API](API.md)
-- E2e, then screenshot tests, after the audits. → [TESTING](TESTING.md#ci)
-- `pnpm run typecheck` before each release. → [DEPLOY](DEPLOY.md)
+- If an app has an API contract, put the API steps after `size` and before the audits. See [API](API.md).
+- The API steps are: regenerate `openapi.json` and run `git diff --exit-code`, `redocly lint`, and `oasdiff breaking`.
+- Put e2e tests and then screenshot tests after the audits. See [TESTING](TESTING.md#run-tests-in-ci).
+- Run the steps in this order, and stop at the first failure. See [GitHub Actions](STACK.md#github-actions).

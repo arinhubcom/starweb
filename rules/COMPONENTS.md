@@ -1,81 +1,128 @@
 # COMPONENTS
 
-## Astro components
+This file covers how to write and add UI components: Astro components, Fulldev UI blocks, React islands, shadcn/ui, and Base UI. Read it before you add or change a component.
 
-### [Astro](STACK.md#astro) components
+## Write an Astro component
 
-- `.astro` by default; islands → [ARCH](ARCH.md).
-- Props: `interface Props` in frontmatter; wrapping one element → `extends HTMLAttributes<"section">` (`astro/types`).
-- `Polymorphic`/`HTMLTag` (`astro/types`) for an `as` prop; `ComponentProps<typeof X>` to reuse props, never copy the type.
-- `const { title, size = "default", class: className, ...rest } = Astro.props`; root: `<section class={cn("p-4", className)} {...rest}>`. Never drop `id`, `aria-*`, `data-*`.
-- `<slot />`, named slots for regions, fallback content inside `<slot>`; `Astro.slots.has("footer")` to wrap conditionally.
-- `src/components/ui/` is presentational: no database, API, or `Astro.locals`. Load data in pages or blocks, pass props. → [DATA](DATA.md)
-- Semantic HTML: `<button>` actions, `<a href>` navigation, ordered headings. No click handlers on `<div>`.
-- Images: `<Image />` from `astro:assets` with `alt`. EmDash image fields: `Image` from `emdash/ui`. → [MEDIA](MEDIA.md) (EmDash media)
-- Small interactions (toggle, copy, menu): `<script>` in the component, not an island.
-- Server values to script via `data-*` + `element.dataset`. No `define:vars`, no `is:inline` (disable bundling). Only exception: theme script.
-- Component that can appear more than once with script → custom element (`customElements.define`, `connectedCallback`).
-- No `client:*` on an `.astro` component (Astro throws).
-- File names kebab-case as the shadcn CLI writes (`button.astro`); imports PascalCase (`Button`).
-- Every component (Fulldev UI, [shadcn/ui](STACK.md#shadcnui), [Base UI](STACK.md#base-ui), and your own): styles in [Tailwind Variants](STACK.md#tailwind-variants) `tv()` that follow [MATERIAL](MATERIAL.md): sizes, targets, state layer, focus ring, disabled opacity, motion, and color roles. Apply it right after `shadcn add`, in the same commit. Reference: `src/components/ui/button/button-variants.ts`.
+- Use `.astro` by default. For islands, see [ARCH](ARCH.md).
+- Declare props with `interface Props` in the frontmatter.
+- If the component wraps one element, extend its attributes: `extends HTMLAttributes<"section">` from `astro/types`.
+- For an `as` prop, use `Polymorphic` or `HTMLTag` from `astro/types`.
+- To reuse the props of another component, use `ComponentProps<typeof X>`. Never copy the type.
+- Destructure the props: `const { title, size = "default", class: className, ...rest } = Astro.props`.
+- On the root element, merge the class and spread the rest: `<section class={cn("p-4", className)} {...rest}>`.
+- Never drop `id`, `aria-*`, or `data-*`.
+- Use `<slot />` for content and named slots for regions. Put fallback content inside `<slot>`.
+- To wrap a slot only when it has content, use `Astro.slots.has("footer")`.
+- Keep `src/components/ui/` presentational: no database, API, or `Astro.locals`.
+- Load data in pages or blocks and pass it as props. See [DATA](DATA.md).
+- Use semantic HTML: `<button>` for actions, `<a href>` for navigation, and ordered headings.
+- Do not put click handlers on a `<div>`.
+- Use `<Image />` from `astro:assets` with `alt`.
+- For EmDash image fields, use `Image` from `emdash/ui`. See [MEDIA](MEDIA.md#use-the-emdash-media-library).
+- Do not add `client:*` to an `.astro` component. Astro throws an error.
+- Name files in kebab-case, as the shadcn CLI writes them (`button.astro`). Import them in PascalCase (`Button`).
 
-### [Fulldev UI](STACK.md#fulldev-ui)
+### Add a script to a component
 
-- Source of `.astro` components and page blocks (sections, hero, features, pricing, FAQ); no client JS.
-- Keep `paths` in `tsconfig.json`; `shadcn add` needs it.
-- No second `shadcn init`.
-- After each `shadcn add` (Fulldev or shadcn/ui): convert every `cva()` in the added files to `tv()`. `cva("<base>", { variants, defaultVariants })` → `tv({ base: "<base>", variants, defaultVariants })`; `import { tv, type VariantProps } from "tailwind-variants"`. Call sites stay. Registry items import `class-variance-authority` without listing it; `pnpm exec astro check` reports each file left. → [DESIGN](DESIGN.md)
-- After each `shadcn add` (Fulldev or shadcn/ui): replace every `@lucide/astro` and `lucide-react` icon with `MaterialIcon` (→ [MEDIA](MEDIA.md) (Icons)), with `size-*` → `text-*`, and add the name to `ICON_NAMES`. Remove `@lucide/astro` and `lucide-react` from `package.json`.
-- `@fulldev/icon` comes with blocks, headers, and footers. Delete `src/components/ui/icon/`, replace each use with `MaterialIcon` or a local SVG (brand mark), and remove `lucide-static` and `simple-icons` from `package.json`. Never move `MaterialIcon` to `src/components/ui/icon/`.
-- Keep `"iconLibrary": "lucide"` in `components.json`; `shadcn` has no Material Symbols option.
-- Add components with `pnpm exec shadcn add @fulldev/button` (uses the project's `shadcn`). No `@latest`, no hand copy.
-- Your code after install; edit it in `src/components/ui/<name>/`.
-- Theme via the CSS variables from init; no hardcoded colors.
-- Skills: `pnpm dlx skills add shadcn/ui`, `pnpm dlx skills add fulldotdev/ui --skill fulldev-ui`.
-- React islands (shadcn/ui, Base UI) only for interactive parts with no Fulldev component.
+- For a small interaction such as a toggle, copy, or menu, put a `<script>` in the component. Do not use an island.
+- Pass server values to the script with `data-*` and `element.dataset`.
+- Do not use `define:vars` or `is:inline`, because they disable bundling. The theme script is the only exception.
+- If a component with a script can appear more than once, use a custom element: `customElements.define` and `connectedCallback`.
 
-## React components
+### Style a component
 
-### [React](STACK.md#react)
+- Style every component with [Tailwind Variants](STACK.md#tailwind-variants) `tv()`. This covers Fulldev UI, [shadcn/ui](STACK.md#shadcnui), [Base UI](STACK.md#base-ui), and your own components.
+- Follow [MATERIAL](MATERIAL.md) for sizes, targets, state layer, focus ring, disabled opacity, motion, and color roles.
+- Apply the styles right after `shadcn add`, in the same commit.
+- Use `src/components/ui/button/button-variants.ts` as the reference.
 
-- React 19 function components; no classes.
-- No `forwardRef`; `ref` is a prop.
-- `<Context value={...}>`, not `<Context.Provider>`.
-- Props type from the wrapped element/part (`React.ComponentProps<"button">`, `ButtonPrimitive.Props`); take `className`, merge with `cn()`, spread rest on root.
-- Derive during render; no state copy, no `useEffect` sync.
-- User-action logic in event handlers; `useEffect` only for outside systems (browser API, third-party widget).
-- Reset state with `key` (`<Profile key={userId} />`), not an effect.
-- No data fetch in `useEffect` → props from Astro, or TanStack Query. → [ARCH](ARCH.md)
-- List keys: stable data IDs, not index when items move or change.
-- `useId()` for label/input/`aria-*` IDs.
+## Add a component with Fulldev UI
 
-### Astro islands
+- Use [Fulldev UI](STACK.md#fulldev-ui) as the source of `.astro` components and page blocks: sections, hero, features, pricing, and FAQ. They have no client JavaScript.
+- Add a component with `pnpm exec shadcn add @fulldev/button`. This uses the `shadcn` of the project.
+- Do not use `@latest`. Do not copy a component by hand.
+- Do not run `shadcn init` a second time.
+- After install, the code is yours. Edit it in `src/components/ui/<name>/`.
+- Theme the component with the CSS variables from init. Do not hardcode colors.
+- Add the skills with `pnpm dlx skills add shadcn/ui` and `pnpm dlx skills add fulldotdev/ui --skill fulldev-ui`.
+- Use a React island (shadcn/ui, Base UI) only for interactive parts that have no Fulldev UI component.
 
-- Hydrated island props serializable only (string, number, array, plain object, `Date`, `Map`, `Set`); no functions.
-- Handle events inside the island, not passed from `.astro`.
-- Children from `.astro` are static HTML (slots become props); no interactive state in them.
-- Small islands: static content in `.astro`, hydrate only the interactive part.
-- `client:only="react"` only for components needing browser APIs at render.
-- No React context across islands → store. → [ARCH](ARCH.md)
-- Shared islands: `src/components/islands/`; one app: `src/apps/<app>/islands/` ([ARCH](ARCH.md) (Apps)); reusable React UI: `src/components/ui/react/`.
+## Clean up after `shadcn add`
 
-### [shadcn/ui](STACK.md#shadcnui)
+These steps apply to each `shadcn add`, for Fulldev UI and for shadcn/ui.
 
-- For React islands (dialog, dropdown menu, popover, tabs, select); Base UI wrappers in the Fulldev theme. Static UI → Fulldev `.astro`.
-- Use the shadcn/ui component when it exists; no hand-written Base UI wrapper.
-- Keep `"style": "base-vega"` in `components.json` (fixed after init). No `radix-*` style (imports `radix-ui`).
-- Add with `--path`: `pnpm exec shadcn add dialog --path src/components/ui/react` (default path is for `.astro`). Registry dependencies land in the same folder with imports rewritten to `@/components/ui/react/...`.
-- Before the first React component: add `@base-ui/react` (init and `base-vega` do not add it).
-- After each `shadcn add`: `pnpm exec astro check`; add the reported missing packages, except Lucide → `MaterialIcon`.
-- After each `shadcn add` check `package.json`; if `radix-ui` or `@radix-ui/*` was added, remove it and add the component again from `base-vega`.
-- Edit in `src/components/ui/react/`.
+### Convert `cva()` to `tv()`
 
-### [Base UI](STACK.md#base-ui)
+- Convert every `cva()` in the added files to `tv()`. See [DESIGN](DESIGN.md).
+- Write `cva("<base>", { variants, defaultVariants })` as `tv({ base: "<base>", variants, defaultVariants })`.
+- Import with `import { tv, type VariantProps } from "tailwind-variants"`.
+- Leave the call sites as they are.
+- Registry items import `class-variance-authority` without listing it. `pnpm exec astro check` reports each file you left.
 
-- `@base-ui/react` for interactive island components. No Radix UI.
-- React wrappers in `src/components/ui/react/`, Tailwind-styled; islands import the wrapper. No `.tsx` in `src/components/ui/`.
-- All parts of one component (`Dialog`, `DialogTrigger`, `DialogContent`) composed in one `.tsx` island (`src/components/islands/` or `src/apps/<app>/islands/`), used in `.astro` with `client:*`. Never parts directly in `.astro` (separate islands, no shared context, Base UI error #79).
-- States: data attributes + Tailwind data variants (`data-checked:bg-primary`, `data-popup-open:opacity-100`).
-- `className={(state) => cn(base, state.checked && checked)}` only when no data attribute exists.
-- Exposed CSS variables in arbitrary values: `max-h-(--available-height)`.
-- `render` prop for own element: `<Menu.Trigger render={<Button />} />`.
+### Replace Lucide icons
+
+- Replace every `@lucide/astro` and `lucide-react` icon with `MaterialIcon`. See [MEDIA](MEDIA.md#add-an-icon).
+- Change `size-*` to `text-*` on the icon.
+- Add the icon name to `ICON_NAMES`.
+- Remove `@lucide/astro` and `lucide-react` from `package.json`.
+- If `@fulldev/icon` comes with blocks, headers, or footers, delete `src/components/ui/icon/`.
+- Replace each use of it with `MaterialIcon`, or with a local SVG for a brand mark.
+- Remove `lucide-static` and `simple-icons` from `package.json`.
+- Never move `MaterialIcon` to `src/components/ui/icon/`.
+- Keep `"iconLibrary": "lucide"` in `components.json`. The shadcn CLI has no Material Symbols option.
+
+## Write a React component
+
+- Write React 19 function components. Do not write classes. See [React](STACK.md#react).
+- Do not use `forwardRef`. `ref` is a prop.
+- Write `<Context value={...}>`, not `<Context.Provider>`.
+- Take the props type from the wrapped element or part: `React.ComponentProps<"button">` or `ButtonPrimitive.Props`.
+- Take `className`, merge it with `cn()`, and spread the rest on the root.
+- Derive values during render. Do not copy state and do not sync it with `useEffect`.
+- Put user-action logic in event handlers.
+- Use `useEffect` only for outside systems, such as a browser API or a third-party widget.
+- Reset state with `key`, as in `<Profile key={userId} />`, not with an effect.
+- Do not fetch data in `useEffect`. Pass props from Astro, or use TanStack Query. See [ARCH](ARCH.md).
+- Use stable data IDs as list keys. Do not use the index when items move or change.
+- Use `useId()` for the IDs of labels, inputs, and `aria-*` attributes.
+
+## Hydrate a React island
+
+- Pass only serializable props to a hydrated island: string, number, array, plain object, `Date`, `Map`, `Set`. No functions.
+- Handle events inside the island. Do not pass them from `.astro`.
+- Children from `.astro` are static HTML, because slots become props. Do not put interactive state in them.
+- For a small island, keep the static content in `.astro` and hydrate only the interactive part.
+- Use `client:only="react"` only for components that need browser APIs at render.
+- Do not share React context across islands. Use a store. See [ARCH](ARCH.md).
+- Put shared islands in `src/components/islands/`.
+- Put the islands of one app in `src/apps/<app>/islands/`. See [ARCH](ARCH.md#add-a-micro-frontend-as-an-astro-integration).
+- Put reusable React UI in `src/components/ui/react/`.
+
+## Add a React component with shadcn/ui
+
+- Use shadcn/ui for React islands such as dialog, dropdown menu, popover, tabs, and select. These are Base UI wrappers in the Fulldev UI theme.
+- For static UI, use a Fulldev UI `.astro` component.
+- Use the shadcn/ui component when it exists. Do not write a Base UI wrapper by hand.
+- Keep `"style": "base-vega"` in `components.json`. It cannot change after init.
+- Do not use a `radix-*` style, because it imports `radix-ui`.
+- Add a component with `--path`: `pnpm exec shadcn add dialog --path src/components/ui/react`. The default path is for `.astro`.
+- Registry dependencies land in the same folder, with imports rewritten to `@/components/ui/react/...`.
+- Edit the component in `src/components/ui/react/`.
+- Before the first React component, add `@base-ui/react`. Init and `base-vega` do not add it.
+- After each add, run `pnpm exec astro check`.
+- Add the packages it reports as missing, except Lucide packages. Use `MaterialIcon` instead.
+- After each add, check `package.json`. If `radix-ui` or `@radix-ui/*` was added, remove it and add the component again from `base-vega`.
+
+## Compose a component with Base UI
+
+- Use `@base-ui/react` for interactive island components. Do not use Radix UI.
+- Put React wrappers in `src/components/ui/react/`, styled with Tailwind. Islands import the wrapper.
+- Do not put `.tsx` files in `src/components/ui/`.
+- Compose all parts of one component (`Dialog`, `DialogTrigger`, `DialogContent`) in one `.tsx` island. Use `src/components/islands/` or `src/apps/<app>/islands/`.
+- Use that island in `.astro` with `client:*`.
+- Never use the parts directly in `.astro`. They become separate islands with no shared context, and Base UI reports error #79.
+- Style states with data attributes and Tailwind data variants: `data-checked:bg-primary`, `data-popup-open:opacity-100`.
+- Use `className={(state) => cn(base, state.checked && checked)}` only when no data attribute exists.
+- Use exposed CSS variables in arbitrary values: `max-h-(--available-height)`.
+- To render your own element, use the `render` prop: `<Menu.Trigger render={<Button />} />`.

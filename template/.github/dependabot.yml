@@ -8,6 +8,9 @@ updates:
       day: "monday"
       time: "02:00"
       timezone: "Europe/Prague"
+    # Wait 3 days after a release. Keep it equal to `minimumReleaseAge` in
+    # pnpm-workspace.yaml (4320 minutes). For a package that releases often,
+    # use a group, not a longer cooldown.
     cooldown:
       default-days: 3
     # EmDash moves through Starweb: rules/UPDATE.md (EmDash update).
@@ -15,12 +18,16 @@ updates:
       - dependency-name: "emdash"
       - dependency-name: "@emdash-cms/cloudflare"
     groups:
+      # One PR for packages that must move together. A person merges it by hand
+      # after the compatibility checks in rules/DEPS.md.
       astro:
         patterns:
           - "astro"
           - "@astrojs/*"
           - "wrangler"
           - "@emdash-cms/*"
+      # Minor and patch updates of development dependencies. The automerge
+      # workflow merges this group.
       dev-dependencies:
         dependency-type: "development"
         update-types:

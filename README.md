@@ -364,7 +364,7 @@ flowchart TD
 - **`production` environment:** production deploys run in the GitHub environment `production`, only from `main` or a release tag. A private repository needs GitHub Pro or Team for this.
 - **Cloudflare tokens:** the production token is a secret of the `production` environment, and a second token, a secret of the `dev` environment, handles PR previews and dev deploys. Each token has only the permissions it needs, for one account and one zone. Forks get no token.
 
-Read the details in [rules/SECURITY.md](rules/SECURITY.md), [rules/DEPS.md](rules/DEPS.md#supply-chain), and [rules/DEPLOY.md](rules/DEPLOY.md#ci).
+Read the details in [rules/SECURITY.md](rules/SECURITY.md), [rules/DEPS.md](rules/DEPS.md#supply-chain), and [rules/DEPLOY.md](rules/DEPLOY.md#set-up-ci).
 
 ## 💳 Payments
 
@@ -418,7 +418,7 @@ The CMS gives auth, i18n, custom content types, sandboxed plugins, agent integra
 
 ### SaaS
 
-The diagram shows how the site, the admin panel, and many apps share one Worker and one login, while each app keeps its own folder, routes, and database. The template has no apps yet: you add them with the steps in [rules/SAAS.md](rules/SAAS.md) and [rules/ARCH.md](rules/ARCH.md#apps). Solid lines show the default setup, and dashed lines show what you add when you need it.
+The diagram shows how the site, the admin panel, and many apps share one Worker and one login, while each app keeps its own folder, routes, and database. The template has no apps yet: you add them with the steps in [rules/SAAS.md](rules/SAAS.md) and [rules/ARCH.md](rules/ARCH.md#add-an-app). Solid lines show the default setup, and dashed lines show what you add when you need it.
 
 ```mermaid
 %%{init: {"htmlLabels": false, "flowchart": {"htmlLabels": false, "wrappingWidth": 600, "padding": 20}}}%%

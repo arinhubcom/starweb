@@ -1,6 +1,6 @@
 // Fail the build when a font family has no file. When a provider cannot reach
 // its API, `astro build` only warns, and the site ships without the font.
-// See Fonts in rules/MEDIA.md.
+// See Change or add a font in rules/MEDIA.md.
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fonts } from "../src/lib/fonts.ts";

@@ -1,6 +1,8 @@
 // Generate src/styles/theme.css from one seed color. Run with:
 // pnpm exec tsx scripts/theme.ts
-// See the Color section in rules/MATERIAL.md. Change SEED, not the output.
+// Use `tsx`, not plain `node`: `@material/material-color-utilities` 0.4.0
+// imports files without `.js`, so plain Node fails.
+// See the Set the colors section in rules/MATERIAL.md. Change SEED, not the output.
 import { writeFileSync } from "node:fs";
 import {
   argbFromHex,
@@ -10,6 +12,7 @@ import {
 } from "@material/material-color-utilities";
 import type { DynamicScheme } from "@material/material-color-utilities";
 
+// The only color input. Do not pick theme colors by hand.
 const SEED = "#6750a4";
 const OUTPUT = "src/styles/theme.css";
 
@@ -65,6 +68,8 @@ const extraRoles = (s: DynamicScheme): Record<string, number> => ({
   scrim: s.scrim,
 });
 
+// "2025" is the Expressive spec. 0 is standard contrast. `false` goes to
+// `:root`, `true` goes to `.dark`.
 const schemeFor = (isDark: boolean): DynamicScheme =>
   new SchemeTonalSpot(Hct.fromInt(argbFromHex(SEED)), isDark, 0, "2025");
 

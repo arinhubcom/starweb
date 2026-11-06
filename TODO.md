@@ -51,7 +51,7 @@ Steps that no test has run:
 - [ ] Run `pnpm run dev` and the admin setup wizard (step 23), and `pnpm exec emdash doctor` (step 25) on a generated project.
 - [ ] Run the optional steps 8-21 on a generated project, and confirm that `pnpm run check` and `pnpm run build` still pass.
 
-- [ ] Measure the CPU time of `@emdash-cms/plugin-forms` and `@emdash-cms/plugin-field-kit` as [rules/CMS.md](rules/CMS.md#emdash-plugin-cpu-budget) requires: `/`, and a page with a form. The Chrome DevTools Protocol `Profiler` hung through the `wrangler dev` inspector proxy, so use the DevTools UI or `$workers.cpuTimeMs` after a real deploy.
+- [ ] Measure the CPU time of `@emdash-cms/plugin-forms` and `@emdash-cms/plugin-field-kit` as [rules/CMS.md](rules/CMS.md#keep-to-the-cpu-budget) requires: `/`, and a page with a form. The Chrome DevTools Protocol `Profiler` hung through the `wrangler dev` inspector proxy, so use the DevTools UI or `$workers.cpuTimeMs` after a real deploy.
 - [ ] Wait for a real weekly run of the Forms `cleanup` task, and confirm that it deletes old submissions and their files. No test has run the cron task.
 
 Rules to add:

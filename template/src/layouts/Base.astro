@@ -7,6 +7,7 @@ import { resolveStarterSiteIdentity } from "../utils/site-identity";
 import { Font } from "astro:assets";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { themeScript } from "@/lib/theme-script";
+// Import global.css once, here in the base layout.
 import "@/styles/global.css";
 
 interface Props {
@@ -40,12 +41,15 @@ const titleIncludesSiteName =
 const fullTitle = titleIncludesSiteName ? title : `${title} — ${siteTitle}`;
 const pageDescription = description ?? siteTagline;
 const menu = menuResult.data;
-// EmDashHead computes no canonical URL for a custom page. null opts out.
+// EmDashHead computes no canonical URL for a custom page, so a custom page gets
+// one from its pathname. A page that is not indexable passes `canonical={null}`.
 const pageCanonical =
   canonical === undefined && !content
     ? new URL(Astro.url.pathname, Astro.site).href
     : (canonical ?? null);
 
+// The lang attribute of <html> comes from the current locale. Do not hard-code
+// lang="en".
 const pageCtx = createPublicPageContext({
   Astro: {
     url: Astro.url,
@@ -69,12 +73,17 @@ const pageCtx = createPublicPageContext({
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{fullTitle}</title>
+    {/*
+      The one blocking inline script in <head>. It sets .dark on <html> before
+      the first paint, so the page does not flash the wrong theme.
+    */}
     <script is:inline set:html={themeScript} />
     <Font cssVariable="--font-roboto-flex" preload={[{ subset: "latin" }]} />
     <Font cssVariable="--font-material-symbols" preload />
     <EmDashHead page={pageCtx} />
   </head>
   <body class="@container">
+    {/* Skip link: the first focusable element on the page (WCAG 2.4.1). */}
     <a href="#main" class="sr-only focus:not-sr-only">
       Skip to main content
     </a>

@@ -1,13 +1,18 @@
 import { tv, type VariantProps } from "tailwind-variants";
 
-// Styles follow rules/MATERIAL.md (States, Motion, Buttons). The radius comes from the Fulldev UI theme, the font from
+// Styles follow rules/MATERIAL.md (Style states, Animate, Buttons). The radius comes from the Fulldev UI theme, the font from
 // src/lib/fonts.ts.
 export const buttonVariants = tv({
   base: [
     "group/button relative inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap select-none in-data-[slot=button-group]:rounded-md aria-invalid:border-destructive",
     // State layer: an overlay in the content color, never a new container color.
+    // Every component gets the same state layer in the `base` of its `tv()`. An
+    // installed component loses its own hover color.
     "before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-current before:opacity-0 before:transition-opacity before:duration-150 before:ease-standard hover:before:opacity-8 focus-visible:before:opacity-10 active:before:opacity-10",
+    // Focus ring: 3px wide, 2px offset, in the theme color `outline-ring`.
     "outline-ring focus-visible:outline-3 focus-visible:outline-offset-2",
+    // Disabled is 38% with no state layer. It replaces the shadcn/ui
+    // `disabled:opacity-50`.
     "disabled:pointer-events-none disabled:opacity-38",
     "[&_.icon]:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
   ],

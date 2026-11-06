@@ -271,7 +271,9 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 ### Risks
 
 - shadcn/ui components are React. In `.astro` pages each one is an island with client JavaScript, so we use them only for interactive parts.
-- shadcn/ui also has `radix-*` styles that import `radix-ui`. The style cannot change after init, so a project set up with a Radix style must start again.
+- shadcn/ui also has `radix-*` styles that import `radix-ui`. The style cannot change after init, so a project set up with a Radix style must start again. `components.json` keeps `"style": "base-vega"` for this reason.
+- `components.json` keeps `"iconLibrary": "lucide"`, because the shadcn/ui CLI has no Material Symbols option. After each `shadcn add`, replace the Lucide icons with `MaterialIcon`.
+- `components.json` cannot hold comments. Tested on 2026-11-06 with `shadcn` 4.23.0: `shadcn info` fails with `Invalid configuration found` when the file has one `//` comment, and passes without it. So these reasons live here.
 - Component sizes (for example `h-9`) are not MD3 sizes. We change them after install.
 
 ## [Kumo](https://github.com/cloudflare/kumo)
@@ -748,7 +750,8 @@ What this means for tests:
 ### Why Istanbul coverage and not V8
 
 - The Workers Vitest plugin runs tests in workerd, which does not expose V8 coverage. The Cloudflare docs list V8 coverage as a known issue and say to use Istanbul.
-- Coverage thresholds apply only when coverage runs, so the `test` script passes `--coverage`.
+- Coverage thresholds apply only when coverage runs, so the `test` script passes `--coverage`. `package.json` cannot hold comments, so the reason lives here.
+- `@vitest/coverage-istanbul` has the same version as `vitest`: the peer dependency of `@vitest/coverage-istanbul` 5.1.0 is exactly `vitest` 5.1.0. Move both together.
 
 ### Why the manual workflow also runs `vitest -u`
 
@@ -785,6 +788,7 @@ trendaro-fe (qset v4) has four test tiers for each widget: unit tests, DOM snaps
 - pnpm 12 has what the npm setup used: `minimumReleaseAge` (default 1 day, here 3), [`pnpm audit signatures`](https://pnpm.io/cli/audit), and frozen lockfiles in CI. It also fails an install on an [unreviewed build script](https://pnpm.io/settings/build); npm ran them all.
 - No `packageManager` pin, because of the [GitHub docs](https://docs.github.com/en/code-security/dependabot/ecosystems-supported-by-dependabot/supported-ecosystems-and-repositories): "When pnpm writes `pnpm-lock.yaml` as two YAML documents, the dependency graph does not detect the dependencies in that file. This is the default format for pnpm 12 projects that pin a pnpm version." Alerts and security updates then stop. On 2026-11-04, pnpm 12.16.1 wrote two documents with the pin and one without it. The same pnpm docs that cover the pin name no way to keep one document with it, so `pnpm/action-setup` pins the version in CI, and `scripts/test-template.sh` fails on a pin.
 - `create-emdash` adapts its output to the package manager that runs it. Under `pnpm create`, `README.md` and `EMDASH.md` show pnpm commands, and `package.json` gets a `packageManager` pin. `starter/` holds that output, so `--check` sees no false difference. The template does not take the pin, because `updatePackageJson` only moves the EmDash versions.
+- `package.json` holds no comments, because npm and pnpm read it as strict JSON, and `scripts/update.mjs`, `scripts/update-starter.mjs`, and `scripts/check-why.mjs` read it with `JSON.parse`. A reason for a script, a pin, or a missing field goes in this file.
 - No Corepack: the [pnpm CI docs](https://pnpm.io/continuous-integration) say "Do not use Corepack".
 - Dependabot [supports pnpm 12](https://github.blog/changelog/2026-10-20-dependabot-now-supports-npm-12-pnpm-11-and-12-and-bun-1-4) since 2026-10-20. Not verified: the Dependabot docs do not name pnpm in the `cooldown` table, and do not mention the `catalog:` protocol. No real Dependabot run has tested this setup yet.
 
@@ -957,6 +961,7 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - Without `stylesheet`, Oxfmt counts classes from Starweb tokens as unknown and sorts them first.
 - Without `functions`, classes in `tv()` and `cn()` stay unsorted, although most component classes live there.
 - The cost: Oxfmt fails when `theme.css` is missing, so `theme.ts` runs first, and the starter config drops `stylesheet`.
+- `.oxfmtrc.json` holds no comments: `scripts/update-starter.mjs` reads the file with `JSON.parse` (through `readJson`), which fails on a comment. The script drops `stylesheet` because the starter has no `global.css`.
 - Tested on 2026-11-05 with `oxfmt` 0.75.0.
 
 ### Why `theme.css` is not in the template
@@ -1097,7 +1102,8 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - Lighthouse CI sees a regression before merge, against the build of the pull request.
 - PageSpeed Insights sees production, with the real network and Workers Cache. It needs no Chrome and needs only `fetch`.
 - Lighthouse CI is a warning and not a required check, because the Lighthouse docs call free CI environments volatile and scores vary between runs.
-- Reports stay private: the upload target is the filesystem, not temporary public storage, and there is no upload wait.
+- Reports stay private: the upload target is the filesystem, not temporary public storage, and there is no upload wait. `lighthouserc.json` keeps `ci.upload.target` at `filesystem` for this reason.
+- `lighthouserc.json` cannot hold comments: `@lhci/utils` 0.15.1 reads a `.json` rc file with `JSON.parse`. So the reason for its port lives here: `ci.collect.startServerCommand` listens on port 4322. Stop any other server on that port before `pnpm run lighthouse`.
 - Tested on 2026-11-05 with `@lhci/cli` 0.15.1, 3 runs on `/`: all categories took 46 s, `performance` only took 33 s. Performance only saves 13 s of 46 s.
 - 3 runs and not 1: the workflow does not delay the pull request (own workflow, not required), and a median is more stable. One run took 11 s.
 - No `disableFullPageScreenshot`: it saved about 1 s (32 s against 33 s).
@@ -1113,6 +1119,8 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 ### Why two client JavaScript limits
 
 - One island's own chunk was 156 B in a probe, but the page needs about 60 kB brotli, because every island loads the shared React renderer. A per-island limit alone misses that cost, and a per-page limit alone does not say which island grew.
+
+- `page-js-limits.json` cannot hold comments, because `scripts/check-js-size.ts` reads it with `JSON.parse` and validates the result with a schema. [PERF](rules/PERF.md#limit-client-javascript) says how to set an entry.
 
 ### Why limits have 10 % headroom
 

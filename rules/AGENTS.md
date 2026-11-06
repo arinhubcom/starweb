@@ -44,53 +44,121 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the reposit
 - Use one registry: [STACK.md](STACK.md). Each name gets one `###` entry: a one-line scope, the topic files, then the sources (`llms`, `context7`, `docs`, `github`, `mcp`, `skills`, `tools`), as bare URLs.
 - Link each name to its registry entry once in each topic file, at first use: `[Kysely](STACK.md#kysely)`. Do not repeat source URLs in topic files.
 - Use a deep link in a topic file only when the registry sources cannot find the page by name, such as a specific GitHub file, a legal text, or a GitHub issue.
-- `rules/` is copied to each project, so a rule never names the Starweb template: `package.json`, not `template/package.json`. Exceptions: a path in the Starweb clone that a step in [SETUP](SETUP.md) or [UPDATE](UPDATE.md) reads, and this file.
+- `rules/` is copied to each project, so a rule never names the Starweb template: `package.json`, not `template/package.json`.
+- The exceptions are a path in the Starweb clone that a step in [SETUP](SETUP.md) or [UPDATE](UPDATE.md) reads, and this file.
 
 ## WHY.md
 
-- A commit that adds, changes, or removes a decision in `rules/` (chosen or forbidden tool, limit, number, version pin) updates its reason in [WHY.md](../WHY.md) in the same commit. Remove a reason when its decision goes.
-- A decision a reader would question needs a reason in `WHY.md`. If you cannot verify the reason, ask the user. Do not invent one.
-- A test note in `WHY.md` has the form `Tested on YYYY-MM-DD with <name> <version>`. When a template pin changes, run the test again and update the note, or keep the old date and version.
-- Before a commit that touches `rules/`, `WHY.md`, or `template/package.json`: `node scripts/check-why.mjs`. CI runs it too. It fails on a broken link or anchor, an undated test note, or another major version than the template pin. It warns on another minor version.
+- A decision is a chosen or forbidden tool, a limit, a number, or a version pin.
+- When a commit adds, changes, or removes a decision in `rules/`, update its reason in [WHY.md](../WHY.md) in the same commit.
+- Remove a reason when its decision goes.
+- A decision a reader would question needs a reason in `WHY.md`.
+- If you cannot verify the reason, ask the user. Do not invent one.
+- A test note in `WHY.md` has the form `Tested on YYYY-MM-DD with <name> <version>`.
+- When a template pin changes, run the test again and update the note. Or keep the old date and version.
+- Before a commit that touches `rules/`, `WHY.md`, or `template/package.json`, run `node scripts/check-why.mjs`. CI runs it too.
+- The script fails on a broken link or anchor, an undated test note, or another major version than the template pin.
+- The script warns on another minor version.
 - The script cannot find a false or missing reason. After a large change to `rules/`, compare `WHY.md` with `rules/` section by section.
 
 ## Verification
 
 - Verify each rule in the official docs or on GitHub before you add it.
-- When the docs do not fully answer it, or it depends on tool output, a config, or an error: install the package in a temporary folder outside the repository, run a short script, check the result. No test packages in the repository.
-- A rule you cannot verify is not added. Say what you could not verify.
+- If the docs do not fully answer it, or it depends on tool output, a config, or an error, test it in a temporary folder outside the repository.
+- In that folder, install the package, run a short script, and check the result.
+- Do not add test packages to the repository.
+- Do not add a rule you cannot verify. Say what you could not verify.
 
 ## Sources
 
-- Context7: `https://context7.com/<library-id>/llms.txt?tokens=10000`. Find the ID with `https://context7.com/api/v1/search?query=<name>`. Prefer a `verified` ID with the higher `benchmarkScore`.
-- `llms.txt`: try `<docs-origin>/llms.txt` and `/llms-full.txt`. Add only a URL that returns 200 with `text/plain` or `text/markdown`.
-- Skills: find with `https://skills.sh/api/search?q=<name>`. Prefer the vendor's own skill, then the most installed one. Link `https://skills.sh/<owner>/<repo>/<skill>`.
-- Check every URL before you add it. A URL that fails is not added.
-- Context7 rate-limits `llms.txt` checks (429); verify a Context7 ID through the search API instead.
+- Context7: use `https://context7.com/<library-id>/llms.txt?tokens=10000`.
+- Find the Context7 ID with `https://context7.com/api/v1/search?query=<name>`. Prefer a `verified` ID with the higher `benchmarkScore`.
+- Context7 rate-limits `llms.txt` checks (429). Verify a Context7 ID through the search API instead.
+- `llms.txt`: try `<docs-origin>/llms.txt` and `/llms-full.txt`.
+- Add an `llms.txt` URL only if it returns 200 with `text/plain` or `text/markdown`.
+- Skills: find a skill with `https://skills.sh/api/search?q=<name>`. Prefer the vendor's own skill, then the most installed one.
+- Link a skill as `https://skills.sh/<owner>/<repo>/<skill>`.
+- Check every URL before you add it. Do not add a URL that fails.
 
-## Template
+## Change the template in Starweb
 
-- `template/` holds the `create-emdash` output (`cloudflare:starter`) with the Starweb changes in place, `package.json`, and the configs, formatted with Oxfmt. A new project takes over the folder: `scripts/setup.mjs` copies it to the project root. No `files/` subfolder, no `create-emdash` run in a project.
-- Not in `template/`: `.env` (`setup.mjs` writes a new key per project), `worker-configuration.d.ts`.
-- `template/pnpm-lock.yaml` matches `template/package.json` (`setup.mjs` runs `pnpm install --frozen-lockfile`). After a change to `template/package.json`: `pnpm install --lockfile-only` in `template/`.
-- `starter/` holds the last `create-emdash` output, shaped like `template/` (renamed, formatted, without the files above, the lockfile, and `pnpm-workspace.yaml`): the merge base. No hand edits.
-- EmDash update → [UPDATE](UPDATE.md) (EmDash update). `.github/workflows/starter-check.yml` runs `node scripts/update-starter.mjs --check` every Monday, and opens or updates one issue when `create-emdash` gives other files than `starter/` or a newer version is ready to pin.
-- No install commands in `rules/` (`pnpm add`, `pnpm remove`, `pnpm exec astro add`). A package every project needs goes in `template/package.json`, its config in `template/`. A rule for an optional feature names the packages only.
-- A rule and the file in `template/` or `scripts/setup.mjs` that implements it change in the same commit.
+This section is for the Starweb repository, not for a project. A project does not change `template/`.
+
+### What the folders hold
+
+- `template/` holds the `create-emdash` output (`cloudflare:starter`) with the Starweb changes in place.
+- `template/` also holds `package.json` and the configs, formatted with Oxfmt.
+- A new project takes over the folder. `scripts/setup.mjs` copies it to the project root.
+- Do not add a `files/` subfolder. Do not run `create-emdash` in a project.
+- Do not put `.env` or `worker-configuration.d.ts` in `template/`. `setup.mjs` writes a new key to `.env` for each project.
+- `template/pnpm-lock.yaml` must match `template/package.json`, because `setup.mjs` runs `pnpm install --frozen-lockfile`.
+- After a change to `template/package.json`, run `pnpm install --lockfile-only` in `template/`.
+- `starter/` holds the last `create-emdash` output. It is the merge base. Do not edit it by hand.
+- `starter/` has the shape of `template/`: renamed and formatted, without the files above, the lockfile, and `pnpm-workspace.yaml`.
+- For an EmDash update, see [UPDATE](UPDATE.md#emdash-update).
+- `.github/workflows/starter-check.yml` runs `node scripts/update-starter.mjs --check` every Monday.
+- It opens or updates one issue when `create-emdash` gives other files than `starter/`, or when a newer version is ready to pin.
+
+### Keep the template, the rules, and the docs in step
+
+- Do not put install commands in `rules/` (`pnpm add`, `pnpm remove`, `pnpm exec astro add`).
+- Put a package that every project needs in `template/package.json`, and its config in `template/`.
+- A rule for an optional feature names the packages only.
+- Change a rule and the file in `template/` or `scripts/setup.mjs` that implements it in the same commit.
 - A new decision in `template/` that a reader would question needs its reason in `WHY.md` or a comment in the file.
-- Each decision that applies to every project and that a file, config value, package, script, or CI step can implement goes in `template/` or `scripts/setup.mjs`, not in `rules/`, or in a step in [SETUP](SETUP.md) that a real project can run. Conditional rules ("uses X →") need a [SETUP](SETUP.md) step. A step never names a file that neither the template nor the step creates.
-- Keep [SETUP](SETUP.md) and [UPDATE](UPDATE.md) current, in the same commit as the change: a change to `template/`, `scripts/`, CI, or a rule that changes what a new project needs updates SETUP; one that changes what an existing project must do updates UPDATE. A step never names a command, flag, file, or `update.mjs` output label that no longer exists.
-- `template/.agents/skills/` holds the starter skills and `starweb-update`. Claude Code reads only `.claude/skills`, so keep the symbolic link `.claude/skills` → `../.agents/skills`. `starweb-update` points to `rules/UPDATE.md` in the clone; no steps in the skill.
+- Put a decision that applies to every project in `template/` or `scripts/setup.mjs`, not in `rules/`, if a file, config value, package, script, or CI step can implement it.
+- If a file cannot implement it, write it as a step in [SETUP](SETUP.md) that a real project can run.
+- A conditional rule, such as "If the project uses X", needs a [SETUP](SETUP.md) step.
+- A step never names a file that neither the template nor the step creates.
+- Keep [SETUP](SETUP.md) and [UPDATE](UPDATE.md) current, in the same commit as the change.
+- If a change to `template/`, `scripts/`, CI, or a rule changes what a new project needs, update SETUP.
+- If a change to `template/`, `scripts/`, CI, or a rule changes what an existing project must do, update UPDATE.
+- A step never names a command, flag, file, or `update.mjs` output label that no longer exists.
+- `template/.agents/skills/` holds the starter skills and `starweb-update`.
+- Claude Code reads only `.claude/skills`. Keep the symbolic link `.claude/skills` that points to `../.agents/skills`.
+- `starweb-update` points to `rules/UPDATE.md` in the clone. The skill holds no steps.
 - A new template file or behavior gets a check in `scripts/test-template.sh`.
-- Exact versions in `template/package.json`, no `^` or `~`. A `catalog:` entry has its exact version in `template/pnpm-workspace.yaml`.
-- Before a commit that touches `template/`, `scripts/`, or a rule they implement: `bash scripts/test-template.sh <tmp-dir>` (new folder outside the repository). `--quick` stops after the checks, for iteration only.
-- Before each template test, check every package in `template/package.json` for a newer version (`pnpm view <package> time`); pin the newest that is older than 3 days and within peer ranges and the [DEPS](DEPS.md) ignore list, then test with it.
-- New minor or major of `@astrojs/cloudflare`, `wrangler`, `tailwindcss`, `zod`, `effect`, `typescript-eslint`, `oxlint`, `oxfmt`, `@e18e/eslint-plugin`, `vitest`, `knip`, and any new version of `oxlint-plugin-react-doctor`, in a Dependabot pull request or a pin change: read the release notes of each version it passes (sources in [STACK](STACK.md)). Update the rules, `WHY.md`, and `template/` for each new feature that fits the stack, deprecation, or fixed workaround, in the same pull request. `oxlint-plugin-react-doctor`: also compare the rules. → [QUALITY](QUALITY.md) (React Doctor rules)
-- New `astro` minor or major: read its post in the [Astro blog feed](https://astro.build/rss.xml) (`Astro X.Y` for each minor it passes, plus the monthly "What's new in Astro" posts since the old pin). Update the rules, `WHY.md`, and `template/` for each new feature, deprecation, or fixed workaround in the same commit as the version bump.
-- Before a push that changes the steps in [SETUP](SETUP.md), `scripts/setup.mjs`, or the Quick start prompt in `README.md`: test setup with an agent. → [WHY](../WHY.md#why-an-agent-tests-setup)
-  - New sub-agent with no context from your session. Its task is the Quick start prompt, copied from `README.md`.
-  - Change in the prompt only: the clone URL = path of the local repository when the change is not pushed, and the project and clone folders = new folders outside the repository.
-  - Tell the sub-agent the answer to the optional parts question, only after it reports the question. It runs no step that needs a Cloudflare account (login, deploy), unless you give it a test account.
-  - Done when: it asked the question before step 2, it ran the steps of the parts you picked, and `pnpm run check`, `pnpm run build`, and `pnpm run size` pass in the new project.
-  - It reports each step that it misread or could not follow. Fix the step, and run the test again.
-- Also `bash scripts/test-update.sh <tmp-dir>` (another new folder) when the change touches `scripts/update.mjs`, `scripts/update-starter.mjs`, `scripts/setup.mjs`, `scripts/lib.mjs`, `.starweb.json`, or the files `update.mjs` merges. It edits lines 7, 10, and 13 of `rules/DEV.md`; keep that file at 13 or more lines.
+
+### Pin versions
+
+- Use exact versions in `template/package.json`, with no `^` or `~`.
+- A `catalog:` entry has its exact version in `template/pnpm-workspace.yaml`.
+
+### Test before a commit
+
+- Before a commit that touches `template/`, `scripts/`, or a rule they implement, run `bash scripts/test-template.sh <tmp-dir>`. Use a new folder outside the repository.
+- `--quick` stops after the checks. Use it for iteration only.
+- Before each template test, check every package in `template/package.json` for a newer version with `pnpm view <package> time`.
+- Pin the newest version that is older than 3 days and within the peer ranges and the [DEPS](DEPS.md) ignore list. Then test with it.
+
+### Read the release notes
+
+- Read the release notes of each version that a change passes when a Dependabot pull request or a pin change brings one of these:
+  - A new minor or major of `@astrojs/cloudflare`, `wrangler`, `tailwindcss`, `zod`, `effect`, `typescript-eslint`, `oxlint`, `oxfmt`, `@e18e/eslint-plugin`, `vitest`, or `knip`.
+  - Any new version of `oxlint-plugin-react-doctor`.
+- The sources are in [STACK](STACK.md).
+- For each new feature that fits the stack, deprecation, or fixed workaround, update the rules, `WHY.md`, and `template/` in the same pull request.
+- For `oxlint-plugin-react-doctor`, also compare the rules. See [QUALITY](QUALITY.md#change-the-react-doctor-rules).
+- For a new `astro` minor or major, read its post in the [Astro blog feed](https://astro.build/rss.xml).
+- Read `Astro X.Y` for each minor the pin passes, plus the monthly "What's new in Astro" posts since the old pin.
+- For each new feature, deprecation, or fixed workaround, update the rules, `WHY.md`, and `template/` in the same commit as the version bump.
+
+### Test setup with an agent
+
+- Before a push that changes the steps in [SETUP](SETUP.md), `scripts/setup.mjs`, or the Quick start prompt in `README.md`, test setup with an agent. See [WHY](../WHY.md#why-an-agent-tests-setup).
+  - Start a new sub-agent with no context from your session. Its task is the Quick start prompt, copied from `README.md`.
+  - If the change is not pushed, change only the clone URL in the prompt to the path of the local repository.
+  - Change the project and clone folders in the prompt to new folders outside the repository.
+  - Tell the sub-agent the answer to the optional parts question, only after it reports the question.
+  - The sub-agent runs no step that needs a Cloudflare account (login, deploy), unless you give it a test account.
+  - The test is done when the sub-agent asked the question before step 2, and ran the steps of the parts you picked.
+  - The test is also done when `pnpm run check`, `pnpm run build`, and `pnpm run size` pass in the new project.
+  - The sub-agent reports each step that it misread or could not follow. Fix the step, and run the test again.
+
+### Test the update script
+
+- Also run `bash scripts/test-update.sh <tmp-dir>` in another new folder when the change touches one of these:
+  - `scripts/update.mjs`, `scripts/update-starter.mjs`, `scripts/setup.mjs`, or `scripts/lib.mjs`.
+  - `.starweb.json`.
+  - The files `update.mjs` merges.
+- The script edits lines 2, 3, 4, 7, 10, and 13 of `rules/DEV.md`. Keep that file at 13 or more lines.

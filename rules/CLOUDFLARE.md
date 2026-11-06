@@ -1,12 +1,10 @@
 # CLOUDFLARE
 
-Plans and cost. Limits and budgets → [PERF](PERF.md). Plugins per plan → [CMS](CMS.md#plugins-on-workers-free-and-paid). Free plan rules → [SAAS](SAAS.md#workers-free-plan).
+This file covers Cloudflare plans and prices. Read it before you choose a plan or estimate the cost of a project. For limits and budgets, see [PERF](PERF.md). For plugins per plan, see [CMS](CMS.md#choose-a-plugin-setup-for-your-plan). For Free plan rules, see [SAAS](SAAS.md#workers-free-plan).
 
-## Cost
+## Look up a price
 
-### Prices
-
-Prices checked 2026-11-04, in USD, without tax. Paid minimum: $5 per month per account.
+Prices checked 2026-11-04. They are in USD, without tax. The Paid minimum is $5 per month per account.
 
 | Service | Free | Paid included per month | Paid extra |
 | --- | --- | --- | --- |
@@ -27,9 +25,11 @@ Prices checked 2026-11-04, in USD, without tax. Paid minimum: $5 per month per a
 | Workers Logs events | 200,000 per day | 20 million | $0.60 per million; new pricing from 2026-12-01 |
 | Dynamic Workers created | None | 1,000 unique | $0.002 per Dynamic Worker per day |
 
-### Worker cost examples
+- Before a plan decision, check the pricing pages: [Workers](https://developers.cloudflare.com/workers/platform/pricing/), [Dynamic Workers](https://developers.cloudflare.com/dynamic-workers/pricing/), [D1](https://developers.cloudflare.com/d1/platform/pricing/), [R2](https://developers.cloudflare.com/r2/pricing/), [Workers KV](https://developers.cloudflare.com/kv/platform/pricing/), [Queues](https://developers.cloudflare.com/queues/platform/pricing/), and [Images](https://developers.cloudflare.com/images/pricing/).
 
-Worker cost per month, with every request at the full 10 ms and no cache hits. D1, R2, and other services are extra.
+## Estimate the Worker cost
+
+The table shows the Worker cost per month, with every request at the full 10 ms and no cache hits. D1, R2, and other services cost extra.
 
 | Requests per month | Requests | CPU | Total |
 | --- | --- | --- | --- |
@@ -38,12 +38,12 @@ Worker cost per month, with every request at the full 10 ms and no cache hits. D
 | 30 million | $6.00 | $5.40 | $16.40 |
 | 100 million | $27.00 | $19.40 | $51.40 |
 
-- Total = $5 + requests + CPU.
-- Check before a plan decision: [Workers](https://developers.cloudflare.com/workers/platform/pricing/), [Dynamic Workers](https://developers.cloudflare.com/dynamic-workers/pricing/), [D1](https://developers.cloudflare.com/d1/platform/pricing/), [R2](https://developers.cloudflare.com/r2/pricing/), [Workers KV](https://developers.cloudflare.com/kv/platform/pricing/), [Queues](https://developers.cloudflare.com/queues/platform/pricing/), [Images](https://developers.cloudflare.com/images/pricing/).
+- The total is $5 plus the requests cost plus the CPU cost.
 
-### Price checks
+## Check the prices again
 
-- Check the prices in this file every 3 months, before each plan decision, and when Cloudflare announces a pricing change. → [WHY](../WHY.md#why-prices-get-checked-every-3-months)
-- Update the `Prices checked` date in the same commit, also when no price changed. Recalculate Worker cost examples when a Worker price changes.
-- Check Workers Logs on 2026-12-01 (new pricing).
-- Next check: 2027-02-04.
+- Check the prices in this file every 3 months, before each plan decision, and when Cloudflare announces a pricing change. See [WHY](../WHY.md#why-prices-get-checked-every-3-months).
+- Update the `Prices checked` date in the same commit, also when no price changed.
+- When a Worker price changes, recalculate the Worker cost examples.
+- Check Workers Logs on 2026-12-01 for the new pricing.
+- The next check is on 2027-02-04.

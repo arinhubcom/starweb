@@ -1,5 +1,5 @@
 // Forms plugin policy. The plugin has no working option for these values, so
-// the middleware enforces them. See the Forms section in rules/CMS.md.
+// the middleware enforces them. See the Add EmDash Forms section in rules/CMS.md.
 const FORMS_API = "/_emdash/api/plugins/emdash-forms";
 
 export const FORM_CREATE_PATH = `${FORMS_API}/forms/create`;

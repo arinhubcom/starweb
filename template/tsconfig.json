@@ -1,11 +1,16 @@
 {
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
+    // Do not use "preserve": `vitest run --coverage` then fails on any uncovered
+    // `.tsx` file (`Support for the experimental syntax 'jsx'`).
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "types": ["node", "@cloudflare/vitest-plugin/types"],
+    // Keep it: `shadcn add` reads the `@/` alias from here. Do not add `baseUrl`:
+    // `oxlint-tsgolint` rejects it, and TypeScript 7 removed it.
     "paths": { "@/*": ["./src/*"] },
     "noUncheckedIndexedAccess": true,
+    // Keep it. Spread an optional value only when it is set.
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,

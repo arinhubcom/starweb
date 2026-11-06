@@ -1,4 +1,7 @@
-# rules/DEPS.md (Install, pnpm minimumReleaseAge, pnpm audit).
+# rules/DEPS.md (Install packages > pnpm, Update packages > Supply chain).
+# A package with a build script is listed here with `true` or `false`. pnpm
+# fails an install on an unreviewed build script. Read the script of a new
+# package first, then add it.
 allowBuilds:
   esbuild: true
   workerd: true
@@ -7,6 +10,9 @@ allowBuilds:
 # "zod": "catalog:" in package.json.
 catalog:
   zod: 4.6.7
+# In minutes: 4320 = 3 days. Keep it equal to `cooldown.default-days` in
+# .github/dependabot.yml (3 days), so that a manual install and a Dependabot PR
+# wait the same time. There is no exclude list, so new emdash releases wait too.
 minimumReleaseAge: 4320
 overrides:
   zod: "catalog:"

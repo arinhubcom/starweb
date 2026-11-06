@@ -4,7 +4,8 @@
 type Destination = "worker" | "environment" | "production";
 export type Target = "dev" | "production";
 
-// A project adds its own names here and to rules/TOKENS.md.
+// A project adds its own names here and to the table in rules/TOKENS.md. All
+// tokens that CI reads live in GitHub environments, not in repository secrets.
 export const SECRETS: Readonly<Record<string, Destination>> = {
   BETTER_AUTH_SECRET: "worker",
   EMDASH_ENCRYPTION_KEY: "worker",
@@ -97,6 +98,8 @@ const describeDestination = (name: string, target: Target): string => {
 };
 
 // A production-only token in the dev environment is one that nothing reads.
+// `PAGESPEED_API_KEY` and `CLOUDFLARE_OBSERVABILITY_TOKEN` go with
+// `set-secrets production` only. `set-secrets dev` refuses them.
 export const assertTargetFits = (
   entries: readonly SecretEntry[],
   target: Target,
@@ -161,6 +164,8 @@ export const redact = (text: string, values: readonly string[]): string =>
     .toSorted((a, b) => b.length - a.length)
     .reduce((result, value) => result.split(value).join(REDACTED), text);
 
+// Error 10222: Cloudflare needs an uploaded version before it accepts Worker
+// secrets. Without one, the command fails.
 export const failureHint = (output: string): string | undefined =>
   output.includes("10222") || output.includes("no uploaded versions")
     ? "The Worker has no uploaded version. Upload a version first (wrangler versions upload), then run this command again."

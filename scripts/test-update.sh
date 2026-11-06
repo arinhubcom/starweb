@@ -133,6 +133,9 @@ fi
 
 step "Update a project whose commit has the old layout: template/files, no starter"
 LEGACY_COMMIT=c75cbad
+# The rules changed a lot since this commit, so the project edit of an earlier
+# step would conflict. This step tests the layout, not a rule merge.
+cp "$STARWEB/rules/DEV.md" "$APP/rules/DEV.md"
 node -e '
   const fs = require("node:fs");
   const [file, commit] = process.argv.slice(1);

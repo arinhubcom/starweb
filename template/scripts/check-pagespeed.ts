@@ -1,6 +1,6 @@
 // Measure the performance score of the production site with the PageSpeed
 // Insights API. Run with: pnpm run pagespeed [url...]
-// Needs network access and PAGESPEED_API_KEY. See Performance in rules/PERF.md.
+// Needs network access and PAGESPEED_API_KEY. See Measure Core Web Vitals in rules/PERF.md.
 import { SITE } from "../src/lib/site.ts";
 import {
   TARGET_SCORE,

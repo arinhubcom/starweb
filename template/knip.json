@@ -1,5 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
+  // `entry` replaces the default `index`, `main`, and `cli`. It is not an ignore
+  // list. `!` marks production code for `knip --production`, which finds code
+  // that only tests and stories use. Do not list the files that plugins find:
+  // Astro adds `src/pages/**`, `src/content.config.ts`, and `src/middleware.ts`.
+  // Wrangler adds `main` (`src/worker.ts`). Storybook, Vitest, and Playwright
+  // add stories, `.storybook/`, tests, and `playwright.config.ts`.
   "entry": [
     "src/live.config.ts",
     "src/apps/*/pages/**/*.astro!",
@@ -7,6 +13,8 @@
     "src/apps/*/admin/{plugin.ts,pages.tsx}!",
     "scripts/*.ts"
   ],
+  // Installed components export their full API, and agent skills hold files that
+  // no code imports. So do not add `.agents/**` to `ignore`.
   "ignoreIssues": {
     "src/components/ui/**": ["files", "exports", "types"],
     ".agents/skills/**": ["files"]

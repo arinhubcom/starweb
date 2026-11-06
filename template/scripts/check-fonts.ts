@@ -1,5 +1,5 @@
 // Check src/lib/fonts.ts against the font providers. Run with: pnpm run fonts
-// Needs network access, like the build. See Fonts in rules/MEDIA.md.
+// Needs network access, like the build. See Change or add a font in rules/MEDIA.md.
 import { ICON_NAMES, fonts } from "../src/lib/fonts.ts";
 import {
   findFamilyProblems,

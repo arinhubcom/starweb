@@ -1,6 +1,12 @@
 // Send secrets from stdin to GitHub and to the Worker. Run with:
 //   <source> | pnpm run set-secrets <dev|production> [--dry-run]
 // The password manager stays your choice. See rules/TOKENS.md.
+// Reads `KEY=VALUE` lines from stdin. `--dry-run` lists the names and their
+// destinations and sends nothing. It is not part of `pnpm run check`.
+// Worker secrets go in one `wrangler versions secret bulk` call: `--env=` for
+// dev, `--env=production` for production. The call creates a version and does
+// not deploy it. Environment secrets go through `gh secret set NAME --env
+// <dev|production>` with the value on stdin.
 import { spawn } from "node:child_process";
 import {
   assertTargetFits,
@@ -62,7 +68,7 @@ const run = (step: Command): Promise<Result> =>
 const printProductionNote = (plan: readonly Command[]) => {
   if (!plan.some((step) => step.command === "pnpm")) return;
   console.info(
-    "The Worker command only created a version. Release it with `wrangler versions deploy --env production` (rules/DEPLOY.md, Secrets).",
+    "The Worker command only created a version. Release it with `wrangler versions deploy --env production` (rules/DEPLOY.md, Set secrets).",
   );
 };
 

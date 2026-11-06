@@ -1,120 +1,137 @@
 # OBSERVABILITY
 
-→ [DEPLOY](DEPLOY.md) (version metadata, release tags), [SAAS](SAAS.md) (Sentry per tenant), [SECURITY](SECURITY.md), [ARCH](ARCH.md).
+This file covers logs, traces, errors, alerts, and health checks. Read it before you add logging, error reporting, or a monitor. For version metadata and release tags, see [DEPLOY](DEPLOY.md#version-metadata). For Sentry per tenant, see [SAAS](SAAS.md). See also [SECURITY](SECURITY.md) and [ARCH](ARCH.md).
 
-## Logs
+## Write logs
 
-### [Workers](STACK.md#workers) Logs
+### Workers Logs
 
-- `env.production` inherits `observability`, repeat only for a different value. → [DEPLOY](DEPLOY.md) (Environments). Redeploy after a change.
-- `head_sampling_rate` (0-1, default `1`) only for a high-traffic Worker; same key under `observability.logs` and `observability.traces` for separate rates.
-- Retention 3 days (Free) / 7 days (Paid): export for longer ([OpenTelemetry](STACK.md#opentelemetry) export).
-- Entry ≤ 256 KB (truncated above).
+- `env.production` inherits `observability`. Repeat it only for a different value. See [DEPLOY](DEPLOY.md#wrangler-config).
+- Redeploy after you change `observability`.
+- Set `head_sampling_rate` (0 to 1, default `1`) only for a high-traffic [Workers](STACK.md#workers) Worker.
+- To set separate rates, use the same key under `observability.logs` and `observability.traces`.
+- Workers Logs keep entries for 3 days on Free and 7 days on Paid. For longer, export them with [OpenTelemetry](STACK.md#opentelemetry).
+- An entry larger than 256 KB is truncated.
 
 ### console
 
-- Only `console.debug/info/log/warn/error`. No `console.dir/time/assert` (no-ops in Workers).
-- Log an object: `console.log({ event: "order.created", order_id })`. No string concatenation (fields are indexed).
-- Caught error → `console.error(error)`; never swallow.
-- Levels: `error` failure, `warn` recoverable, `info` normal event, `debug` detail.
-- No secrets, tokens, passwords, session IDs, request bodies, personal data (emails). Log IDs (`user_id`, `tenant_id`).
-- Add `env.CF_VERSION_METADATA.id` as `version` to each entry. → [DEPLOY](DEPLOY.md) (Version metadata)
+- Use only `console.debug`, `console.info`, `console.log`, `console.warn`, and `console.error`.
+- Do not use `console.dir`, `console.time`, or `console.assert`. They do nothing in Workers.
+- Log an object, for example `console.log({ event: "order.created", order_id })`.
+- Do not build a log string by concatenation. Fields are indexed.
+- For a caught error, call `console.error(error)`. Never swallow an error.
+- Use `error` for a failure, `warn` for a recoverable problem, `info` for a normal event, and `debug` for detail.
+- Never log secrets, tokens, passwords, session IDs, request bodies, or personal data such as emails.
+- Log IDs instead, such as `user_id` and `tenant_id`.
+- Add `env.CF_VERSION_METADATA.id` as `version` to each entry. See [DEPLOY](DEPLOY.md#version-metadata).
+
+### Effect
+
+- With [Effect](STACK.md#effect), log with `Effect.log`, `logDebug`, `logInfo`, `logWarning`, `logError`, and `logFatal`.
+- Use the runtime layer `Logger.structured`, which turns an object into indexed fields.
+- Do not use `Logger.json`. It writes one string.
+- Add fields with `Effect.annotateLogs({ request_id, tenant_id })`, not in the message.
+- Set the minimum level with the `Logger.minimumLogLevel(LogLevel.Info)` layer.
+- Pass the `Cause` or the error, for example `Effect.logError("save failed", cause)`. Do not use `String(error)`.
+- Time an operation with `Effect.withSpan("orders.create")`. Use stable names.
 
 ### Real-time logs
 
-- Live view after a release: `pnpm exec wrangler tail <worker>-production --format json`; filter `--status error`, `--search <text>`, `--version-id <id>`; query with `jq`.
-- No `wrangler tail` for storage (stores nothing, drops messages under load).
+- To watch a release live, run `pnpm exec wrangler tail <worker>-production --format json`.
+- Filter with `--status error`, `--search <text>`, or `--version-id <id>`. Query the output with `jq`.
+- Do not use `wrangler tail` for storage. It stores nothing and drops messages under load.
 
-## [Effect](STACK.md#effect)
+## Add traces
 
-- Log with `Effect.log`, `logDebug`, `logInfo`, `logWarning`, `logError`, `logFatal`.
-- Runtime layer `Logger.structured` (object → indexed fields). No `Logger.json` (one string).
-- Fields via `Effect.annotateLogs({ request_id, tenant_id })`, not in the message.
-- Min level: `Logger.minimumLogLevel(LogLevel.Info)` layer.
-- Pass the `Cause` or error: `Effect.logError("save failed", cause)`, not `String(error)`.
-- `Effect.withSpan("orders.create")` to time an operation; stable names.
+- To trace fetch, bindings (D1, KV, R2), RPC, and handlers, set `"observability": { "traces": { "enabled": true, "head_sampling_rate": 0.05 } }`.
+- Lower the rate for high traffic.
+- Traces have 7 days of retention. They are billed from 2026-12-01.
+- To export logs and traces to a third party, use OpenTelemetry export. Do not add an SDK to the Worker.
 
-## Traces
+## Report errors with Sentry
 
-### Workers traces
+### Cloudflare setup
 
-- `"observability": { "traces": { "enabled": true, "head_sampling_rate": 0.05 } }` traces fetch, bindings (D1, KV, R2), RPC, handlers.
-- Lower the rate for high traffic. 7 days retention; billed from 2026-12-01.
+- Use [Sentry](STACK.md#sentry) with the package `@sentry/cloudflare`.
+- Use `compatibility_date` of `2026-08-04` or later, and do not set `nodejs_compat`. See [ARCH](ARCH.md).
+- Read the DSN from `env` as the Worker secret or variable `SENTRY_DSN`. Run `wrangler types` after you add it.
+- Do not hardcode a DSN for each environment. For production, see [DEPLOY](DEPLOY.md#set-secrets).
+- Set `environment: env.SENTRY_ENVIRONMENT`.
+- Set the variable `SENTRY_ENVIRONMENT` to `production` or `dev` for each Wrangler environment.
+- Set `tracesSampleRate` below `1.0` in production.
+- Do not measure span durations for CPU-only work. `Date.now()` and `performance.now()` advance only after I/O, so the result is `0ms`.
 
-### OpenTelemetry export
+### Astro setup
 
-- Export logs and traces to a third party with OpenTelemetry export. No SDK in the Worker.
+- For [Astro](STACK.md#astro) on Cloudflare, use the packages `@sentry/astro` and `@sentry/cloudflare`.
+- Use Astro 6 or newer and `@astrojs/cloudflare` 13 or newer.
+- Keep `"main": "./src/worker.ts"`.
+- Do not use `sentry.server.config.ts`.
+- Do not use the `@astrojs/cloudflare/entrypoints/server` handler. It replaces the [EmDash](STACK.md#emdash) handler. See [ARCH](ARCH.md#run-background-work).
+- In `src/worker.ts`, export `Sentry.withSentry((env) => ({ dsn: env.SENTRY_DSN, ... }), { ...handler, scheduled: createScheduledHandler() })`.
+- Take `handler` from `@emdash-cms/cloudflare/worker`.
+- `withSentry` wraps `fetch`, `scheduled`, `email`, `queue`, and `tail` of that object. Keep `queue()` in it.
+- Export [Workflow](STACK.md#workflows) and [Durable Object](STACK.md#durable-objects) classes as separate named exports of `src/worker.ts`. `withSentry` does not wrap them.
+- Wrap them with `Sentry.instrumentWorkflowWithSentry` or `instrumentDurableObjectWithSentry`.
+- Add `sentry()` from `@sentry/astro` to `integrations`, next to the Cloudflare adapter.
+- In `sentry.client.config.ts`, call `Sentry.init({ dsn: import.meta.env.PUBLIC_SENTRY_DSN })`.
+- Put `PUBLIC_SENTRY_DSN` in `.env` for the build.
+- Add the DSN host to the CSP `connect-src`, for example `https://o<orgId>.ingest.sentry.io`. See [SECURITY](SECURITY.md#change-the-csp).
+- List Sentry as a processor. See [PRIVACY](PRIVACY.md).
 
-## Errors
+### Data collection
 
-### [Sentry](STACK.md#sentry) for Cloudflare
+- Set the server options `dataCollection: { userInfo: false, httpBodies: [] }`. The default sends IP, user fields, and bodies.
+- Extend the denylist for identifying headers, cookies, and query params: `httpHeaders: { deny: ["forwarded", "-ip", "remote-", "via", "-user"] }`.
+- Send IDs only: `Sentry.setUser({ id: userId })` and `Sentry.setTag("tenant_id", tenantId)`.
+- Never send emails or names.
 
-- `@sentry/cloudflare`.
-- `compatibility_date` ≥ `2026-08-04`, no `nodejs_compat`. → [ARCH](ARCH.md)
-- DSN: Worker secret/var `SENTRY_DSN` read from `env`; `wrangler types` after adding. No hardcoded DSN per environment. Production → [DEPLOY](DEPLOY.md) (Secrets).
-- `environment: env.SENTRY_ENVIRONMENT`; var `SENTRY_ENVIRONMENT` = `production` or `dev` per Wrangler environment.
-- `tracesSampleRate` < `1.0` in production.
-- No span durations for CPU-only work (`Date.now()`/`performance.now()` advance only after I/O → `0ms`).
+### Releases
 
-### Sentry for [Astro](STACK.md#astro) on Cloudflare
-
-- Packages `@sentry/astro`, `@sentry/cloudflare`. Astro ≥ 6, `@astrojs/cloudflare` ≥ 13.
-- Keep `"main": "./src/worker.ts"`. Not `sentry.server.config.ts`, not the `@astrojs/cloudflare/entrypoints/server` handler (replaces the [EmDash](STACK.md#emdash) handler). → [ARCH](ARCH.md) (Background work)
-- `src/worker.ts`: `export default Sentry.withSentry((env) => ({ dsn: env.SENTRY_DSN, ... }), { ...handler, scheduled: createScheduledHandler() })`, `handler` from `@emdash-cms/cloudflare/worker`. Wraps `fetch`, `scheduled`, `email`, `queue`, `tail` of that object; keep `queue()` in it.
-- [Workflow](STACK.md#workflows) and [Durable Object](STACK.md#durable-objects) classes: separate named exports of `src/worker.ts`, not wrapped → `Sentry.instrumentWorkflowWithSentry` / `instrumentDurableObjectWithSentry`.
-- `sentry()` from `@sentry/astro` in `integrations`, next to the Cloudflare adapter.
-- `sentry.client.config.ts`: `Sentry.init({ dsn: import.meta.env.PUBLIC_SENTRY_DSN })`; `PUBLIC_SENTRY_DSN` in `.env` for the build.
-- CSP `connect-src` gets the DSN host (`https://o<orgId>.ingest.sentry.io`). → [SECURITY](SECURITY.md) (Headers)
-- List Sentry as processor. → [PRIVACY](PRIVACY.md)
-
-### Sentry data collection
-
-- Server options `dataCollection: { userInfo: false, httpBodies: [] }` (default sends IP, user fields, bodies).
-- Extend denylist for identifying headers, cookies, query params: `httpHeaders: { deny: ["forwarded", "-ip", "remote-", "via", "-user"] }`.
-- IDs only: `Sentry.setUser({ id: userId })`, `Sentry.setTag("tenant_id", tenantId)`. No emails, names.
-
-### Sentry releases
-
-- Release fallback order: `release`, `SENTRY_RELEASE`, `CF_VERSION_METADATA.id`. → [DEPLOY](DEPLOY.md)
-- Release name = release tag: `--var SENTRY_RELEASE:<worker>-YYYY-MM-DD-rN` on `wrangler versions upload` in the tag workflow (`${{ github.ref_name }}`).
-- Same name in SDK and source map upload: `release: { name: process.env.SENTRY_RELEASE }` in `sentry()` options; `SENTRY_RELEASE` env = tag in the tag workflow build step.
+- Sentry takes the release from `release`, then `SENTRY_RELEASE`, then `CF_VERSION_METADATA.id`, in this order. See [DEPLOY](DEPLOY.md).
+- Name the release like the release tag.
+- In the tag workflow, pass `--var SENTRY_RELEASE:<worker>-YYYY-MM-DD-rN` to `wrangler versions upload`, using `${{ github.ref_name }}`.
+- Use the same name in the SDK and the source map upload.
+- Set `release: { name: process.env.SENTRY_RELEASE }` in the `sentry()` options.
+- In the tag workflow build step, set the `SENTRY_RELEASE` env to the tag.
 
 ### Source maps
 
-- `"upload_source_maps": true` in `wrangler.jsonc` (uploads on `wrangler deploy` and `versions upload`).
-- `vite: { build: { sourcemap: true } }` in `astro.config`. Never leave unset: `sentry()` sets `"hidden"`, no `sourceMappingURL` comment, Wrangler uploads nothing, no error. After build, `dist/server/entry.mjs` ends with `//# sourceMappingURL=entry.mjs.map`.
-- Keep server maps in `dist/server` until deploy/upload; do not delete in the build.
-- Delete only client maps: `sourcemaps: { filesToDeleteAfterUpload: ["./dist/client/**/*.map"] }` in `sentry()`. Do not rely on the default (`./dist/**/client/**/*.map` and `./dist/**/server/**/*.map`).
-
-### Sentry source maps
-
-- `org`, `project`, `authToken: process.env.SENTRY_AUTH_TOKEN` in `sentry()` options.
-- `SENTRY_AUTH_TOKEN`: GitHub Actions secret, or `.env.sentry-build-plugin` locally. Never commit.
-- Build without it: upload skipped, client maps still deleted, `sourceMappingURL` stays → DevTools missing-map warning. Set it for client stack traces.
+- Set `"upload_source_maps": true` in `wrangler.jsonc`. It uploads on `wrangler deploy` and `versions upload`.
+- Set `vite: { build: { sourcemap: true } }` in `astro.config`.
+- Never leave it unset. `sentry()` then sets `"hidden"`, the build writes no `sourceMappingURL` comment, and Wrangler uploads nothing without an error.
+- After the build, check that `dist/server/entry.mjs` ends with `//# sourceMappingURL=entry.mjs.map`.
+- Keep server maps in `dist/server` until the deploy or upload. Do not delete them in the build.
+- Delete only client maps: `sourcemaps: { filesToDeleteAfterUpload: ["./dist/client/**/*.map"] }` in `sentry()`.
+- Do not rely on the default, which is `./dist/**/client/**/*.map` and `./dist/**/server/**/*.map`.
+- Set `org`, `project`, and `authToken: process.env.SENTRY_AUTH_TOKEN` in the `sentry()` options.
+- Store `SENTRY_AUTH_TOKEN` as a GitHub Actions secret, or in `.env.sentry-build-plugin` locally. Never commit it.
+- Without the token, the build skips the upload, still deletes client maps, and keeps `sourceMappingURL`. DevTools shows a missing-map warning.
+- Set the token to get client stack traces.
 - Check with a production build, not `wrangler dev`.
 
 ### Workers Issues
 
-- Second view only (open beta): `"observability": { "issues": { "enabled": true } }`, Wrangler ≥ 4.134.0.
+- Use Workers Issues as a second view only. It is in open beta.
+- Enable it with `"observability": { "issues": { "enabled": true } }`. It needs Wrangler 4.134.0 or newer.
 
-## Alerts
+## Set up alerts
 
-### Sentry alerts
+- In Sentry, open **Monitors > Alerts**. Alert on new issues and regressions, to one team channel.
+- Filter by production environment and severity. Do not alert on every event.
+- In Cloudflare, add a Custom Alert or a usage-based billing notification for platform limits. Send it to email, a webhook, or PagerDuty.
 
-- **Monitors > Alerts**: new issues and regressions, one team channel. Filter production environment and severity; not every event.
+## Add a health check
 
-### Cloudflare Notifications
+### Astro endpoint
 
-- Custom Alert or usage-based billing notification for platform limits → email, webhook, or PagerDuty.
-
-## Health checks
-
-### Astro endpoints
-
-- `src/pages/health.ts`: `GET`, `export const prerender = false`; `200` + JSON `{ status, version: env.CF_VERSION_METADATA.id }`. Bind `CF_VERSION_METADATA` again in `env.production`. → [DEPLOY](DEPLOY.md) (Environments)
-- No secrets, binding names, or error details in the response.
+- Create `src/pages/health.ts` with a `GET` handler and `export const prerender = false`.
+- Return `200` and JSON `{ status, version: env.CF_VERSION_METADATA.id }`.
+- Bind `CF_VERSION_METADATA` again in `env.production`. See [DEPLOY](DEPLOY.md#wrangler-config).
+- Do not return secrets, binding names, or error details.
 
 ### Sentry uptime monitoring
 
-- Uptime Monitor (**Monitors**) for `https://<your-domain>/health`; `2xx` passes.
-- Keep failure tolerance 3. No API tokens in monitor headers.
+- Create an Uptime Monitor under **Monitors** for `https://<your-domain>/health`. A `2xx` response passes.
+- Keep the failure tolerance at 3.
+- Do not put API tokens in monitor headers.
