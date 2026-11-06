@@ -176,7 +176,7 @@ Step 1 chooses the optional parts. Steps 2 to 4 create the project with [setup.m
 ### [skills CLI](STACK.md#skills-cli)
 
 22. Install the agent skills.
-    - Run each command on the `Skills:` line of [CMS](CMS.md) and [COMPONENTS](COMPONENTS.md), one at a time. Commas separate the commands.
+    - Run these commands one at a time: `pnpm dlx skills add emdash-cms/skills`, `pnpm dlx skills add shadcn/ui`, and `pnpm dlx skills add fulldotdev/ui --skill fulldev-ui`.
     - Run only these commands. The `skills` sources in [STACK](STACK.md) are not part of setup.
     - If an agent or a script runs them, add `--yes`.
     - Skills go to `.agents/skills`. `.claude/skills` links to that folder.
