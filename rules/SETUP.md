@@ -174,6 +174,7 @@ Step 1 chooses the optional parts. Steps 2 to 4 create the project with [setup.m
     - Playwright and `@axe-core/playwright` ([axe](STACK.md#axe)).
     - `pnpm exec playwright install chromium`.
     - `playwright.config.ts` with `webServer` for `astro preview --ignore-lock`.
+    - A first test in `e2e/` that uses `@axe-core/playwright`. Without it, Knip reports the package as unused.
     - See [TESTING](TESTING.md#write-screenshot-tests), [TESTING](TESTING.md#write-end-to-end-tests), and [TESTING](TESTING.md#test-accessibility).
 
 ## Agent skills
@@ -190,6 +191,7 @@ Step 1 chooses the optional parts. Steps 2 to 4 create the project with [setup.m
 ## Checks
 
 23. Run `pnpm run dev`, open `http://localhost:4321/_emdash/admin/`, and complete the setup wizard.
+    - Under an agent, `astro dev` moves to the background. Stop it with `pnpm exec astro dev stop`.
     - If the project has user login without the email part, turn off **Require email verification** on the Better Auth settings page. Sign-up cannot finish without an email.
     - To test a form, set the [Turnstile test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) in the Forms plugin settings.
     - See [DEV](DEV.md) and [CMS](CMS.md#add-emdash-forms).

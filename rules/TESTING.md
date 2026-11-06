@@ -89,6 +89,7 @@ This file covers how to write and run tests in a project: unit, component, snaps
 ### Playwright setup
 
 - Run Playwright against `astro preview`. See [DEV](DEV.md).
+- Put the tests in `e2e/`, and set `testDir: "./e2e"`. `vitest.config.ts` excludes that folder.
 - Install the browser with `pnpm exec playwright install chromium`.
 - In `webServer`, set `command: 'pnpm run preview --port <port> --ignore-lock'`, the same port in `url`, and `reuseExistingServer: !process.env.CI`.
 - Keep `--ignore-lock`. Without it, `astro preview` moves to the background under an agent, and Playwright reports that the server exited early.
@@ -105,6 +106,7 @@ This file covers how to write and run tests in a project: unit, component, snaps
 ## Test accessibility
 
 - On each page, run `new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze()` from `@axe-core/playwright`, using [axe](STACK.md#axe).
+- Use the named import `import { AxeBuilder } from "@axe-core/playwright"`. Oxlint rejects the default import with `no-named-as-default`.
 - Expect `violations` to equal `[]`.
 
 ## Run tests in CI
