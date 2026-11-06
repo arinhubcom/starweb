@@ -23,7 +23,8 @@ This file covers search engine optimization of the public site: site URL, page h
 
 - Follow [Google Search Central](STACK.md#google-search-central).
 - Give each page a unique, specific, short `<title>`. Do not use "Home".
-- Put the site name after a separator, at the end or the start: `Pricing | Starweb`.
+- Put the site name at the end of the title, after the separator ` | `: `Pricing | Starweb`.
+- Do not use an em dash as the separator.
 - Use the full tagline on the home page only.
 - Use one `<h1>` that matches the title.
 - Give each page a unique `<meta name="description">` of 160 characters or fewer.

@@ -89,7 +89,7 @@ This file holds technical rules, not legal advice. Read it before you add analyt
 ## Choose the data location
 
 - Use no jurisdiction. Do not pass `--jurisdiction` to `wrangler d1 create` or `wrangler r2 bucket create`, and do not set `jurisdiction` in `r2_buckets`. See [WHY](../WHY.md#why-no-d1-jurisdiction).
-- Place the [D1](STACK.md#d1) primary with a location hint. See [PERF](PERF.md#choose-the-placement).
+- Place the [D1](STACK.md#d1) primary with the location that the user chose during setup. See [PERF](PERF.md#choose-the-placement).
 - Never claim in the policy that data stays in the EU or in one region. State the US transfer.
 
 ## Handle logs

@@ -36,9 +36,8 @@ const { siteTitle, siteTagline, siteLogo } = resolveStarterSiteIdentity(
 );
 const titleIncludesSiteName =
   title === siteTitle ||
-  title.endsWith(` | ${siteTitle}`) ||
-  title.endsWith(` — ${siteTitle}`);
-const fullTitle = titleIncludesSiteName ? title : `${title} — ${siteTitle}`;
+  title.endsWith(` | ${siteTitle}`);
+const fullTitle = titleIncludesSiteName ? title : `${title} | ${siteTitle}`;
 const pageDescription = description ?? siteTagline;
 const menu = menuResult.data;
 // EmDashHead computes no canonical URL for a custom page, so a custom page gets
@@ -90,8 +89,9 @@ const pageCtx = createPublicPageContext({
     <EmDashBodyStart page={pageCtx} />
 
     <header>
-      <nav>
-        <a href="/">
+      {/* Each link is a 48px target, with 8px between targets. See rules/MATERIAL.md. */}
+      <nav class="flex flex-wrap items-center gap-2">
+        <a href="/" class="inline-flex min-h-12 min-w-12 items-center">
           {siteLogo ? (
             <img
               src={siteLogo.url}
@@ -105,6 +105,7 @@ const pageCtx = createPublicPageContext({
         {menu?.items.map((item) => (
           <a
             href={item.url}
+            class="inline-flex min-h-12 min-w-12 items-center"
             target={item.target}
             rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
           >
@@ -121,7 +122,9 @@ const pageCtx = createPublicPageContext({
     </main>
 
     <footer>
-      <a href="/privacy">Privacy</a>
+      <a href="/privacy" class="inline-flex min-h-12 min-w-12 items-center">
+        Privacy
+      </a>
     </footer>
 
     <EmDashBodyEnd page={pageCtx} />

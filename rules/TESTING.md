@@ -90,7 +90,8 @@ This file covers how to write and run tests in a project: unit, component, snaps
 
 - Run Playwright against `astro preview`. See [DEV](DEV.md).
 - Install the browser with `pnpm exec playwright install chromium`.
-- In `webServer`, set `command: 'pnpm run preview --port <port>'`, the same port in `url`, and `reuseExistingServer: !process.env.CI`.
+- In `webServer`, set `command: 'pnpm run preview --port <port> --ignore-lock'`, the same port in `url`, and `reuseExistingServer: !process.env.CI`.
+- Keep `--ignore-lock`. Without it, `astro preview` moves to the background under an agent, and Playwright reports that the server exited early.
 - If you start the server by hand, from a script, or from an agent, add `--background` and stop it by process ID. See [DEV](DEV.md#start-a-preview-from-an-agent-or-a-script).
 
 ### Critical flows

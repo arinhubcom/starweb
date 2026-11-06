@@ -471,6 +471,8 @@ echo "ok: security.txt has the type and the fields"
 expect_status 200 "GET /privacy" "$BASE_URL/privacy"
 curl -s --max-time 30 "$BASE_URL/privacy" | grep -q 'Privacy policy' || fail "/privacy has no title"
 curl -s --max-time 30 "$BASE_URL/" | grep -q 'href="/privacy"' || fail "the footer has no link to /privacy"
+curl -s --max-time 30 "$BASE_URL/" | grep -q 'href="/privacy" class="inline-flex min-h-12' || fail "the footer link is not a 48px target"
+curl -s --max-time 30 "$BASE_URL/privacy" | grep -q '<title>Privacy policy | ' || fail "the page title does not use the | separator"
 echo "ok: the privacy page exists, and the footer links to it"
 
 echo

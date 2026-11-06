@@ -35,7 +35,7 @@ The template holds what every project uses. The agent asks which of these parts 
 - Storybook for components.
 - Playwright and axe for end-to-end and accessibility tests.
 
-Some parts need others: for example, Stripe billing needs customer login. The template also turns on scheduled publishing, and the agent asks whether to keep it.
+Some parts need others: for example, Stripe billing needs customer login. The template also turns on scheduled publishing, and the agent asks whether to keep it. The agent also asks where to create the D1 database: in a region that you choose, or with no location.
 
 ## 🔄 Update a project
 

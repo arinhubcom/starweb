@@ -450,7 +450,13 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 
 - GDPR does not require storage in the EU. It allows a transfer to the United States under an adequacy decision (Article 45) or with safeguards such as Standard Contractual Clauses (Article 46).
 - Cloudflare is certified under the EU-U.S. Data Privacy Framework, and its DPA includes the EU Standard Contractual Clauses.
-- A database without a jurisdiction needs only a location hint, and the Worker can run near it with Targeted Placement.
+- A database without a jurisdiction needs no more than an optional location hint, and the Worker can run near it with Targeted Placement.
+
+### Why setup asks for the D1 location
+
+- The [D1 data location docs](https://developers.cloudflare.com/d1/configuration/data-location/) describe a location hint only when you create a database, and they do not describe a way to change it. So the choice belongs in setup.
+- With no hint, D1 creates the primary "in a location close to where you issued the request to create a database". That is often right, but it depends on where the agent runs, so the user must know about it.
+- A hint is not a guarantee: D1 runs "in the nearest possible location (by latency) to your preference".
 
 ### Why no D1 read replication
 

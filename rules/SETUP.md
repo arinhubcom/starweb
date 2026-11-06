@@ -11,6 +11,9 @@ Step 1 chooses the optional parts. Steps 2 to 4 create the project with [setup.m
 1. Ask the user which optional parts to add.
    - Put the whole list in one question.
    - Ask for the site URL for step 4 in the same question.
+   - Ask for the D1 location for step 6 in the same question. The choices are `wnam` (Western North America), `enam` (Eastern North America), `weur` (Western Europe), `eeur` (Eastern Europe), `apac` (Asia-Pacific), `oc` (Oceania), or no location.
+   - Say that with no location, D1 creates the database close to where step 6 runs.
+   - If the user is not sure about the location, use no location.
    - Wait for the answer before step 2. See [WHY](../WHY.md#why-setup-asks-about-optional-parts-first).
    - These are the optional parts and their steps:
      - Sandboxed plugins (Workers paid plan): step 3.
@@ -65,7 +68,9 @@ Step 1 chooses the optional parts. Steps 2 to 4 create the project with [setup.m
 
 5. Run `pnpm exec wrangler login`.
 6. Set up the Cloudflare resources in `wrangler.jsonc`.
-   - Create the [D1](STACK.md#d1) database with a location hint.
+   - If the user chose a location in step 1, create the [D1](STACK.md#d1) database with `pnpm exec wrangler d1 create <name> --location=<hint>`.
+   - If the user chose no location, create it with `pnpm exec wrangler d1 create <name>`.
+   - Write the choice in a comment next to `d1_databases` in `wrangler.jsonc`, so that later databases use the same one.
    - Add its `database_id` to the `DB` entry of `d1_databases` in `wrangler.jsonc`.
    - If the database is not near the default `aws:eu-central-1`, change the Targeted Placement region.
    - Give `FORMS_LIMITER` a `namespace_id` that no other Worker in the account uses.
@@ -168,7 +173,7 @@ Step 1 chooses the optional parts. Steps 2 to 4 create the project with [setup.m
 21. If the project has end-to-end tests, set up these parts:
     - Playwright and `@axe-core/playwright` ([axe](STACK.md#axe)).
     - `pnpm exec playwright install chromium`.
-    - `playwright.config.ts` with `webServer` for `astro preview`.
+    - `playwright.config.ts` with `webServer` for `astro preview --ignore-lock`.
     - See [TESTING](TESTING.md#write-screenshot-tests), [TESTING](TESTING.md#write-end-to-end-tests), and [TESTING](TESTING.md#test-accessibility).
 
 ## Agent skills
