@@ -158,7 +158,7 @@ Content and UI strings use two tools: [PolyStella](https://github.com/cloudflare
 
 ### Risks
 
-- PolyStella is 0.x and changes often; its README calls it work in progress. Review its changelog before each update ([DEPS](rules/DEPS.md) does not automerge 0.x).
+- PolyStella is 0.x and changes often; its README calls it work in progress. Review its changelog before each update ([`dependabot-automerge.yml`](template/.github/workflows/dependabot-automerge.yml) does not automerge 0.x).
 - Only Workers AI models. Workers AI bills the account also in `astro dev`.
 
 ## [Kysely](https://kysely.dev)
@@ -453,7 +453,7 @@ The project keeps two merge engines: the built-in one in `tv()` (default `tailwi
 ### Why no D1 read replication
 
 - EmDash server-rendered requests make several D1 round trips, so the EmDash docs run the Worker near the primary with Targeted Placement. The same docs say: "Do not enable D1 read replicas with Targeted Placement."
-- Without replicas, every query uses the nearby primary, even with `session: "auto"` and `coalesce: true`. The rules remove both options, so the config does not suggest replication.
+- Without replicas, every query uses the nearby primary, even with `session: "auto"` and `coalesce: true`. The template removes both options, so the config does not suggest replication.
 - Cost: reads do not scale out to replicas, and a visitor far from the primary waits longer.
 
 ### Why one project and one domain
@@ -968,7 +968,7 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 ### Why Knip has named exceptions
 
-- Installed components export their full API, and the rules install some packages before any code uses them. Named `ignoreIssues`, `ignore`, and `ignoreDependencies` entries keep real unused code visible.
+- Installed components export their full API, and the rules install some packages before any code uses them. Named `ignoreIssues` and `ignoreDependencies` entries keep real unused code visible.
 - An agent skill is not project code, and it can hold example files that no code imports. On 2026-11-05, the `shadcn/ui` skill added four such files to `.agents/skills/shadcn/`, and Knip 6.44.1 reported them, so `pnpm run check` failed after the skills step of setup.
 
 ### Why Oxlint is the only linter
@@ -1055,7 +1055,7 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - `.github/workflows/starter-check.yml` runs every Monday, because no other signal exists: Dependabot ignores the EmDash packages, and `pnpm run check` cannot see a new commit in `emdash-cms/templates`. It updates one open issue, so a change that waits does not add a new issue each week.
 - A project can use the `upgrading-emdash` skill when it cannot wait for a Starweb pin. The skill runs the official `upgrade-emdash`, which writes a work order with the changelog entries and the migration delta. It takes an npm tag such as `latest` and rejects a version, so it skips the tested pin: the project runs the checks itself, and Starweb stays the default path.
 - Dependabot groups the whole template in one group, `stack`, in the Starweb repository. One PR updates the set, and one CI run tests the set together. Separate PRs would test each package alone, and a pair that must match (for example `astro` and `@astrojs/cloudflare`) could fail in both.
-- The project `dependabot.yml` in `template/` uses the groups from [DEPS.md](rules/DEPS.md), because a project has its own review flow.
+- The project `dependabot.yml` in `template/` has its own groups, `astro` and `dev-dependencies`, because a project has its own review flow.
 
 ### Why update.mjs uses a three-way merge
 

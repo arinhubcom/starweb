@@ -39,7 +39,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 ### [Wrangler](STACK.md#wrangler)
 
 5. `pnpm exec wrangler login`.
-6. Create the [D1](STACK.md#d1) database with a location hint, set `database_id` in `wrangler.jsonc`, and change the Targeted Placement region if the database is not near the default `aws:eu-central-1`. Give `FORMS_LIMITER` a `namespace_id` that no other Worker in the account uses. → [PERF](PERF.md) (Placement), [SAAS](SAAS.md), [CMS](CMS.md#emdash-forms) (Architecture)
+6. Create the [D1](STACK.md#d1) database with a location hint, add its `database_id` to the `DB` entry of `d1_databases` in `wrangler.jsonc`, and change the Targeted Placement region if the database is not near the default `aws:eu-central-1`. Give `FORMS_LIMITER` a `namespace_id` that no other Worker in the account uses. → [PERF](PERF.md) (Placement), [SAAS](SAAS.md), [CMS](CMS.md#emdash-forms) (Architecture)
 7. Local edit; needs no login or step 6. No scheduled publishing → remove the Cron Trigger and the `scheduled` handler in `src/worker.ts`. Kept → no change. → [CMS](CMS.md) (Drafts and preview)
 8. Uses [Queues](STACK.md#queues) → producers, consumers, a dead letter queue, `queue()` export in `src/worker.ts`. → [ARCH](ARCH.md) (Backend)
 
