@@ -2,19 +2,49 @@
 
 Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the repository root.
 
-`rules/` is written for an agent that knows the stack. Name the lib, tool, API, pattern, or spec. Do not explain what its docs explain. Put reasons and alternatives in [WHY.md](../WHY.md).
+`rules/` is written for a person or an agent who works in a project. A person must be able to read each rule without help. Do not explain what the docs of a tool explain. Put long reasons and alternatives in [WHY.md](../WHY.md).
 
-## Format
+## How to write a rule
 
-- One registry: [STACK.md](STACK.md). Each name gets one `###` entry: a one-line scope, the topic files, then the sources (`llms`, `context7`, `docs`, `github`, `mcp`, `skills`, `tools`), as bare URLs.
-- Topic files link each name to its registry entry once, at first use: `[Kysely](STACK.md#kysely)`. Do not repeat source URLs in topic files.
-- Use a deep link in a topic file only when the registry sources cannot find the page by name (a specific GitHub file, a legal text, a GitHub issue).
-- `##` per area, `###` per name. One rule per bullet, a fragment is fine: `No \`forwardRef\`; \`ref\` is a prop.`
-- Keep every project decision that the template does not hold: chosen tool, forbidden tool, exact path, file name, command, binding, version pin, limit, number, order. Drop the reason unless the agent would otherwise "fix" the rule back.
-- Write the forbidden option and its replacement in one bullet: `No Drizzle/Prisma → Kysely.`
-- Cross-reference with `→ [FILE](FILE.md)`.
+### Follow the work in a project
+
+- Start each file with one sentence that says what the file covers and when to read it.
+- Name each `##` section after a task or a situation, for example `## Add a database table` or `## Release to production`.
+- Put the sections in the order that the work happens.
+- Use `###` only to split a long task into smaller parts.
+- Use a numbered list when the order matters. Use bullets for the other rules.
+- Use a table to look up values, not to hold rules.
+
+### Keep each rule small
+
+- Write one decision or one action per bullet.
+- If a rule has two decisions, split it into two bullets.
+- Write a complete sentence of about 25 words or fewer.
+- Add a short reason only when someone would otherwise "fix" the rule back. Put a longer reason in [WHY.md](../WHY.md).
+- Put a condition first: `If the app sends email, add ...`.
+- Write a forbidden option and its replacement in one bullet: `Use Kysely, not Drizzle or Prisma.`
+- Write out what you mean. Do not use arrows, `=`, or abbreviations in place of words.
+- Link to another rule with a full sentence: `See [DEPLOY](DEPLOY.md#ci).`
+
+### Explain a config in the config
+
+- Keep a config value, list, script, package, pin, and CI step only in its file. Do not describe them in a rule.
+- Explain a config value in a comment next to the value. Say why the value is there and what breaks when you change it.
+- If a file cannot hold comments, such as `package.json`, put the reason in [WHY.md](../WHY.md).
+- A rule keeps what a file cannot show: how to write new code, an optional feature with no template file, a forbidden option, and an account step.
+- A rule can name the file that holds a decision, so that the reader knows where to look.
+
+### Keep the decisions
+
+- Keep every project decision that the template does not hold: chosen tool, forbidden tool, exact path, file name, command, binding, limit, number, and order.
+- When you move a decision out of a rule, move it to a comment in the file or to [WHY.md](../WHY.md) in the same commit.
+
+### Links and names
+
+- Use one registry: [STACK.md](STACK.md). Each name gets one `###` entry: a one-line scope, the topic files, then the sources (`llms`, `context7`, `docs`, `github`, `mcp`, `skills`, `tools`), as bare URLs.
+- Link each name to its registry entry once in each topic file, at first use: `[Kysely](STACK.md#kysely)`. Do not repeat source URLs in topic files.
+- Use a deep link in a topic file only when the registry sources cannot find the page by name, such as a specific GitHub file, a legal text, or a GitHub issue.
 - `rules/` is copied to each project, so a rule never names the Starweb template: `package.json`, not `template/package.json`. Exceptions: a path in the Starweb clone that a step in [SETUP](SETUP.md) or [UPDATE](UPDATE.md) reads, and this file.
-- What belongs in the template stays out of `rules/`: a config value, list, script, package, pin, or CI step lives only in its file. A rule keeps what a file cannot show: how to write new code, optional features with no template file, a forbidden option, an account step. A reason that must stay with the file goes in a comment there or in [WHY.md](../WHY.md).
 
 ## WHY.md
 

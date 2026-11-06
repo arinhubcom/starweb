@@ -1032,6 +1032,13 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 - Email is its own part, because it needs a verified sender domain, and a project can use login without it. The emdash-better-auth README says that without an email provider sign-up is a dead end until you turn off **Require email verification**, so the setup wizard step says to do that. It is a setting on an admin page, so it needs a person at a browser.
 - The template stays small, because it holds only what every project uses. The list is in [SETUP.md](rules/SETUP.md), so an agent asks about the same parts each time.
 
+### Why the rules follow the work in a project
+
+- A rule is read while someone does a task in a project, so a section named after the task is easier to find than a section named after a tool.
+- A person must be able to read and check the rules, not only an agent. So a rule is a complete sentence, and it holds one decision.
+- A long rule hides decisions and is hard to change. Two short rules are better than one complex rule.
+- A comment in a config file sits next to the value that it explains, and it changes in the same edit. A description of a config in a rule can drift from the file.
+
 ### Why a template, setup.mjs, and CI
 
 - A list of 60 manual steps gave a different result each time: an agent could skip a step, change a version, or copy a config with a mistake. Files in `template/` are the same each time and carry the config that a test project proved.

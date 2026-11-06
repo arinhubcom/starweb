@@ -1,6 +1,6 @@
 # README
 
-Starweb rules for agents that know the stack: names only, sources in [STACK.md](STACK.md). Reasons and alternatives: [WHY.md](../WHY.md).
+Starweb rules for a person or an agent who works in a project. Each file follows a part of the work. Reasons and alternatives are in [WHY.md](../WHY.md), and config values are explained in comments in the config files.
 
 Start with [STACK.md](STACK.md): every lib, tool, and spec with its `llms.txt`, Context7, GitHub, MCP, and skills.sh links.
 

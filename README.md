@@ -2,8 +2,9 @@
 
 **[Star it](https://github.com/arinhubcom/starweb). [Fork it](https://github.com/arinhubcom/starweb/fork). [Change it](#-change-starweb).**
 
-Starweb is a template for AI agents. Use it to build websites and web apps.
-It is built on [Astro](https://astro.build) and
+Starweb is a template for new projects. Your AI agent uses it to build websites and web apps.
+A project is a new, separate repository that gets a copy of the rules and the template, and other parts of Starweb when it needs them. You build your site in that repository, not in the Starweb repository.
+Starweb is built on [Astro](https://astro.build) and
 [Cloudflare Workers](https://workers.cloudflare.com), with [EmDash](https://docs.emdashcms.com/) as the CMS. Read [why we chose this stack](WHY.md).
 
 ## 🏁 Quick start
