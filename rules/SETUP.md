@@ -40,7 +40,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 
 5. `pnpm exec wrangler login`.
 6. Create the [D1](STACK.md#d1) database with a location hint, set `database_id` in `wrangler.jsonc`, and change the Targeted Placement region if the database is not near the default `aws:eu-central-1`. Give `FORMS_LIMITER` a `namespace_id` that no other Worker in the account uses. → [PERF](PERF.md) (Placement), [SAAS](SAAS.md), [CMS](CMS.md#emdash-forms) (Architecture)
-7. No scheduled publishing → remove the Cron Trigger and the `scheduled` handler in `src/worker.ts`. → [CMS](CMS.md) (Drafts and preview)
+7. Local edit; needs no login or step 6. No scheduled publishing → remove the Cron Trigger and the `scheduled` handler in `src/worker.ts`. Kept → no change. → [CMS](CMS.md) (Drafts and preview)
 8. Uses [Queues](STACK.md#queues) → producers, consumers, a dead letter queue, `queue()` export in `src/worker.ts`. → [ARCH](ARCH.md) (Backend)
 
 ## Astro
@@ -93,14 +93,14 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 
 ### [skills CLI](STACK.md#skills-cli)
 
-22. Run each command on the `Skills:` line of [CMS](CMS.md) and [COMPONENTS](COMPONENTS.md). Only these; the `skills` sources in [STACK](STACK.md) are not part of setup. A shell with no prompts → add `--yes`.
+22. Run each command on the `Skills:` line of [CMS](CMS.md) and [COMPONENTS](COMPONENTS.md), one at a time. Only these; the `skills` sources in [STACK](STACK.md) are not part of setup. An agent or a script runs them → add `--yes`. Skills go to `.agents/skills`, with links in `.claude/skills`; step 26 commits them.
 
 ## Checks
 
 23. `pnpm run dev`; open `http://localhost:4321/_emdash/admin/`; complete the setup wizard. User login without the email part → turn off **Require email verification** on the Better Auth settings page, because sign-up cannot finish without an email. To test a form, set the [Turnstile test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/) in the Forms plugin settings. → [DEV](DEV.md), [CMS](CMS.md#emdash-forms)
 24. `pnpm run check`, `pnpm run build`, and `pnpm run size` exit with 0 before the first commit. `pnpm run preview --port <port> --background`: `/` returns 200; then `pnpm exec astro preview stop`. → [QUALITY](QUALITY.md) (Order), [PERF](PERF.md#client-javascript), [DEV](DEV.md)
-25. `pnpm exec emdash doctor`; pass = the scheduler line has `✔`. Exit code 1 and `database: not found` are expected, not a failure: its database check looks for local SQLite, not D1. Scheduled publishing removed in step 7 → skip this step. → [CMS](CMS.md) (Drafts and preview)
-26. Commit.
+25. `pnpm exec emdash doctor`; pass = the scheduler line has `✔`. Exit code 1, `database: not found`, and `ERROR 1 issues found` are expected, not a failure: its database check looks for local SQLite, not D1. Scheduled publishing removed in step 7 → skip this step. → [CMS](CMS.md) (Drafts and preview)
+26. First commit: `git add -A`, then `git commit -m "chore: set up <name> with Starweb"`. `setup.mjs` makes none. `.gitignore` keeps `.env` out.
 
 ## Deploy
 
