@@ -24,7 +24,7 @@
 - No separate stage Worker: stage is a no-traffic version of the prod Worker. → [WHY](../WHY.md#why-three-environments)
 - Separate D1, KV, R2 per environment, same binding names. Dev and PR previews never use prod data.
 - Repeat in `env.production` (not inherited): `d1_databases`, `r2_buckets`, `kv_namespaces`, `version_metadata`, `images`, `ratelimits`, `ai`, `queues`, `workflows`, `durable_objects`, `services`, `vars`, `secrets`, `define`. Do not repeat (inherited): `compatibility_date`, `compatibility_flags`, `observability`, `placement`, `triggers`, `assets`.
-- `SESSION` KV namespace in `kv_namespaces` in `env.production` and at top level ([Astro](STACK.md#astro) `sessionKVBindingName` default); `wrangler.jsonc` starts with the top-level one. No `session: false`: [EmDash](STACK.md#emdash) stores admin logins in Astro sessions.
+- `SESSION` KV namespace in `kv_namespaces` in `env.production` too ([Astro](STACK.md#astro) `sessionKVBindingName` default). No `session: false`: [EmDash](STACK.md#emdash) stores admin logins in Astro sessions.
 - Prod gets its own `routes` (custom domain). Dev stays on `workers.dev` with one Worker; more Workers → Separate Workers.
 - `"preview_urls": true` in `env.production` (with `routes`, `workers_dev` defaults to `false`, so stage has no URL). Protect the stage URL with Cloudflare Access (Version URLs).
 - Stage uses prod bindings: apply prod migrations before the stage upload (Migrations).
@@ -35,7 +35,7 @@
 
 - Tag `<worker>-YYYY-MM-DD-rN`; `<worker>` = top-level `name` in `wrangler.jsonc`, not `<worker>-production`. Example `mysite-2026-10-14-r1`. `rN` restarts at `r1` each day. No semver. → [WHY](../WHY.md#why-date-based-release-tags)
 - Annotated tag on `main`: `git tag -a mysite-2026-10-14-r1 -m "<summary>"`, `git push origin mysite-2026-10-14-r1`. The push uploads stage (CI).
-- Remove the `deploy` script `astro build && wrangler deploy`, or replace it with `astro build` + `wrangler versions upload`. Never release prod with `wrangler deploy`.
+- No `deploy` script that runs `wrangler deploy` for prod.
 - Same tag in `wrangler versions upload --tag`: promotion finds the version by tag.
 
 ### Gradual deployments
@@ -47,7 +47,7 @@
 
 ### Version metadata
 
-- Binding `CF_VERSION_METADATA` (`version_metadata`). `env.CF_VERSION_METADATA.id` in every log line and error report.
+- `env.CF_VERSION_METADATA.id` in every log line and error report.
 
 ### Version URLs
 
@@ -68,7 +68,7 @@
 
 ### [EmDash](STACK.md#emdash) core migrations
 
-- `emdash migrate` in CI against the remote D1 database of the environment, after `pnpm run build` (writes `.emdash/migrations.json`; keep it in `.gitignore`).
+- `emdash migrate` in CI against the remote D1 database of the environment, after `pnpm run build` (writes `.emdash/migrations.json`).
 - `pnpm exec emdash migrate --account-id "$CLOUDFLARE_ACCOUNT_ID" --d1 "$D1_DATABASE_ID" --expected-target-fingerprint "$EMDASH_TARGET_FINGERPRINT"`, `CLOUDFLARE_API_TOKEN` with D1 Edit. Non-interactive apply fails without the fingerprint.
 - After deploy: `pnpm exec emdash migrate --check` (non-zero on pending or unknown migrations).
 - Local: `pnpm exec emdash migrate --wrangler-config wrangler.jsonc --wrangler-env production` with `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`; check the printed target. CI uses the explicit `--account-id`/`--d1` form.
@@ -95,7 +95,7 @@
 ### Secrets
 
 - Prod: `wrangler versions secret put` then `wrangler versions deploy`. Never `wrangler secret put` in prod.
-- Which token goes where, and `pnpm run set-secrets` (`scripts/set-secrets.ts`, sends via `wrangler versions secret bulk`) → [TOKENS](TOKENS.md).
+- Which token goes where, and `pnpm run set-secrets` → [TOKENS](TOKENS.md).
 - New secret before the version that reads it deploys.
 - Set or change a prod secret before the stage upload, or `wrangler versions upload --secrets-file <file>`, so the tagged version has it. (`versions secret put` changes the latest uploaded version and creates a new one.)
 - Secret change after the stage upload → deploy the version `versions secret put` created (ID from `wrangler versions list --env production`), not the tagged one.
@@ -158,5 +158,5 @@ Moving an app to its own Worker. → [ARCH](ARCH.md) (Apps) first.
 
 ## Checks
 
-- `pnpm run check` (includes `pnpm run typecheck`) before each release. → [QUALITY](QUALITY.md)
+- `pnpm run check` before each release. → [QUALITY](QUALITY.md)
 - Test locally with `astro build` and `astro preview`. → [DEV](DEV.md)

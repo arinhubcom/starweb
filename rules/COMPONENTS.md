@@ -14,8 +14,6 @@
 - Images: `<Image />` from `astro:assets` with `alt`. EmDash image fields: `Image` from `emdash/ui`. → [MEDIA](MEDIA.md) (EmDash media)
 - Small interactions (toggle, copy, menu): `<script>` in the component, not an island.
 - Server values to script via `data-*` + `element.dataset`. No `define:vars`, no `is:inline` (disable bundling). Only exception: theme script.
-- Theme script: blocking `<script is:inline set:html={themeScript} />` in `<head>` of the base layout, sets `.dark` before first paint; text is a constant in `src/lib/theme-script.ts`. → [UI-UX](UI-UX.md) (Theme)
-- CSP for theme script: Astro adds no hash for `is:inline`. In the CSP module compute `"sha256-" + createHash("sha256").update(themeScript).digest("base64")` (`node:crypto`), add to `csp.scriptDirective.hashes`. → [SECURITY](SECURITY.md) (Headers)
 - Component that can appear more than once with script → custom element (`customElements.define`, `connectedCallback`).
 - No `client:*` on an `.astro` component (Astro throws).
 - File names kebab-case as the shadcn CLI writes (`button.astro`); imports PascalCase (`Button`).
@@ -24,16 +22,14 @@
 ### [Fulldev UI](STACK.md#fulldev-ui)
 
 - Source of `.astro` components and page blocks (sections, hero, features, pricing, FAQ); no client JS.
-- `tsconfig.json` `compilerOptions` keep `"baseUrl": "."`, `"paths": { "@/*": ["./src/*"] }`; `shadcn add` needs them.
-- The project holds the output of `shadcn init` with `https://ui.full.dev/r/styles/base-vega/base.json`: `components.json` (`@fulldev` registry), theme tokens in `src/styles/global.css`, `cn()` in `src/lib/utils.ts`, packages `shadcn`, `cn`, `tw-animate-css`. No second `shadcn init`.
-- `tailwind-variants`; no `class-variance-authority` (`no-restricted-imports` in `.oxlintrc.json` fails on it).
+- Keep `paths` in `tsconfig.json`; `shadcn add` needs it.
+- No second `shadcn init`.
 - After each `shadcn add` (Fulldev or shadcn/ui): convert every `cva()` in the added files to `tv()`. `cva("<base>", { variants, defaultVariants })` → `tv({ base: "<base>", variants, defaultVariants })`; `import { tv, type VariantProps } from "tailwind-variants"`. Call sites stay. Registry items import `class-variance-authority` without listing it; `pnpm exec astro check` reports each file left. → [DESIGN](DESIGN.md)
 - After each `shadcn add` (Fulldev or shadcn/ui): replace every `@lucide/astro` and `lucide-react` icon with `MaterialIcon` (→ [MEDIA](MEDIA.md) (Icons)), with `size-*` → `text-*`, and add the name to `ICON_NAMES`. Remove `@lucide/astro` and `lucide-react` from `package.json`.
 - `@fulldev/icon` comes with blocks, headers, and footers. Delete `src/components/ui/icon/`, replace each use with `MaterialIcon` or a local SVG (brand mark), and remove `lucide-static` and `simple-icons` from `package.json`. Never move `MaterialIcon` to `src/components/ui/icon/`.
 - Keep `"iconLibrary": "lucide"` in `components.json`; `shadcn` has no Material Symbols option.
-- `class="@container"` on `<body>` in the base layout (container query variants such as `@2xl:`).
 - Add components with `pnpm exec shadcn add @fulldev/button` (uses the project's `shadcn`). No `@latest`, no hand copy.
-- Location: `src/components/ui/<name>/` (`button.astro`, `button-variants.ts`, `index.ts`); `import { Button } from "@/components/ui/button"`. Your code after install; edit there.
+- Your code after install; edit it in `src/components/ui/<name>/`.
 - Theme via the CSS variables from init; no hardcoded colors.
 - Skills: `pnpm dlx skills add shadcn/ui`, `pnpm dlx skills add fulldotdev/ui --skill fulldev-ui`.
 - React islands (shadcn/ui, Base UI) only for interactive parts with no Fulldev component.

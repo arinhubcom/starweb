@@ -5,7 +5,6 @@
 ### [emdash-better-auth](STACK.md#emdash-better-auth)
 
 - Site-user login (members, customers). `authProviders: [betterAuthProvider()]` in `emdash()`; `betterAuthSettingsPlugin()` in `plugins` (admin settings page).
-- Needs `@astrojs/react` and `@tailwindcss/vite` in `astro.config` ([Tailwind CSS](STACK.md#tailwind-css); else auth pages are unstyled).
 - `BETTER_AUTH_SECRET` = Worker secret, value from `openssl rand -base64 32`. Local: `.env` only; no `.dev.vars` (Wrangler then ignores `.env`). Production → [DEPLOY](DEPLOY.md) (Secrets).
 - Set Astro `site:` (or `BETTER_AUTH_URL`) when more than one host answers (custom domain + `*.workers.dev`).
 - Email verification is on by default. Before go-live: an email provider (→ Email), or **Require email verification** off on the settings page. Without a provider, sign-up cannot finish, and password reset and email login do not work.

@@ -26,6 +26,7 @@ export default defineConfig({
     responsiveStyles: true,
   },
   integrations: [
+    // react() before emdash(): otherwise the admin UI hangs on "Loading EmDash...".
     react(),
     emdash({
       database: d1({ binding: "DB" }),

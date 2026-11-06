@@ -6,11 +6,10 @@ Public site only. `hreflang` → [I18N](I18N.md). Images, social preview images 
 
 ### [Astro](STACK.md#astro) `site`
 
-- `site` in `astro.config` = final public URL with scheme (`https://example.com`).
 - Same origin for [EmDash](STACK.md#emdash): **Settings > General > Site URL**, `siteUrl` in `emdash()`, or `EMDASH_SITE_URL`. It builds sitemap, `robots.txt`, JSON-LD URLs; Astro `site` alone leaves `localhost` there.
 - Check `/robots.txt` and `WebSite` JSON-LD show the public origin.
 - Absolute URLs: `new URL(path, Astro.site)`, never `Astro.url.origin`.
-- `trailingSlash`: `'always'` or `'never'`, never `'ignore'`. Check prerendered pages on the deployed Worker (host may ignore it). No Astro `redirects` fix (unsupported).
+- Never `trailingSlash: 'ignore'`. Check prerendered pages on the deployed Worker (host may ignore it). No Astro `redirects` fix (unsupported).
 
 ## Page head
 
@@ -23,10 +22,10 @@ Public site only. `hreflang` → [I18N](I18N.md). Images, social preview images 
 ### EmDash SEO
 
 - `"seo"` in `supports` of each routable collection, or **SEO** in **Content Types** (SEO panel: title, description, image, canonical, **Hide from search engines**).
-- `<EmDashHead page={page} />` from `emdash/ui` in `<head>` of every public page; `page` from `createPublicPageContext()` (`emdash/page`). Renders description, robots, canonical, Open Graph, Twitter Card.
+- `<EmDashHead>` renders description, robots, canonical, Open Graph, Twitter Card.
 - Content page: `content: { collection, id, slug }`; title and canonical from `getSeoMeta()`. Custom pages (home, listings, landing): `kind: "custom"` plus `canonical: new URL(Astro.url.pathname, Astro.site).href` (EmDashHead computes none). It emits no `hreflang` there → [I18N](I18N.md) (hreflang).
 - Skip `<EmDashHead>` only on private pages and app routes; add `<meta name="robots" content="noindex">`.
-- Render `<title>` yourself. No own description, canonical, or Open Graph tags on pages with `<EmDashHead>`; change via SEO panel, page context, or plugin `page:metadata` hook.
+- No own description, canonical, or Open Graph tags on pages with `<EmDashHead>`; change via SEO panel, page context, or plugin `page:metadata` hook.
 - Title separator and default social image: **Settings > SEO**; pass `settings.seo?.titleSeparator` to `getSeoMeta()` as `titleSeparator`.
 
 ### [Open Graph](STACK.md#open-graph)
@@ -60,7 +59,7 @@ Public site only. `hreflang` → [I18N](I18N.md). Images, social preview images 
 
 ### 404
 
-- `src/pages/404.astro`; real `404` status, never `200` (soft 404). Dynamic page without entry: `return Astro.rewrite("/404")`; custom markup on-demand: `Astro.response.status = 404`.
+- Real `404` status, never `200` (soft 404). Dynamic page without entry: `return Astro.rewrite("/404")`; custom markup on-demand: `Astro.response.status = 404`.
 
 ### 410
 

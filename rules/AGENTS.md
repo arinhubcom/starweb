@@ -10,10 +10,11 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project
 - Topic files link each name to its registry entry once, at first use: `[Kysely](STACK.md#kysely)`. Do not repeat source URLs in topic files.
 - Use a deep link in a topic file only when the registry sources cannot find the page by name (a specific GitHub file, a legal text, a GitHub issue).
 - `##` per area, `###` per name. One rule per bullet, a fragment is fine: `No \`forwardRef\`; \`ref\` is a prop.`
-- Keep every project decision: chosen tool, forbidden tool, exact path, file name, command, binding, version pin, limit, number, order. Drop the reason unless the agent would otherwise "fix" the rule back.
+- Keep every project decision that the template does not hold: chosen tool, forbidden tool, exact path, file name, command, binding, version pin, limit, number, order. Drop the reason unless the agent would otherwise "fix" the rule back.
 - Write the forbidden option and its replacement in one bullet: `No Drizzle/Prisma → Kysely.`
 - Cross-reference with `→ [FILE](FILE.md)`.
 - `rules/` is copied to each project, so a rule never names the Starweb template: `package.json`, not `template/package.json`. Exceptions: a path in the Starweb clone that a step in [SETUP](SETUP.md) or [UPDATE](UPDATE.md) reads, and this file.
+- What belongs in the template stays out of `rules/`: a config value, list, script, package, pin, or CI step lives only in its file. A rule keeps what a file cannot show: how to write new code, optional features with no template file, a forbidden option, an account step. A reason that must stay with the file goes in a comment there or in [WHY.md](../WHY.md).
 
 ## WHY.md
 
@@ -46,8 +47,8 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project
 - EmDash update → [UPDATE](UPDATE.md) (EmDash update). `.github/workflows/starter-check.yml` runs `node scripts/update-starter.mjs --check` every Monday, and opens or updates one issue when `create-emdash` gives other files than `starter/` or a newer version is ready to pin.
 - No install commands in `rules/` (`pnpm add`, `pnpm remove`, `pnpm exec astro add`). A package every project needs goes in `template/package.json`, its config in `template/`. A rule for an optional feature names the packages only.
 - A rule and the file in `template/` or `scripts/setup.mjs` that implements it change in the same commit.
-- No edit to `template/` without the rule that describes it; change the rule first.
-- Keep the template current with `rules/`: each rule that applies to every project and that a file, config value, package, script, or CI step can implement has that implementation in `template/` or `scripts/setup.mjs`, or a step in [SETUP](SETUP.md) that a real project can run. Conditional rules ("uses X →") need a [SETUP](SETUP.md) step. A step never names a file that neither the template nor the step creates.
+- A new decision in `template/` that a reader would question needs its reason in `WHY.md` or a comment in the file.
+- Each decision that applies to every project and that a file, config value, package, script, or CI step can implement goes in `template/` or `scripts/setup.mjs`, not in `rules/`, or in a step in [SETUP](SETUP.md) that a real project can run. Conditional rules ("uses X →") need a [SETUP](SETUP.md) step. A step never names a file that neither the template nor the step creates.
 - Keep [SETUP](SETUP.md) and [UPDATE](UPDATE.md) current, in the same commit as the change: a change to `template/`, `scripts/`, CI, or a rule that changes what a new project needs updates SETUP; one that changes what an existing project must do updates UPDATE. A step never names a command, flag, file, or `update.mjs` output label that no longer exists.
 - `template/.agents/skills/` holds the starter skills and `starweb-update`. Claude Code reads only `.claude/skills`, so keep the symbolic link `.claude/skills` → `../.agents/skills`. `starweb-update` points to `rules/UPDATE.md` in the clone; no steps in the skill.
 - A new template file or behavior gets a check in `scripts/test-template.sh`.

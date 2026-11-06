@@ -96,6 +96,6 @@ Behavior and task completion, site and app. Look → [MATERIAL](MATERIAL.md), [D
 
 - Default follows the system. Theme setting: light, dark, system.
 - `localStorage` key `theme` (`light`, `dark`, `system`). No cookie, no server-rendered `.dark` (CDN caches public pages → [PERF](PERF.md) (Cache); server cannot know the system setting).
-- `.dark` on `<html>` before first paint: the one blocking inline script in `<head>` of the base layout; reads `theme`, falls back to `matchMedia("(prefers-color-scheme: dark)")` for `system` or missing → [DESIGN](DESIGN.md) (dark variant), [COMPONENTS](COMPONENTS.md) (Astro components).
+- `.dark` on `<html>` before first paint: the one blocking inline script in `<head>` of the base layout; reads `theme`, falls back to `matchMedia("(prefers-color-scheme: dark)")` for `system` or missing → [COMPONENTS](COMPONENTS.md) (Astro components).
 - On pick, update `localStorage` and `.dark` together; for `system` also listen to the query's `change` event.
 - Contrast rules (Accessibility) hold in both themes.

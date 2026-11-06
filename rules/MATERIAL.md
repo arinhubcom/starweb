@@ -12,7 +12,7 @@
 ## Layout
 
 - 1dp = 1 CSS px. Tailwind step (`--spacing: 0.25rem`) = 4px.
-- `@theme` in `global.css`: `--breakpoint-medium: 37.5rem;` (600) `--breakpoint-expanded: 52.5rem;` (840) `--breakpoint-large: 75rem;` (1200) `--breakpoint-xlarge: 100rem;` (1600). < 600 compact, no prefix. Page layout uses `medium:` `expanded:` `large:` `xlarge:`; keep default `sm:` `md:` (Fulldev UI uses them).
+- < 600 compact, no prefix. Page layout uses `medium:` `expanded:` `large:` `xlarge:`; keep default `sm:` `md:` (Fulldev UI uses them).
 - Page margin `px-4 medium:px-6`. Pane gap `gap-6`.
 - Panes: 1 on compact/medium, 2 on expanded/large, ≤ 3 on xlarge. Medium 2 panes only for low-density content (settings), `grid-cols-2`.
 - Fixed pane: expanded `w-90` (360px), large/xlarge `large:w-103` (412px); the other fills.
@@ -51,15 +51,6 @@
 
 ## Motion
 
-- `@theme` in `global.css`:
-
-  ```css
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
-  --ease-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
-  --ease-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
-  --ease-spring-fast-spatial: linear(0, 0.099, 0.317, 0.561, 0.775, 0.934, 1.034, 1.083, 1.095, 1.084, 1.063, 1.04, 1.02, 1.005, 0.996, 0.992, 0.991, 0.992, 0.994, 0.996, 1);
-  ```
-
 - `duration-*` only: 50, 100, 150, 200 (short); 250, 300, 350, 400 (medium); 450, 500, 550, 600 (long); 700, 800, 900, 1000 (extra long) ms.
 - Enter `ease-emphasized-decelerate`; exit `ease-emphasized-accelerate`.
 - Small-component `transform` (switch handle): `ease-spring-fast-spatial duration-350`; full-screen transitions use longer durations.
@@ -71,59 +62,15 @@
 - Generate from one seed with [material-color-utilities](https://github.com/material-foundation/material-color-utilities) (`@material/material-color-utilities`); no hand-picked theme colors.
 - `new SchemeTonalSpot(Hct.fromInt(argbFromHex(seed)), isDark, 0, "2025")` (Expressive, standard contrast): `false` → `:root`, `true` → `.dark`.
 - `SchemeFidelity` only when the exact brand color must show (seed in `primaryContainer`; 2021 spec only). No `SchemeExpressive` (shifts hues).
-- Build time: `scripts/theme.ts` with the `SEED` constant, run `pnpm exec tsx scripts/theme.ts`; packages `@material/material-color-utilities` and `tsx`. No plain `node` (0.4.0 imports without `.js`).
-- Roles as hex: `hexFromArgb(scheme.surfaceContainerHigh)`.
-- Output `src/styles/theme.css`, imported in `global.css`; never hand-edit, change the seed and rerun.
-- `global.css` has no color variables in `:root` and `.dark`, only `--radius`, shadows, fonts, `--chart-1`..`--chart-5` from Fulldev UI. A registry item adds some → remove them.
-- Role map:
-
-  | shadcn/ui variable | MD3 role |
-  |---|---|
-  | `--background`, `--foreground` | `surface`, `onSurface` |
-  | `--card`, `--card-foreground` | `surfaceContainerLow`, `onSurface` |
-  | `--popover`, `--popover-foreground` | `surfaceContainer`, `onSurface` |
-  | `--primary`, `--primary-foreground` | `primary`, `onPrimary` |
-  | `--secondary`, `--secondary-foreground` | `secondaryContainer`, `onSecondaryContainer` |
-  | `--muted`, `--muted-foreground` | `surfaceContainerHighest`, `onSurfaceVariant` |
-  | `--accent`, `--accent-foreground` | `secondaryContainer`, `onSecondaryContainer` |
-  | `--destructive` | `error` |
-  | `--border` | `outlineVariant` |
-  | `--input` | `outline` |
-  | `--ring` | `secondary` |
-  | `--sidebar`, `--sidebar-foreground` | `surface`, `onSurface` |
-  | `--sidebar-primary`, `--sidebar-primary-foreground` | `primary`, `onPrimary` |
-  | `--sidebar-accent`, `--sidebar-accent-foreground` | `secondaryContainer`, `onSecondaryContainer` |
-  | `--sidebar-border`, `--sidebar-ring` | `outlineVariant`, `secondary` |
-
-- Roles without a shadcn/ui variable: kebab-case variables exposed in `@theme inline` in `theme.css` (`--surface-container-high` + `--color-surface-container-high: var(--surface-container-high);`): `primaryContainer`, `onPrimaryContainer`, `tertiary`, `onTertiary`, `tertiaryContainer`, `onTertiaryContainer`, `onError`, `errorContainer`, `onErrorContainer`, `surfaceContainerLowest`..`surfaceContainerHighest`, `inverseSurface`, `inverseOnSurface`, `inversePrimary`, `outline`, `outlineVariant`, `scrim`.
+- No plain `node` for `scripts/theme.ts` (0.4.0 imports without `.js`).
+- A registry item that adds color variables to `global.css` → remove them.
 - Use as MD3 does: dialog `bg-surface-container-high`; highlight `bg-primary-container text-on-primary-container`; destructive button `bg-destructive text-on-error`.
 
 ## Components
 
 ### Buttons
 
-- `size` variants of Fulldev UI and [Base UI](STACK.md#base-ui) buttons (→ [DESIGN](DESIGN.md)): `xs`, `default` and `sm`, `md`, `lg`, `xl` in `src/components/ui/button/button-variants.ts`; same values in `src/components/ui/react/button.tsx` after install:
-
-  | Size | Height | Side padding | Icon | Gap | Tailwind |
-  |---|---|---|---|---|---|
-  | XS | 32 | 16 | 20 | 8 | `h-8 px-4 gap-2 [&_svg]:size-5` |
-  | S (default) | 40 | 16 | 20 | 8 | `h-10 px-4 gap-2 [&_svg]:size-5` |
-  | M | 56 | 24 | 24 | 8 | `h-14 px-6 gap-2 [&_svg]:size-6` |
-  | L | 96 | 48 | 32 | 12 | `h-24 px-12 gap-3 [&_svg]:size-8` |
-  | XL | 136 | 64 | 40 | 16 | `h-34 px-16 gap-4 [&_svg]:size-10` |
-
-- `MaterialIcon` in a button follows the same icon sizes: `[&_.icon]:text-xl` (20), `text-2xl` (24), `text-[2rem]` (32), `text-[2.5rem]` (40). `[&_svg]` is for a local SVG, such as a brand mark. → [MEDIA](MEDIA.md) (Icons)
-- XS and S buttons and icon buttons: 48x48px target (Targets).
-
-### Icon buttons
-
-| Size | Container | Icon | Tailwind |
-|---|---|---|---|
-| XS | 32 | 20 | `size-8 [&_svg]:size-5` |
-| S (default) | 40 | 24 | `size-10 [&_svg]:size-6` |
-| M | 56 | 24 | `size-14 [&_svg]:size-6` |
-| L | 96 | 32 | `size-24 [&_svg]:size-8` |
-| XL | 136 | 40 | `size-34 [&_svg]:size-10` |
+- `size` variants of Fulldev UI and [Base UI](STACK.md#base-ui) buttons (→ [DESIGN](DESIGN.md)) in `src/components/ui/button/button-variants.ts`; same values in `src/components/ui/react/button.tsx` after install.
 
 ### Text fields
 

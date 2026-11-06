@@ -7,16 +7,14 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 ### [pnpm](STACK.md#pnpm)
 
 - pnpm only ([SETUP](SETUP.md)); no npm/Yarn/Bun; only `pnpm-lock.yaml` in the repository. Commit it with each `package.json` change. → [WHY](../WHY.md#why-pnpm)
-- Exact versions in `package.json`, with `pnpm-lock.yaml`. No `create-emdash`: a project does not use it. New package: let pnpm write the version; never edit it by hand.
-- CI: `pnpm install --frozen-lockfile`, not `pnpm install`.
+- No `create-emdash`: a project does not use it. New package: let pnpm write the version; never edit it by hand.
 - Fix a peer dependency conflict; do not hide it. `emdash-better-auth` needs React ≥ 19.2.6.
-- Settings in `pnpm-workspace.yaml` (pnpm reads only auth, registry, TLS, and proxy settings from `.npmrc`).
-- Build scripts: `allowBuilds` in `pnpm-workspace.yaml` lists each allowed package (`esbuild`, `workerd`). An install fails on a new package with a build script: read the script, then add the package with `true` or `false`.
+- No settings in `.npmrc` except auth, registry, TLS, and proxy: pnpm reads only those from it.
+- An install fails on a new package with a build script: read the script, then add the package to `allowBuilds` with `true` or `false`.
 - Each package that code, a config, or `tsconfig.json` names is a direct dependency (`@types/node`). pnpm does not hoist the others to the top of `node_modules`; no `shamefullyHoist`, no `nodeLinker: hoisted`.
-- Node.js: newest LTS; major in `.nvmrc` (`24`); move up once the next major reaches LTS on the [Node.js release schedule](https://github.com/nodejs/release#release-schedule). No non-LTS. Astro ≥ 7.4.2 needs Node.js ≥ 22.23.4.
-- pnpm ≥ 12; `setup.mjs` and `update.mjs` stop on an older version. No Corepack.
-- No `packageManager` or `devEngines.packageManager` in `package.json`: a pin writes `pnpm-lock.yaml` as two YAML documents, the GitHub dependency graph cannot read them, and Dependabot alerts and security updates stop. CI pins the version in `pnpm/action-setup`. → [WHY](../WHY.md#why-pnpm)
-- CI Node.js: `pnpm/action-setup` first, then `actions/setup-node` with `node-version-file` or `node-version` from the same value as local, `cache: pnpm`.
+- Node.js: newest LTS; move up once the next major reaches LTS on the [Node.js release schedule](https://github.com/nodejs/release#release-schedule). No non-LTS. Astro ≥ 7.4.2 needs Node.js ≥ 22.23.4.
+- No Corepack.
+- No `packageManager` or `devEngines.packageManager` in `package.json`: a pin writes `pnpm-lock.yaml` as two YAML documents, the GitHub dependency graph cannot read them, and Dependabot alerts and security updates stop. → [WHY](../WHY.md#why-pnpm)
 - `pnpm outdated`; `pnpm ls <package>`.
 
 ## Update
@@ -24,8 +22,6 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 ### [Dependabot](STACK.md#dependabot) version updates
 
 - Dependabot for pnpm and GitHub Actions; no Renovate. → [WHY](../WHY.md#why-dependabot-and-not-renovate)
-- `.github/dependabot.yml`, `version: 2`; entries `package-ecosystem: "npm"` (the Dependabot value for pnpm) and `"github-actions"`, both `directory: "/"`.
-- Each `schedule`: `interval: "weekly"`, `day: "monday"`, `time: "02:00"`, IANA `timezone` (`"Europe/Prague"`).
 - Enable Dependabot alerts and security updates in repository settings.
 - GitHub Actions pinned to full commit SHA with version comment: `uses: actions/checkout@<sha> # v5.0.0`. → [DEPLOY](DEPLOY.md) (CI)
 - Monthly: `pnpm update` in a PR, merge after CI (stays in semver ranges, leaves `package.json`).
@@ -33,9 +29,7 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 
 ### Dependabot groups
 
-- Package group `astro`: `patterns: ["astro", "@astrojs/*", "wrangler", "@emdash-cms/*"]`. Merge by hand after the Compatibility checks.
-- Package `ignore`: `emdash`, `@emdash-cms/cloudflare`. → [UPDATE](UPDATE.md) (EmDash update)
-- Package group `dev-dependencies`: `dependency-type: "development"`, `update-types: ["minor", "patch"]`.
+- Merge the `astro` group by hand after the Compatibility checks.
 
 ### Dependabot automerge
 
@@ -50,17 +44,15 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 
 ### Dependabot cooldown
 
-- `"npm"` entry: `cooldown: { default-days: 3 }` (security updates skip it). No longer cooldown for frequent releasers → group.
+- No longer cooldown for frequent releasers → group.
 
 ### pnpm minimumReleaseAge
 
-- `pnpm-workspace.yaml` in repository root (committed): `minimumReleaseAge: 4320` (minutes, so 3 days); equal to `cooldown.default-days`.
+- `minimumReleaseAge` (minutes) equals `cooldown.default-days`.
 - New `emdash` releases wait 3 days (no exclude list). → [UPDATE](UPDATE.md) (EmDash update)
 
 ### pnpm audit
 
-- CI: `pnpm audit --prod --audit-level high`; `pnpm audit signatures`.
-- `overrides: { zod: "catalog:" }` and `catalog: { zod: <version> }` in `pnpm-workspace.yaml`, `"zod": "catalog:"` in `package.json`: `emdash` 1.4.0 pins `zod` 4.5.4 ([GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5), fixed in 4.6.6). The catalog holds the one `zod` version for the project and its dependencies. Remove all three once `emdash` pins `zod` ≥ 4.6.6. → [WHY](../WHY.md#why-zod-has-a-pnpm-override)
 - Full review: `pnpm audit` without `--prod`; fix by update or `pnpm audit --fix update`. `--fix` without a method adds overrides to `pnpm-workspace.yaml`: review them.
 
 ## Add a package

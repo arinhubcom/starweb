@@ -6,7 +6,7 @@
 
 ### [Workers](STACK.md#workers) Logs
 
-- `"observability": { "enabled": true }` in `wrangler.jsonc`; `env.production` inherits it, repeat only for a different value. → [DEPLOY](DEPLOY.md) (Environments). Redeploy after a change.
+- `env.production` inherits `observability`, repeat only for a different value. → [DEPLOY](DEPLOY.md) (Environments). Redeploy after a change.
 - `head_sampling_rate` (0-1, default `1`) only for a high-traffic Worker; same key under `observability.logs` and `observability.traces` for separate rates.
 - Retention 3 days (Free) / 7 days (Paid): export for longer ([OpenTelemetry](STACK.md#opentelemetry) export).
 - Entry ≤ 256 KB (truncated above).
@@ -75,7 +75,7 @@
 
 ### Sentry releases
 
-- `version_metadata` binding `CF_VERSION_METADATA`. → [DEPLOY](DEPLOY.md) Release fallback order: `release`, `SENTRY_RELEASE`, `CF_VERSION_METADATA.id`.
+- Release fallback order: `release`, `SENTRY_RELEASE`, `CF_VERSION_METADATA.id`. → [DEPLOY](DEPLOY.md)
 - Release name = release tag: `--var SENTRY_RELEASE:<worker>-YYYY-MM-DD-rN` on `wrangler versions upload` in the tag workflow (`${{ github.ref_name }}`).
 - Same name in SDK and source map upload: `release: { name: process.env.SENTRY_RELEASE }` in `sentry()` options; `SENTRY_RELEASE` env = tag in the tag workflow build step.
 

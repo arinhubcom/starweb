@@ -10,9 +10,8 @@
 ### [Zod](STACK.md#zod)
 
 - All schemas and validation in Zod.
-- Compile at build time with [zod-compiler](https://github.com/gajus/zod-compiler): Vite plugin in `astro.config`, default import `import zodCompiler from "zod-compiler/vite"`. No `z.compile()` (`new Function()` is blocked on Workers, silently falls back to the slow runtime parser).
-- Effect code: `decode(schema, input): Effect<Output, ValidationError>` in `src/lib/effect/decode.ts`. No `schema.parse()` (throws).
-- Same file: `class ValidationError extends Data.TaggedError("ValidationError")<{ error: z.ZodError }> {}`. `decode` uses `safeParse`: `Effect.succeed(result.data)` or `Effect.fail(new ValidationError({ error: result.error }))`.
+- Compile at build time with [zod-compiler](https://github.com/gajus/zod-compiler). No `z.compile()` (`new Function()` is blocked on Workers, silently falls back to the slow runtime parser).
+- Effect code: `decode` from `src/lib/effect/decode.ts`. No `schema.parse()` (throws).
 
 ## Backend
 
@@ -21,7 +20,7 @@
 - Bindings (KV, D1, R2) from `env`; no public HTTP to a Cloudflare service that has a binding.
 - No request state in globals.
 - `ctx.waitUntil()` for post-response work; in Astro `Astro.locals.cfContext.waitUntil()`.
-- Web APIs over Node.js APIs. `compatibility_date` ≥ `2026-08-04` (Node.js APIs on by default); no `nodejs_compat` flag.
+- Web APIs over Node.js APIs. No `nodejs_compat` flag.
 - Binding types: `wrangler types`, never by hand.
 
 ### Background work
@@ -36,8 +35,8 @@
 - Idempotent consumers (at-least-once): unique ID per message as insert primary key or upstream idempotency key.
 - Repeat `queues.producers` and `queues.consumers` in `env.production` (not inherited). → [DEPLOY](DEPLOY.md) (Environments)
 - No Vercel Workflow DevKit or TanStack Workflow (no stable Cloudflare adapter).
-- Export Workflows, Durable Objects, `queue()` from custom entrypoint `src/worker.ts` (EmDash template; `"main": "./src/worker.ts"`).
-- Keep `...handler` from `@emdash-cms/cloudflare/worker` and `scheduled: createScheduledHandler()`. No `handle()` from `@astrojs/cloudflare/handler` (EmDash handler also publishes scheduled entries and purges cache tags).
+- Export Workflows, Durable Objects, `queue()` from `src/worker.ts`.
+- No `handle()` from `@astrojs/cloudflare/handler` (EmDash handler also publishes scheduled entries and purges cache tags).
 - Workflow = class extending `WorkflowEntrypoint` (`cloudflare:workers`); register in `workflows` (`name`, `binding`, `class_name`); start with `env.MY_WORKFLOW.create({ id, params })`.
 - Workflows rules:
   - One side effect per `step.do()`, idempotent.
@@ -50,7 +49,7 @@
 
 ### [Astro](STACK.md#astro)
 
-- `output: "server"` + `@astrojs/cloudflare`. `export const prerender = true` on static pages.
+- `export const prerender = true` on static pages.
 - Minimal client JS. Order: static `.astro` HTML/CSS → native HTML (`<details>`, `popover`/`popovertarget`, `<form>` + Action) → component `<script>` → server island → React island.
 - `.astro` components by default; islands only for interactivity. → [COMPONENTS](COMPONENTS.md)
 - Forms: `<form method="POST" action={actions.name}>` + `Astro.getActionResult()`. No island just to submit. Page must render on demand.

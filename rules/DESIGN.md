@@ -19,10 +19,8 @@
 ### [Tailwind CSS](STACK.md#tailwind-css)
 
 - Tailwind v4 for all styles; no second styling system.
-- `@tailwindcss/vite` in `astro.config.mjs`; `@import "tailwindcss";` in `src/styles/global.css`. Import `global.css` once, in the base layout.
+- Import `global.css` once, in the base layout.
 - Tokens (colors, fonts, radius, spacing) as theme variables in `@theme` in `global.css`; components use token classes (`bg-primary`), no hardcoded colors or sizes.
-- Keep `@custom-variant dark (&:is(.dark *));` from `shadcn init`; `.dark` on `<html>` via the theme script in `<head>` of the base layout. → [UI-UX](UI-UX.md) (Theme)
-- Merge classes with `cn()` from the [`cn`](https://github.com/shadcn-ui/cn) package (re-exported in `src/lib/utils.ts` by `shadcn init`). No manual string joins, no `clsx`/`tailwind-merge`.
+- Merge classes with `cn()` from `src/lib/utils.ts`. No manual string joins, no `clsx`/`tailwind-merge`.
 - Variants with [Tailwind Variants](STACK.md#tailwind-variants) `tv()` (`base`, `variants`, `defaultVariants`, `compoundVariants`, `slots` for multi-part components), types with its `VariantProps`. No `class-variance-authority` (`cva()`) → convert to `tv()`. No `if` variant logic in markup.
-- Sort classes with the Oxfmt `sortTailwindcss` option. It covers `cn()` and `tv()` arguments.
 - Scoped `<style>` and `@apply` only for CSS Tailwind cannot express.

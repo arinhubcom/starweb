@@ -2,6 +2,9 @@
 allowBuilds:
   esbuild: true
   workerd: true
+# zod: emdash 1.4.0 pins zod 4.5.4 (GHSA-mrhx-c7xc-m3w5, fixed in 4.6.6). Once
+# emdash pins zod >= 4.6.6, remove this catalog, the override, and
+# "zod": "catalog:" in package.json.
 catalog:
   zod: 4.6.7
 minimumReleaseAge: 4320

@@ -1,7 +1,6 @@
 import { tv, type VariantProps } from "tailwind-variants";
 
-// Styles and sizes follow rules/MATERIAL.md (States, Motion, Buttons, Icon
-// buttons). The radius comes from the Fulldev UI theme, the font from
+// Styles follow rules/MATERIAL.md (States, Motion, Buttons). The radius comes from the Fulldev UI theme, the font from
 // src/lib/fonts.ts.
 export const buttonVariants = tv({
   base: [

@@ -27,6 +27,7 @@
   },
   "settings": {
     "react-doctor": {
+      // Required: without it, rules run for every library they name.
       "capabilities": [
         "base-ui",
         "react",

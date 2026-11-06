@@ -14,7 +14,7 @@ Small SaaS: few tenants, little data per tenant, no real-time collaboration. Sit
 - `outer` middleware option skips EmDash middleware on app routes that do not need it.
 - Bindings from `env` in `cloudflare:workers`.
 - `queue`, `scheduled`, [Durable Object](STACK.md#durable-objects) exports in `src/worker.ts` next to the EmDash handler.
-- `createScheduledHandler()` for `scheduled`; custom cron expressions match `triggers.crons`.
+- Custom cron expressions match `triggers.crons`.
 
 ## Multiple apps
 

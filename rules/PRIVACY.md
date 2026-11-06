@@ -33,11 +33,9 @@ Technical rules, not legal advice. → [SAAS](SAAS.md), [AUTH](AUTH.md) (users, 
 
 ### [GDPR Article 13](https://gdpr-info.eu/art-13-gdpr/)
 
-- Page at `/privacy`, linked in the base layout footer and on each sign-up form. Page file `src/pages/privacy.astro`; replace each `[Add` marker before the first production deploy.
-- Content per Article 13: controller contact, purposes, recipients, retention, user rights incl. complaint to a supervisory authority.
-- List each processor by name (Article 13(1)(e)): Cloudflare (hosting, D1, R2, logs, Turnstile on pages with a protected form), plus Stripe, the email provider, Sentry as used.
-- US transfer per processor with safeguard (Article 13(1)(f)). Cloudflare: [EU-U.S. Data Privacy Framework](https://www.cloudflare.com/privacypolicy/) certification and EU Standard Contractual Clauses in the [Cloudflare DPA](https://www.cloudflare.com/cloudflare-customer-dpa/); link both. In the policy page, no separate page.
-- State how a user requests access, export, deletion; one contact email.
+- Link `/privacy` on each sign-up form.
+- List each other processor by name (Article 13(1)(e)): Stripe, the email provider, Sentry as used.
+- US transfer per other processor with safeguard (Article 13(1)(f)), in the policy page.
 - New processor, cookie, or personal data field → update the policy (and re-check safeguards) in the same PR.
 
 ## Data minimization
@@ -46,7 +44,6 @@ Technical rules, not legal advice. → [SAAS](SAAS.md), [AUTH](AUTH.md) (users, 
 
 - Only fields a feature needs (5(1)(c)); no field, column, or event property "for later".
 - Retention period per personal-data table (5(1)(e)); delete after it with the cleanup job. → [SAAS](SAAS.md) (Cleanup)
-- [EmDash Forms](STACK.md#emdash-forms): at most `FORM_RETENTION_DAYS` per form; the plugin deletes weekly. Each submission stores the IP address, user agent, referer, and country; `src/pages/privacy.astro` states them and the period. → [CMS](CMS.md#emdash-forms)
 - No personal data in logs, analytics events, error reports, fixtures, screenshots → IDs.
 - Fake data in tests and dev databases; no production import.
 
