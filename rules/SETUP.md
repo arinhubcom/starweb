@@ -93,7 +93,7 @@ Existing project → [UPDATE](UPDATE.md). Ordered procedure for a new Starweb pr
 
 ### [skills CLI](STACK.md#skills-cli)
 
-22. Run each command on the `Skills:` line of [CMS](CMS.md) and [COMPONENTS](COMPONENTS.md), one at a time. Only these; the `skills` sources in [STACK](STACK.md) are not part of setup. An agent or a script runs them → add `--yes`. Skills go to `.agents/skills`, with links in `.claude/skills`; step 26 commits them.
+22. Run each command on the `Skills:` line of [CMS](CMS.md) and [COMPONENTS](COMPONENTS.md), one at a time; commas separate the commands. Only these; the `skills` sources in [STACK](STACK.md) are not part of setup. An agent or a script runs them → add `--yes`. Skills go to `.agents/skills`; `.claude/skills` links to that folder. Step 26 commits them.
 
 ## Checks
 
