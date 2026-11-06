@@ -1,3 +1,5 @@
+// Test copy of wrangler.jsonc: only the bindings that tests need. No `main` (it
+// fails with `Cannot find package 'virtual:astro-cloudflare:config'`), no `triggers`.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "__NAME__",
