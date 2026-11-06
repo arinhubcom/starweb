@@ -1,6 +1,6 @@
 # AGENTS
 
-Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project root.
+Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the repository root.
 
 `rules/` is written for an agent that knows the stack. Name the lib, tool, API, pattern, or spec. Do not explain what its docs explain. Put reasons and alternatives in [WHY.md](../WHY.md).
 
@@ -27,7 +27,7 @@ Rules for editing `rules/`. Also follow [AGENTS.md](../AGENTS.md) at the project
 ## Verification
 
 - Verify each rule in the official docs or on GitHub before you add it.
-- When the docs do not fully answer it, or it depends on tool output, a config, or an error: install the package in a temporary folder outside the project, run a short script, check the result. No test packages in the project.
+- When the docs do not fully answer it, or it depends on tool output, a config, or an error: install the package in a temporary folder outside the repository, run a short script, check the result. No test packages in the repository.
 - A rule you cannot verify is not added. Say what you could not verify.
 
 ## Sources
