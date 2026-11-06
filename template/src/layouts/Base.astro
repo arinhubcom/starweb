@@ -40,6 +40,11 @@ const titleIncludesSiteName =
 const fullTitle = titleIncludesSiteName ? title : `${title} — ${siteTitle}`;
 const pageDescription = description ?? siteTagline;
 const menu = menuResult.data;
+// EmDashHead computes no canonical URL for a custom page. null opts out.
+const pageCanonical =
+  canonical === undefined && !content
+    ? new URL(Astro.url.pathname, Astro.site).href
+    : (canonical ?? null);
 
 const pageCtx = createPublicPageContext({
   Astro: {
@@ -51,7 +56,7 @@ const pageCtx = createPublicPageContext({
   title: fullTitle,
   pageTitle: pageTitle ?? title,
   description: pageDescription,
-  canonical: canonical ?? null,
+  canonical: pageCanonical,
   image: image ?? null,
   ...(content ? { content } : {}),
   siteName: siteTitle,

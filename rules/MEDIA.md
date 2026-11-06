@@ -21,7 +21,7 @@ Images, video, fonts, icons, uploads. Layout shift → [UI-UX](UI-UX.md) (Cumula
 
 ### Astro Cloudflare adapter
 
-- Keep default `imageService: "cloudflare-binding"` → [ARCH](ARCH.md).
+- Keep the default `imageService` (`cloudflare-binding`; the adapter adds the `IMAGES` binding) → [ARCH](ARCH.md).
 - Prerendered at build, on-demand via binding: `imageService: { build: "compile", runtime: "cloudflare-binding" }`.
 - No `"passthrough"` for content images. No `"custom"` with `sharp` unless tested in `workerd`.
 - Rename the default `IMAGES` binding only with matching `imagesBindingName` (adapter) and `images.binding` (`wrangler.jsonc`).

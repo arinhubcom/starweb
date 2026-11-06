@@ -421,6 +421,11 @@ step "Check the fonts and the icon on the home page"
 printf '%s\n' "$HOME_HTML" | grep -q -- '--font-roboto-flex:' || fail "the home page has no text font"
 printf '%s\n' "$HOME_HTML" | grep -q -- '--font-material-symbols:' || fail "the home page has no icon font"
 printf '%s\n' "$HOME_HTML" | grep -q 'data-slot="material-icon"' || fail "the home page has no icon"
+printf '%s\n' "$HOME_HTML" | grep -q 'rel="canonical"' || fail "the home page has no canonical URL"
+curl -s --max-time 30 "$BASE_URL/privacy" | grep -q 'rel="canonical"' || fail "/privacy has no canonical URL"
+if curl -s --max-time 30 "$BASE_URL/no-such-page" | grep -q 'rel="canonical"'; then
+  fail "the 404 page has a canonical URL"
+fi
 if printf '%s\n' "$HOME_HTML" | grep -qE 'fonts\.(googleapis|gstatic)\.com'; then
   fail "the home page loads a font from Google"
 fi
@@ -448,6 +453,10 @@ CPU_OUT="$(cd "$APP_DIR" && CLOUDFLARE_ACCOUNT_ID=a CLOUDFLARE_OBSERVABILITY_TOK
 printf '%s\n' "$CPU_OUT" | grep -q 'CLOUDFLARE_OBSERVABILITY_TOKEN is not set' || fail "pnpm run worker-cpu without a token did not name CLOUDFLARE_OBSERVABILITY_TOKEN: $CPU_OUT"
 SECRET_OUT="$(cd "$APP_DIR" && PAGESPEED_API_KEY=SECRET-KEY-123 pnpm run pagespeed not-a-url 2>&1 || true)"
 printf '%s\n' "$SECRET_OUT" | grep -q 'SECRET-KEY-123' && fail "pnpm run pagespeed printed the API key"
+AUTOMERGE_WORKFLOW="$APP_DIR/.github/workflows/dependabot-automerge.yml"
+grep -q 'gh pr merge --auto --squash' "$AUTOMERGE_WORKFLOW" || fail "dependabot-automerge.yml does not merge with --auto"
+grep -qE 'dependabot/fetch-metadata@[0-9a-f]{40} ' "$AUTOMERGE_WORKFLOW" || fail "dependabot-automerge.yml does not pin fetch-metadata to a commit"
+grep -q "dependency-group != 'astro'" "$AUTOMERGE_WORKFLOW" || fail "dependabot-automerge.yml can merge the astro group"
 echo "ok: perf.yml runs both checks daily, and each check names its missing variable and prints no secret"
 
 step "Check the security.txt file and the privacy page"

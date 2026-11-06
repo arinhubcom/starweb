@@ -33,11 +33,7 @@ Packages and updates. CI → [DEPLOY](DEPLOY.md). Workers runtime → [ARCH](ARC
 
 ### Dependabot automerge
 
-- Workflow `.github/workflows/dependabot-automerge.yml` (no automerge option in `dependabot.yml`).
-- On `pull_request`, `permissions: { contents: write, pull-requests: write }`, only if `github.event.pull_request.user.login == 'dependabot[bot]'`.
-- `dependabot/fetch-metadata` v3, pinned to a commit SHA.
-- `gh pr merge --auto --squash "$PR_URL"` with `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` only for `dependency-group == 'dev-dependencies'`, or a single patch of a production package (`dependency-type == 'direct:production'` and `update-type == 'version-update:semver-patch'`).
-- No automerge when `previous-version` starts with `0.`, `update-type` is `version-update:semver-major`, or `dependency-group` is `astro`; review changelog, merge by hand.
+- A PR that `dependabot-automerge.yml` skips: review the changelog, merge by hand.
 - CI is a required status check for `main`; enable "Allow auto-merge".
 
 ## Supply chain

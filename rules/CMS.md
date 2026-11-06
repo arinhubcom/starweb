@@ -98,7 +98,7 @@ Own plugins work on Free, as native plugins or in the site process.
 
 ### Core database migrations
 
-- Production: `migrations: { runtime: "manual" }` in `emdash()` (no migrate on first request); `EMDASH_MIGRATIONS_MODE` overrides per environment. Release order → [DEPLOY](DEPLOY.md) (Migrations).
+- Production: `EMDASH_MIGRATIONS_MODE` = `manual` in `env.production.vars` (no migrate on first request). No `migrations: { runtime: "manual" }` in `emdash()` → [WHY](../WHY.md#why-the-migration-mode-is-a-production-variable). Release order → [DEPLOY](DEPLOY.md) (Migrations).
 - `pnpm exec emdash migrate` from the release pipeline, after build, before the new version gets traffic. Remote D1 flags, target fingerprint, post-deploy check, migration lock → [DEPLOY](DEPLOY.md) (EmDash core migrations).
 
 ## WordPress import

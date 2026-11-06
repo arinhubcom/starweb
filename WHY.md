@@ -1146,3 +1146,10 @@ Checked on 2026-10-15 in the [Dependabot options reference](https://docs.github.
 
 - `<EmDashHead>` writes `rel="canonical"` and `og:url` only when the page context or the entry gives a canonical URL.
 - Without it, custom pages have neither, and a hand-written link next to it would duplicate it.
+- `Base.astro` sets the default, so a new page cannot forget it. `404.astro` opts out, because the page is not indexable.
+
+### Why the migration mode is a production variable
+
+- `migrations: { runtime: "manual" }` in `emdash()` applies to each build, so `astro preview` on an empty database fails. Lighthouse CI and the template test run that preview. `migrations.dev` covers only `astro dev`.
+- A variable in `env.production.vars` applies only to production, and dev and PR previews stay on `auto`.
+- Tested on 2026-11-06 with EmDash 1.4.0: on an empty database, `astro preview` returns `200` without the variable, and `503` with `EMDASH_MIGRATIONS_MODE` = `manual` in `vars`.

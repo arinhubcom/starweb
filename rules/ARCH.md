@@ -58,7 +58,7 @@
 - Content collections for Markdown and MDX; no per-request Markdown rendering.
 - Actions for forms and mutations, Zod input.
 - Bindings and secrets: `import { env } from "cloudflare:workers"`. No `process.env`, no `Astro.locals.runtime`.
-- Images: `astro:assets` `<Image />`, keep `imageService: "cloudflare-binding"`.
+- Images: `astro:assets` `<Image />`; keep the default `imageService`.
 
 ### [TanStack](STACK.md#tanstack)
 

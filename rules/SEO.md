@@ -23,7 +23,7 @@ Public site only. `hreflang` → [I18N](I18N.md). Images, social preview images 
 
 - `"seo"` in `supports` of each routable collection, or **SEO** in **Content Types** (SEO panel: title, description, image, canonical, **Hide from search engines**).
 - `<EmDashHead>` renders description, robots, canonical, Open Graph, Twitter Card.
-- Content page: `content: { collection, id, slug }`; title and canonical from `getSeoMeta()`. Custom pages (home, listings, landing): `kind: "custom"` plus `canonical: new URL(Astro.url.pathname, Astro.site).href` (EmDashHead computes none). It emits no `hreflang` there → [I18N](I18N.md) (hreflang).
+- Content page: `content: { collection, id, slug }`; title and canonical from `getSeoMeta()`. Custom pages use the `Base.astro` default, built from the pathname. A page that is not indexable passes `canonical={null}`. `<EmDashHead>` emits no `hreflang` there → [I18N](I18N.md) (hreflang).
 - Skip `<EmDashHead>` only on private pages and app routes; add `<meta name="robots" content="noindex">`.
 - No own description, canonical, or Open Graph tags on pages with `<EmDashHead>`; change via SEO panel, page context, or plugin `page:metadata` hook.
 - Title separator and default social image: **Settings > SEO**; pass `settings.seo?.titleSeparator` to `getSeoMeta()` as `titleSeparator`.
